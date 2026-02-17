@@ -100,11 +100,12 @@ reports.post('/unlock', async (c) => {
 // GET /download/:token
 reports.get('/download/:token', downloadRateLimit, async (c) => {
   const db = c.env.DB
-  const dt = await db.prepare("SELECT * FROM download_tokens WHERE token = ? AND valid_until > datetime('now')").bind(c.req.param('token')).first() as any
-  if (!dt) return c.json({ success: false, error: 'Ungültiger oder abgelaufener Download-Link' }, 403)
-
-  const report = await db.prepare('SELECT * FROM reports WHERE id = ?').bind(dt.report_id).first() as ReportRow | null
-  if (!report || report.is_unlocked !== 1) return c.json({ success: false, error: 'Bericht nicht verfügbar' }, 404)
+  const report = await db.prepare(
+    `SELECT r.* FROM reports r
+     INNER JOIN download_tokens dt ON dt.report_id = r.id
+     WHERE dt.token = ? AND dt.valid_until > datetime('now') AND r.is_unlocked = 1`
+  ).bind(c.req.param('token')).first() as ReportRow | null
+  if (!report) return c.json({ success: false, error: 'Ungültiger oder abgelaufener Download-Link' }, 403)
 
   const filename = `BAFA-Bericht_${(report.company_name || 'Bericht').replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_')}.html`
   await writeAuditLog(db, { userId: report.user_id, eventType: AUDIT_EVENTS.REPORT_DOWNLOAD, detail: report.id })

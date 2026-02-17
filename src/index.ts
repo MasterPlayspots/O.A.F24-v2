@@ -10,6 +10,7 @@ import { promo } from './routes/promo'
 import { orders } from './routes/orders'
 import { payments } from './routes/payments'
 import { admin } from './routes/admin'
+import { generateRateLimit } from './middleware/rateLimit'
 import { performBackup, cleanupOldBackups } from './services/backup'
 import { cleanupAuditLogs } from './services/audit'
 
@@ -55,7 +56,7 @@ app.post('/api/payments/create', async (c) => {
   return app.fetch(new Request(url, { method: 'POST', headers: c.req.raw.headers, body: JSON.stringify(body) }), c.env)
 })
 
-app.post('/api/ai/generate', async (c) => {
+app.post('/api/ai/generate', generateRateLimit, async (c) => {
   const body = await c.req.json()
   const url = new URL('/api/reports/generate', c.req.url)
   return app.fetch(new Request(url, { method: 'POST', headers: c.req.raw.headers, body: JSON.stringify(body) }), c.env)
@@ -70,7 +71,7 @@ app.notFound((c) => c.json({ success: false, error: 'Endpoint nicht gefunden' },
 // Global Error Handler
 // ============================================
 app.onError((err, c) => {
-  console.error('Unhandled error:', err.message, err.stack)
+  console.error(JSON.stringify({ level: 'error', event: 'unhandled_error', message: err.message, stack: err.stack }))
   return c.json({ success: false, error: c.env.ENVIRONMENT === 'production' ? 'Interner Serverfehler' : err.message }, 500)
 })
 
@@ -89,9 +90,9 @@ export default {
         // GDPR audit log cleanup (90 days)
         await cleanupAuditLogs(env.DB)
 
-        console.log(`[cron] Backup + cleanup completed at ${new Date().toISOString()}`)
+        console.log(JSON.stringify({ level: 'info', event: 'cron_completed', timestamp: new Date().toISOString() }))
       } catch (err) {
-        console.error('[cron] Failed:', err)
+        console.error(JSON.stringify({ level: 'error', event: 'cron_failed', error: err instanceof Error ? err.message : String(err) }))
       }
     })())
   },

@@ -26,12 +26,9 @@ export default defineWorkersConfig({
       },
     },
     coverage: {
-      provider: "v8",
+      provider: "istanbul",
       reporter: ["text", "json", "html"],
       exclude: ["**/__tests__/**", "**/node_modules/**"],
     },
-  },
-  css: {
-    postcss: {},
   },
 });

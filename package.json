@@ -27,10 +27,10 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250117.0",
-    "@cloudflare/vitest-pool-workers": "^0.5.22",
+    "@cloudflare/vitest-pool-workers": "^0.12.12",
     "esbuild": "^0.27.3",
     "typescript": "^5.7.2",
-    "vitest": "^4.0.18",
+    "vitest": "~3.2.4",
     "wrangler": "^4.65.0"
   }
 }
