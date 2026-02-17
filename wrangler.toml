@@ -1,0 +1,41 @@
+name = "bafa-creator-ai-worker"
+main = "dist/index.js"
+compatibility_date = "2024-01-01"
+node_compat = true
+
+[vars]
+ENVIRONMENT = "production"
+API_VERSION = "v1"
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "zfbf-db"
+database_id = "6b06bad2-a074-4280-ae26-14d2057893e6"
+
+# KV Namespaces
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "8cb1b5aa11e94d8fb8e9c0a2d3e4f5a6"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "2fddaa5f22c04e9fa8b9c0a2d3e4f5b6"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "2edc5ca833d14fa9b8c9d0a2d3e4f5c6"
+
+# R2 Bucket
+[[r2_buckets]]
+binding = "REPORTS"
+bucket_name = "bafa-reports"
+
+# AI Binding
+[ai]
+binding = "AI"
+
+# Secrets (set via: wrangler secret put <NAME>)
+# OPENAI_API_KEY
+# STRIPE_SECRET_KEY
+# RESEND_API_KEY
