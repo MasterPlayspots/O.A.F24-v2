@@ -11,9 +11,11 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "db:create": "wrangler d1 create zfbf-db",
-    "db:migrate": "wrangler d1 execute zfbf-db --remote --file=./db/migrations/schema.sql",
-    "db:migrate:local": "wrangler d1 execute zfbf-db --local --file=./db/migrations/schema.sql",
+    "db:migrate": "wrangler d1 execute zfbf-db --remote --file=./db/migrations/001-schema-base.sql && wrangler d1 execute zfbf-db --remote --file=./db/migrations/002-payments-promo.sql && wrangler d1 execute zfbf-db --remote --file=./db/migrations/003-auth-tokens.sql && wrangler d1 execute zfbf-db --remote --file=./db/migrations/004-audit-logs.sql",
+    "db:migrate:local": "wrangler d1 execute zfbf-db --local --file=./db/migrations/001-schema-base.sql && wrangler d1 execute zfbf-db --local --file=./db/migrations/002-payments-promo.sql && wrangler d1 execute zfbf-db --local --file=./db/migrations/003-auth-tokens.sql && wrangler d1 execute zfbf-db --local --file=./db/migrations/004-audit-logs.sql",
+    "db:migrate:legacy": "wrangler d1 execute zfbf-db --remote --file=./db/migrations/005-legacy-migration.sql",
     "clean": "rm -rf dist .wrangler"
   },
   "dependencies": {

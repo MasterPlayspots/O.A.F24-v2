@@ -1,7 +1,7 @@
 name = "bafa-creator-ai-worker"
 main = "dist/index.js"
 compatibility_date = "2024-01-01"
-node_compat = true
+compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ENVIRONMENT = "production"
@@ -26,6 +26,10 @@ id = "2fddaa5f22c04e9fa8b9c0a2d3e4f5b6"
 binding = "CACHE"
 id = "2edc5ca833d14fa9b8c9d0a2d3e4f5c6"
 
+[[kv_namespaces]]
+binding = "WEBHOOK_EVENTS"
+id = "3abc6db944e25gb0c9d0e1b3e4f5d7e8"
+
 # R2 Bucket
 [[r2_buckets]]
 binding = "REPORTS"
@@ -35,7 +39,15 @@ bucket_name = "bafa-reports"
 [ai]
 binding = "AI"
 
+# Cron Triggers - Daily backup at 02:00 UTC
+[triggers]
+crons = ["0 2 * * *"]
+
 # Secrets (set via: wrangler secret put <NAME>)
-# OPENAI_API_KEY
+# JWT_SECRET
+# UNLOCK_SECRET
 # STRIPE_SECRET_KEY
+# STRIPE_WEBHOOK_SECRET
+# PAYPAL_CLIENT_ID
+# PAYPAL_CLIENT_SECRET
 # RESEND_API_KEY

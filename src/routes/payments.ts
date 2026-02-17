@@ -1,0 +1,119 @@
+// Payment Routes - Stripe + PayPal
+import { Hono } from 'hono'
+import { z } from 'zod'
+import type { Bindings, Variables } from '../types'
+import { AUDIT_EVENTS, REPORT_PRICE_CENTS } from '../types'
+import { requireAuth } from '../middleware/auth'
+import { createCheckoutSession } from '../services/stripe'
+import { createPayPalOrder, capturePayPalOrder } from '../services/paypal'
+import { verifyStripeSignature, generateHmacSignature } from '../services/hmac'
+import { writeAuditLog } from '../services/audit'
+
+const payments = new Hono<{ Bindings: Bindings; Variables: Variables }>()
+
+// POST /stripe/create-session
+payments.post('/stripe/create-session', requireAuth, async (c) => {
+  const parsed = z.object({ reportId: z.string().uuid(), promoCode: z.string().optional() }).safeParse(await c.req.json())
+  if (!parsed.success) return c.json({ success: false, error: 'Ungültige Anfrage' }, 400)
+  const { reportId, promoCode } = parsed.data; const user = c.get('user'); const db = c.env.DB
+
+  const report = await db.prepare('SELECT id, company_name FROM reports WHERE id = ? AND user_id = ?').bind(reportId, user.id).first<{ id: string; company_name: string }>()
+  if (!report) return c.json({ success: false, error: 'Bericht nicht gefunden' }, 404)
+
+  let amount = REPORT_PRICE_CENTS
+  if (promoCode) {
+    const g = await db.prepare("SELECT * FROM gutscheine WHERE code = ? AND is_active = 1 AND (valid_until IS NULL OR valid_until > datetime('now'))").bind(promoCode.toUpperCase()).first() as any
+    if (g && g.total_uses < g.max_uses) amount = g.discount_type === 'percent' ? Math.round(amount * (1 - g.discount_value / 100)) : Math.max(0, amount - g.discount_value)
+  }
+
+  if (amount === 0) {
+    await db.prepare("UPDATE reports SET is_unlocked = 1, unlock_payment_id = 'promo-free' WHERE id = ?").bind(reportId).run()
+    return c.json({ success: true, status: 'free', message: 'Bericht kostenlos freigeschaltet' })
+  }
+
+  try {
+    const session = await createCheckoutSession(c.env.STRIPE_SECRET_KEY, { reportId, userId: user.id, amount, productName: `BAFA-Bericht: ${report.company_name || 'Beratungsbericht'}`, successUrl: 'https://zfbf.info/payment/success?session={CHECKOUT_SESSION_ID}', cancelUrl: 'https://zfbf.info/payment/cancel', customerEmail: user.email })
+    await db.prepare("INSERT INTO payments (id, user_id, report_id, package_type, amount, provider, provider_payment_id, gutschein_code, status) VALUES (?, ?, ?, 'einzel', ?, 'stripe', ?, ?, 'pending')")
+      .bind(crypto.randomUUID(), user.id, reportId, amount, session.id, promoCode || null).run()
+    return c.json({ success: true, sessionId: session.id, checkoutUrl: session.url })
+  } catch { return c.json({ success: false, error: 'Stripe Checkout konnte nicht erstellt werden' }, 500) }
+})
+
+// POST /stripe/webhook
+payments.post('/stripe/webhook', async (c) => {
+  const sig = c.req.header('stripe-signature')
+  if (!sig) return c.json({ error: 'Missing signature' }, 400)
+  const payload = await c.req.text()
+  if (!await verifyStripeSignature(payload, sig, c.env.STRIPE_WEBHOOK_SECRET)) return c.json({ error: 'Invalid signature' }, 403)
+
+  const event = JSON.parse(payload)
+  const eventKey = `stripe:${event.id}`
+  if (await c.env.WEBHOOK_EVENTS.get(eventKey)) return c.json({ received: true, duplicate: true })
+  await c.env.WEBHOOK_EVENTS.put(eventKey, '1', { expirationTtl: 86400 })
+
+  const db = c.env.DB
+  if (event.type === 'checkout.session.completed') {
+    const s = event.data.object; const reportId = s.metadata?.reportId; const userId = s.metadata?.userId
+    if (reportId && userId) {
+      await db.prepare("UPDATE payments SET status = 'completed' WHERE provider_payment_id = ?").bind(s.id).run()
+      const dlToken = crypto.randomUUID(); const validUntil = new Date(Date.now() + 86400_000).toISOString()
+      await db.batch([
+        db.prepare("UPDATE reports SET is_unlocked=1, unlock_payment_id=? WHERE id=?").bind(s.id, reportId),
+        db.prepare('INSERT INTO download_tokens (id, report_id, token, valid_until) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(), reportId, dlToken, validUntil),
+      ])
+      await writeAuditLog(db, { userId, eventType: AUDIT_EVENTS.PAYMENT, detail: `Stripe ${s.id} for ${reportId}` })
+    }
+  } else if (event.type === 'charge.refunded') {
+    const charge = event.data.object
+    const pay = await db.prepare('SELECT report_id FROM payments WHERE provider_payment_id = ?').bind(charge.payment_intent).first<{ report_id: string }>()
+    if (pay?.report_id) {
+      await db.batch([
+        db.prepare('UPDATE reports SET is_unlocked = 0 WHERE id = ?').bind(pay.report_id),
+        db.prepare("UPDATE payments SET status = 'refunded' WHERE provider_payment_id = ?").bind(charge.payment_intent),
+      ])
+    }
+  }
+  return c.json({ received: true })
+})
+
+// POST /paypal/create-order
+payments.post('/paypal/create-order', requireAuth, async (c) => {
+  const parsed = z.object({ reportId: z.string().uuid(), promoCode: z.string().optional() }).safeParse(await c.req.json())
+  if (!parsed.success) return c.json({ success: false, error: 'Ungültige Anfrage' }, 400)
+  const { reportId } = parsed.data; const user = c.get('user'); const db = c.env.DB
+  const report = await db.prepare('SELECT id, company_name FROM reports WHERE id = ? AND user_id = ?').bind(reportId, user.id).first<{ id: string; company_name: string }>()
+  if (!report) return c.json({ success: false, error: 'Bericht nicht gefunden' }, 404)
+
+  try {
+    const order = await createPayPalOrder(c.env.PAYPAL_CLIENT_ID, c.env.PAYPAL_CLIENT_SECRET, { reportId, userId: user.id, amount: REPORT_PRICE_CENTS, description: `BAFA-Bericht: ${report.company_name || 'Beratungsbericht'}` })
+    await db.prepare("INSERT INTO payments (id, user_id, report_id, package_type, amount, provider, provider_payment_id, status) VALUES (?, ?, ?, 'einzel', ?, 'paypal', ?, 'pending')")
+      .bind(crypto.randomUUID(), user.id, reportId, REPORT_PRICE_CENTS, order.orderId).run()
+    return c.json({ success: true, orderId: order.orderId, approveUrl: order.approveUrl })
+  } catch { return c.json({ success: false, error: 'PayPal Order konnte nicht erstellt werden' }, 500) }
+})
+
+// POST /paypal/capture-order
+payments.post('/paypal/capture-order', requireAuth, async (c) => {
+  const { orderId } = await c.req.json()
+  if (!orderId) return c.json({ success: false, error: 'Order ID erforderlich' }, 400)
+  const user = c.get('user'); const db = c.env.DB
+  try {
+    const capture = await capturePayPalOrder(c.env.PAYPAL_CLIENT_ID, c.env.PAYPAL_CLIENT_SECRET, orderId)
+    if (capture.status === 'COMPLETED') {
+      const pay = await db.prepare('SELECT id, report_id FROM payments WHERE provider_payment_id = ?').bind(orderId).first<{ id: string; report_id: string }>()
+      if (pay) {
+        const dlToken = crypto.randomUUID(); const validUntil = new Date(Date.now() + 86400_000).toISOString()
+        await db.batch([
+          db.prepare("UPDATE payments SET status = 'completed' WHERE id = ?").bind(pay.id),
+          db.prepare("UPDATE reports SET is_unlocked=1, unlock_payment_id=? WHERE id=?").bind(orderId, pay.report_id),
+          db.prepare('INSERT INTO download_tokens (id, report_id, token, valid_until) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(), pay.report_id, dlToken, validUntil),
+        ])
+        await writeAuditLog(db, { userId: user.id, eventType: AUDIT_EVENTS.PAYMENT, detail: `PayPal ${orderId}` })
+        return c.json({ success: true, downloadToken: dlToken, expiresAt: validUntil })
+      }
+    }
+    return c.json({ success: false, error: 'Zahlung nicht abgeschlossen' }, 400)
+  } catch { return c.json({ success: false, error: 'PayPal Capture fehlgeschlagen' }, 500) }
+})
+
+export { payments }

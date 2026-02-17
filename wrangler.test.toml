@@ -1,0 +1,36 @@
+name = "bafa-creator-ai-worker-test"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ENVIRONMENT = "test"
+API_VERSION = "v1"
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "zfbf-db-test"
+database_id = "test-db-id"
+
+# KV Namespaces
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "test-sessions-id"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "test-rate-limit-id"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "test-cache-id"
+
+[[kv_namespaces]]
+binding = "WEBHOOK_EVENTS"
+id = "test-webhook-events-id"
+
+# R2 Bucket
+[[r2_buckets]]
+binding = "REPORTS"
+bucket_name = "bafa-reports-test"
