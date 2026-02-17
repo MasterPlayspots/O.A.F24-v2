@@ -10,7 +10,6 @@ import { promo } from './routes/promo'
 import { orders } from './routes/orders'
 import { payments } from './routes/payments'
 import { admin } from './routes/admin'
-import { generateRateLimit } from './middleware/rateLimit'
 import { performBackup, cleanupOldBackups } from './services/backup'
 import { cleanupAuditLogs } from './services/audit'
 
@@ -27,7 +26,14 @@ app.use('/api/*', strictCorsCheck)
 // Health Check
 // ============================================
 app.get('/', (c) => c.json({ status: 'ok', service: 'zfbf-api', version: c.env.API_VERSION || 'v1' }))
-app.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
+app.get('/health', async (c) => {
+  const checks: Record<string, boolean> = {}
+  try { await c.env.DB.prepare('SELECT 1').first(); checks.database = true } catch { checks.database = false }
+  try { await c.env.CACHE.get('health-check'); checks.kv = true } catch { checks.kv = false }
+  try { await c.env.REPORTS.head('health-check'); checks.r2 = true } catch { checks.r2 = false }
+  const allHealthy = Object.values(checks).every(Boolean)
+  return c.json({ status: allHealthy ? 'healthy' : 'degraded', checks, timestamp: new Date().toISOString() }, allHealthy ? 200 : 503)
+})
 
 // ============================================
 // Route Mounting
@@ -42,27 +48,6 @@ app.route('/api/payments', payments)
 app.route('/api/admin', admin)
 
 // ============================================
-// Legacy Compatibility Redirects
-// ============================================
-app.post('/api/gutschein/validate', async (c) => {
-  const body = await c.req.json()
-  const url = new URL('/api/promo/validate', c.req.url)
-  return app.fetch(new Request(url, { method: 'POST', headers: c.req.raw.headers, body: JSON.stringify(body) }), c.env)
-})
-
-app.post('/api/payments/create', async (c) => {
-  const body = await c.req.json()
-  const url = new URL('/api/orders/create', c.req.url)
-  return app.fetch(new Request(url, { method: 'POST', headers: c.req.raw.headers, body: JSON.stringify(body) }), c.env)
-})
-
-app.post('/api/ai/generate', generateRateLimit, async (c) => {
-  const body = await c.req.json()
-  const url = new URL('/api/reports/generate', c.req.url)
-  return app.fetch(new Request(url, { method: 'POST', headers: c.req.raw.headers, body: JSON.stringify(body) }), c.env)
-})
-
-// ============================================
 // 404 Handler
 // ============================================
 app.notFound((c) => c.json({ success: false, error: 'Endpoint nicht gefunden' }, 404))
@@ -71,7 +56,6 @@ app.notFound((c) => c.json({ success: false, error: 'Endpoint nicht gefunden' },
 // Global Error Handler
 // ============================================
 app.onError((err, c) => {
-  console.error(JSON.stringify({ level: 'error', event: 'unhandled_error', message: err.message, stack: err.stack }))
   return c.json({ success: false, error: c.env.ENVIRONMENT === 'production' ? 'Interner Serverfehler' : err.message }, 500)
 })
 
@@ -89,10 +73,8 @@ export default {
 
         // GDPR audit log cleanup (90 days)
         await cleanupAuditLogs(env.DB)
-
-        console.log(JSON.stringify({ level: 'info', event: 'cron_completed', timestamp: new Date().toISOString() }))
-      } catch (err) {
-        console.error(JSON.stringify({ level: 'error', event: 'cron_failed', error: err instanceof Error ? err.message : String(err) }))
+      } catch {
+        // cron failure - errors surface via Cloudflare dashboard
       }
     })())
   },

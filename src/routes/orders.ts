@@ -4,6 +4,7 @@ import { z } from 'zod'
 import type { Bindings, Variables } from '../types'
 import { PACKAGES } from '../types'
 import { requireAuth } from '../middleware/auth'
+import { validateAndApplyPromo } from '../services/promo'
 
 const orders = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -23,11 +24,11 @@ orders.post('/create', requireAuth, async (c) => {
   let amount = pkg.price, discountAmount = 0, promoCodeId: string | null = null
 
   if (promoCode) {
-    const g = await db.prepare("SELECT * FROM gutscheine WHERE code = ? AND is_active = 1 AND (valid_until IS NULL OR valid_until > datetime('now'))").bind(promoCode.toUpperCase()).first() as any
-    if (g && g.total_uses < g.max_uses) {
-      promoCodeId = g.id
-      discountAmount = g.discount_type === 'percent' ? Math.round(amount * g.discount_value / 100) : Math.min(g.discount_value, amount)
-      amount = Math.max(0, amount - discountAmount)
+    const promo = await validateAndApplyPromo(db, promoCode, pkg.price)
+    if (promo.valid) {
+      promoCodeId = promo.promoCodeId
+      discountAmount = promo.discountAmount
+      amount = promo.discountedAmount
     }
   }
 

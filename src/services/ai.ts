@@ -23,7 +23,7 @@ export async function generateReportSection(ai: Ai, opts: GenerateOpts): Promise
     try {
       const res = await ai.run('@cf/meta/llama-3.1-8b-instruct' as any, {
         messages: [{ role: 'system', content: SYSTEM_PROMPT }, { role: 'user', content: prompt }],
-        max_tokens: 2000,
+        max_tokens: 1200,
         temperature: 0.7,
       }) as any
 

@@ -10,6 +10,7 @@ import { generateReportPreview, generateDownloadHtml } from '../services/report-
 import { verifyHmacSignature } from '../services/hmac'
 import { writeAuditLog } from '../services/audit'
 import { sendDownloadEmail } from '../services/email'
+import { createDownloadToken } from '../services/download'
 
 const reports = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -82,13 +83,8 @@ reports.post('/unlock', async (c) => {
   if (!report) return c.json({ success: false, error: 'Bericht nicht gefunden' }, 404)
   if (report.is_unlocked === 1) return c.json({ success: true, message: 'Bereits freigeschaltet' })
 
-  const downloadToken = crypto.randomUUID()
-  const validUntil = new Date(Date.now() + 24 * 3600_000).toISOString()
-
-  await db.batch([
-    db.prepare("UPDATE reports SET is_unlocked=1, unlock_payment_id=?, updated_at=datetime('now') WHERE id=?").bind(paymentId, reportId),
-    db.prepare('INSERT INTO download_tokens (id, report_id, token, valid_until) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(), reportId, downloadToken, validUntil),
-  ])
+  await db.prepare("UPDATE reports SET is_unlocked=1, unlock_payment_id=?, updated_at=datetime('now') WHERE id=?").bind(paymentId, reportId).run()
+  const { token: downloadToken, validUntil } = await createDownloadToken(db, reportId)
 
   const user = await db.prepare('SELECT email, first_name FROM users WHERE id = ?').bind(report.user_id).first<{ email: string; first_name: string }>()
   if (user && c.env.RESEND_API_KEY) await sendDownloadEmail(c.env.RESEND_API_KEY, user.email, user.first_name, `https://zfbf.info/api/bafa/download/${downloadToken}`)

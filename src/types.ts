@@ -133,6 +133,26 @@ export interface ReportRow {
 
 export const REPORT_PRICE_CENTS = 4900
 
+export const ReportStatus = {
+  DRAFT: 'entwurf',
+  GENERATING: 'generating',
+  GENERATED: 'generiert',
+  FINALIZED: 'finalisiert',
+  ERROR: 'error',
+} as const
+
+export const OrderStatus = {
+  PENDING: 'pending',
+  COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
+} as const
+
+export const PaymentStatus = {
+  PENDING: 'pending',
+  COMPLETED: 'completed',
+  REFUNDED: 'refunded',
+} as const
+
 export const PACKAGES: Record<string, { price: number; reports: number; name: string }> = {
   einzel: { price: 4900, reports: 1, name: 'Einzelbericht' },
   starter: { price: 14900, reports: 3, name: 'Starter-Paket' },

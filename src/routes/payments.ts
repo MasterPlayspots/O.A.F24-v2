@@ -8,6 +8,8 @@ import { createCheckoutSession } from '../services/stripe'
 import { createPayPalOrder, capturePayPalOrder } from '../services/paypal'
 import { verifyStripeSignature, generateHmacSignature } from '../services/hmac'
 import { writeAuditLog } from '../services/audit'
+import { createDownloadToken } from '../services/download'
+import { validateAndApplyPromo } from '../services/promo'
 
 const payments = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -22,8 +24,8 @@ payments.post('/stripe/create-session', requireAuth, async (c) => {
 
   let amount = REPORT_PRICE_CENTS
   if (promoCode) {
-    const g = await db.prepare("SELECT * FROM gutscheine WHERE code = ? AND is_active = 1 AND (valid_until IS NULL OR valid_until > datetime('now'))").bind(promoCode.toUpperCase()).first() as any
-    if (g && g.total_uses < g.max_uses) amount = g.discount_type === 'percent' ? Math.round(amount * (1 - g.discount_value / 100)) : Math.max(0, amount - g.discount_value)
+    const promo = await validateAndApplyPromo(db, promoCode, amount)
+    if (promo.valid) amount = promo.discountedAmount
   }
 
   if (amount === 0) {
@@ -56,11 +58,8 @@ payments.post('/stripe/webhook', async (c) => {
     const s = event.data.object; const reportId = s.metadata?.reportId; const userId = s.metadata?.userId
     if (reportId && userId) {
       await db.prepare("UPDATE payments SET status = 'completed' WHERE provider_payment_id = ?").bind(s.id).run()
-      const dlToken = crypto.randomUUID(); const validUntil = new Date(Date.now() + 86400_000).toISOString()
-      await db.batch([
-        db.prepare("UPDATE reports SET is_unlocked=1, unlock_payment_id=? WHERE id=?").bind(s.id, reportId),
-        db.prepare('INSERT INTO download_tokens (id, report_id, token, valid_until) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(), reportId, dlToken, validUntil),
-      ])
+      await db.prepare("UPDATE reports SET is_unlocked=1, unlock_payment_id=? WHERE id=?").bind(s.id, reportId).run()
+      await createDownloadToken(db, reportId)
       await writeAuditLog(db, { userId, eventType: AUDIT_EVENTS.PAYMENT, detail: `Stripe ${s.id} for ${reportId}` })
     }
   } else if (event.type === 'charge.refunded') {
@@ -102,12 +101,11 @@ payments.post('/paypal/capture-order', requireAuth, async (c) => {
     if (capture.status === 'COMPLETED') {
       const pay = await db.prepare('SELECT id, report_id FROM payments WHERE provider_payment_id = ?').bind(orderId).first<{ id: string; report_id: string }>()
       if (pay) {
-        const dlToken = crypto.randomUUID(); const validUntil = new Date(Date.now() + 86400_000).toISOString()
         await db.batch([
           db.prepare("UPDATE payments SET status = 'completed' WHERE id = ?").bind(pay.id),
           db.prepare("UPDATE reports SET is_unlocked=1, unlock_payment_id=? WHERE id=?").bind(orderId, pay.report_id),
-          db.prepare('INSERT INTO download_tokens (id, report_id, token, valid_until) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(), pay.report_id, dlToken, validUntil),
         ])
+        const { token: dlToken, validUntil } = await createDownloadToken(db, pay.report_id)
         await writeAuditLog(db, { userId: user.id, eventType: AUDIT_EVENTS.PAYMENT, detail: `PayPal ${orderId}` })
         return c.json({ success: true, downloadToken: dlToken, expiresAt: validUntil })
       }
