@@ -40,13 +40,13 @@ admin.patch('/users/:id/role', async (c) => {
 
 // GET /stats
 admin.get('/stats', async (c) => {
-  const [users, reports, payments, promos] = await c.env.DB.batch([
+  const results = await c.env.DB.batch([
     c.env.DB.prepare("SELECT COUNT(*) as total, SUM(CASE WHEN email_verified=1 THEN 1 ELSE 0 END) as verified FROM users"),
     c.env.DB.prepare("SELECT COUNT(*) as total, SUM(CASE WHEN status='generiert' THEN 1 ELSE 0 END) as generated, SUM(CASE WHEN is_unlocked=1 THEN 1 ELSE 0 END) as unlocked FROM reports"),
     c.env.DB.prepare("SELECT COUNT(*) as total, SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN status='completed' THEN amount ELSE 0 END) as revenue FROM payments"),
     c.env.DB.prepare('SELECT COUNT(*) as total FROM gutscheine WHERE is_active = 1'),
   ])
-  return c.json({ success: true, stats: { users: users.results[0], reports: reports.results[0], payments: payments.results[0], activePromos: (promos.results[0] as any)?.total || 0 } })
+  return c.json({ success: true, stats: { users: results[0]?.results?.[0] ?? null, reports: results[1]?.results?.[0] ?? null, payments: results[2]?.results?.[0] ?? null, activePromos: (results[3]?.results?.[0] as Record<string, unknown>)?.total ?? 0 } })
 })
 
 export { admin }

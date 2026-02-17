@@ -1,6 +1,7 @@
 // Report Routes - Generate, Preview, Unlock, Download, CRUD
 import { Hono } from 'hono'
 import { z } from 'zod'
+import type { Context } from 'hono'
 import type { Bindings, Variables, ReportRow } from '../types'
 import { AUDIT_EVENTS } from '../types'
 import { requireAuth } from '../middleware/auth'
@@ -18,7 +19,7 @@ const generateSchema = z.object({
   branche: z.string().min(1, 'Branche ist erforderlich'),
   unterbranche: z.string().optional(),
   companyName: z.string().min(1, 'Unternehmensname ist erforderlich'),
-  companyData: z.record(z.any()).optional(),
+  companyData: z.record(z.string(), z.any()).optional(),
   stichpunkte: z.array(z.string()).optional(),
   herausforderungen: z.array(z.string()).optional(),
   module: z.array(z.string()).optional(),
@@ -32,14 +33,26 @@ const unlockSchema = z.object({
   signature: z.string().min(1),
 })
 
+const DEFAULT_PAGE_SIZE = 50
+const MAX_PAGE_SIZE = 100
+
+async function checkKontingent(db: D1Database, userId: string): Promise<{ hasQuota: boolean }> {
+  const u = await db.prepare('SELECT kontingent_total, kontingent_used FROM users WHERE id = ?').bind(userId).first<{ kontingent_total: number; kontingent_used: number }>()
+  return { hasQuota: !!u && u.kontingent_total - u.kontingent_used > 0 }
+}
+
+function kontingentError(c: Context<{ Bindings: Bindings; Variables: Variables }>) {
+  return c.json({ success: false, error: 'Kontingent aufgebraucht', needsUpgrade: true }, 403)
+}
+
 // POST /generate
 reports.post('/generate', requireAuth, generateRateLimit, async (c) => {
   const parsed = generateSchema.safeParse(await c.req.json())
-  if (!parsed.success) return c.json({ success: false, error: 'Validierungsfehler', details: parsed.error.issues.map((e: any) => e.message) }, 400)
+  if (!parsed.success) return c.json({ success: false, error: 'Validierungsfehler', details: parsed.error.issues.map((e: z.ZodIssue) => e.message) }, 400)
 
   const user = c.get('user'); const db = c.env.DB; const d = parsed.data
-  const u = await db.prepare('SELECT kontingent_total, kontingent_used FROM users WHERE id = ?').bind(user.id).first<{ kontingent_total: number; kontingent_used: number }>()
-  if (!u || u.kontingent_total - u.kontingent_used <= 0) return c.json({ success: false, error: 'Kontingent aufgebraucht', needsUpgrade: true }, 403)
+  const { hasQuota } = await checkKontingent(db, user.id)
+  if (!hasQuota) return kontingentError(c)
 
   const reportId = crypto.randomUUID()
   await db.prepare("INSERT INTO reports (id, user_id, status, company_name, branche, unterbranche) VALUES (?, ?, 'generating', ?, ?, ?)")
@@ -108,10 +121,18 @@ reports.get('/download/:token', downloadRateLimit, async (c) => {
   return new Response(generateDownloadHtml(report), { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Content-Disposition': `attachment; filename="${filename}"` } })
 })
 
-// GET / - List reports
+// GET / - List reports (with pagination)
 reports.get('/', requireAuth, async (c) => {
-  const r = await c.env.DB.prepare('SELECT id, status, company_name, branche, unterbranche, qa_gesamt, is_unlocked, created_at, updated_at FROM reports WHERE user_id = ? ORDER BY updated_at DESC').bind(c.get('user').id).all()
-  return c.json({ success: true, reports: r.results })
+  const page = Math.max(1, parseInt(c.req.query('page') || '1', 10))
+  const limit = Math.min(MAX_PAGE_SIZE, Math.max(1, parseInt(c.req.query('limit') || String(DEFAULT_PAGE_SIZE), 10)))
+  const offset = (page - 1) * limit
+
+  const [countResult, r] = await Promise.all([
+    c.env.DB.prepare('SELECT COUNT(*) as total FROM reports WHERE user_id = ?').bind(c.get('user').id).first<{ total: number }>(),
+    c.env.DB.prepare('SELECT id, status, company_name, branche, unterbranche, qa_gesamt, is_unlocked, created_at, updated_at FROM reports WHERE user_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?').bind(c.get('user').id, limit, offset).all(),
+  ])
+
+  return c.json({ success: true, reports: r.results, pagination: { page, limit, total: countResult?.total || 0, totalPages: Math.ceil((countResult?.total || 0) / limit) } })
 })
 
 // GET /:id
@@ -124,8 +145,8 @@ reports.get('/:id', requireAuth, async (c) => {
 // POST / - Create draft
 reports.post('/', requireAuth, async (c) => {
   const user = c.get('user'); const db = c.env.DB
-  const u = await db.prepare('SELECT kontingent_total, kontingent_used FROM users WHERE id = ?').bind(user.id).first<{ kontingent_total: number; kontingent_used: number }>()
-  if (!u || u.kontingent_total - u.kontingent_used <= 0) return c.json({ success: false, error: 'Kontingent aufgebraucht', needsUpgrade: true }, 403)
+  const { hasQuota } = await checkKontingent(db, user.id)
+  if (!hasQuota) return kontingentError(c)
   const id = crypto.randomUUID()
   await db.prepare("INSERT INTO reports (id, user_id, status) VALUES (?, ?, 'entwurf')").bind(id, user.id).run()
   return c.json({ success: true, reportId: id })
@@ -144,8 +165,8 @@ reports.patch('/:id', requireAuth, async (c) => {
 // POST /:id/finalize
 reports.post('/:id/finalize', requireAuth, async (c) => {
   const user = c.get('user'); const db = c.env.DB
-  const u = await db.prepare('SELECT kontingent_total, kontingent_used FROM users WHERE id = ?').bind(user.id).first<{ kontingent_total: number; kontingent_used: number }>()
-  if (!u || u.kontingent_total - u.kontingent_used <= 0) return c.json({ success: false, error: 'Kontingent aufgebraucht', needsUpgrade: true }, 403)
+  const { hasQuota } = await checkKontingent(db, user.id)
+  if (!hasQuota) return kontingentError(c)
   await db.batch([
     db.prepare("UPDATE reports SET status = 'finalisiert' WHERE id = ? AND user_id = ?").bind(c.req.param('id'), user.id),
     db.prepare('UPDATE users SET kontingent_used = kontingent_used + 1 WHERE id = ?').bind(user.id),
