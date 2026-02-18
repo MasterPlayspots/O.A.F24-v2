@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "echo 'Worker runs on Cloudflare – skipping local dev'",
     "build": "esbuild src/index.ts --bundle --format=esm --outfile=dist/index.js --external:cloudflare:* --minify",
     "deploy": "pnpm build && wrangler deploy",
     "lint": "eslint src",
