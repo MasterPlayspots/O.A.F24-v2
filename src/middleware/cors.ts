@@ -12,6 +12,7 @@ const DEV_ORIGINS = [
   'http://localhost:3000',
   'http://localhost:5173',
   'https://v0-bafa-creator-ai.vercel.app',
+  'http://localhost:3000',
 ]
 
 function getAllowedOrigins(env?: string): string[] {

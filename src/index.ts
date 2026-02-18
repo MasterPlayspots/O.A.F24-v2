@@ -1,7 +1,7 @@
 // ZFBF Worker - Modular Hono API
 import { Hono } from 'hono'
 import type { Bindings, Variables } from './types'
-import { securityHeaders } from './middleware/security'
+import { securityHeaders, csrfProtection } from './middleware/security'
 import { corsMiddleware, strictCorsCheck } from './middleware/cors'
 import { auth } from './routes/auth'
 import { reports } from './routes/reports'
@@ -10,8 +10,10 @@ import { promo } from './routes/promo'
 import { orders } from './routes/orders'
 import { payments } from './routes/payments'
 import { admin } from './routes/admin'
+import { gdpr } from './routes/gdpr'
 import { performBackup, cleanupOldBackups } from './services/backup'
 import { cleanupAuditLogs } from './services/audit'
+import { cleanupExpiredData } from './services/retention'
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -21,6 +23,7 @@ const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 app.use('/*', securityHeaders)
 app.use('/*', corsMiddleware)
 app.use('/api/*', strictCorsCheck)
+app.use('/api/*', csrfProtection)
 
 // ============================================
 // Health Check
@@ -46,6 +49,7 @@ app.route('/api/promo', promo)
 app.route('/api/orders', orders)
 app.route('/api/payments', payments)
 app.route('/api/admin', admin)
+app.route('/api/user', gdpr)
 
 // ============================================
 // 404 Handler
@@ -73,6 +77,17 @@ export default {
 
         // GDPR audit log cleanup (90 days)
         await cleanupAuditLogs(env.DB)
+
+        // GDPR data retention cleanup
+        await cleanupExpiredData(env.DB)
+
+        // Weekly learning cycle (cron: 0 3 * * 1 - Monday 03:00 UTC)
+        const trigger = new Date(event.scheduledTime)
+        if (trigger.getUTCDay() === 1 && trigger.getUTCHours() === 3) {
+          // Learning cycle runs weekly - placeholder for bafa_learnings analysis
+          // TODO: Implement full learning cycle against BAFA_CONTENT D1 binding
+          console.log('Weekly learning cycle triggered at', trigger.toISOString())
+        }
       } catch {
         // cron failure - errors surface via Cloudflare dashboard
       }

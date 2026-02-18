@@ -6,12 +6,18 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 ENVIRONMENT = "test"
 API_VERSION = "v1"
+FRONTEND_URL = "http://localhost:3000"
 
-# D1 Database
+# D1 Databases
 [[d1_databases]]
 binding = "DB"
 database_name = "zfbf-db-test"
 database_id = "test-db-id"
+
+[[d1_databases]]
+binding = "BAFA_CONTENT"
+database_name = "bafa-learnings-test"
+database_id = "test-bafa-content-id"
 
 # KV Namespaces
 [[kv_namespaces]]
