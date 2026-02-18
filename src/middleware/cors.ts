@@ -7,6 +7,7 @@ const ALLOWED_ORIGINS = [
   'https://zfbf.info',
   'https://www.zfbf.info',
   'https://v0-bafa-creator-ai.vercel.app',
+  'http://localhost:3000',
 ]
 
 export const corsMiddleware = cors({

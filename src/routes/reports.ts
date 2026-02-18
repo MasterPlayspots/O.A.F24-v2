@@ -15,14 +15,14 @@ import { createDownloadToken } from '../services/download'
 const reports = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
 const generateSchema = z.object({
-  branche: z.string().min(1, 'Branche ist erforderlich'),
-  unterbranche: z.string().optional(),
-  companyName: z.string().min(1, 'Unternehmensname ist erforderlich'),
+  branche: z.string().min(1, 'Branche ist erforderlich').max(100),
+  unterbranche: z.string().max(100).optional(),
+  companyName: z.string().min(1, 'Unternehmensname ist erforderlich').max(200),
   companyData: z.record(z.any()).optional(),
-  stichpunkte: z.array(z.string()).optional(),
-  herausforderungen: z.array(z.string()).optional(),
-  module: z.array(z.string()).optional(),
-  massnahmen: z.array(z.object({ name: z.string(), methode: z.string(), ergebnis: z.string() })).optional(),
+  stichpunkte: z.array(z.string().max(500)).max(20).optional(),
+  herausforderungen: z.array(z.string().max(500)).max(20).optional(),
+  module: z.array(z.string().max(200)).max(10).optional(),
+  massnahmen: z.array(z.object({ name: z.string().max(200), methode: z.string().max(1000), ergebnis: z.string().max(1000) })).max(20).optional(),
 })
 
 const unlockSchema = z.object({

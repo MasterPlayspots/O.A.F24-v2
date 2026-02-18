@@ -83,6 +83,8 @@ export interface UserRow {
   reset_token_expires: string | null
   bafa_status: string
   onboarding_completed: number
+  privacy_accepted_at: string | null
+  deleted_at: string | null
   created_at: string
   updated_at: string
 }

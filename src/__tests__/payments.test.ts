@@ -102,7 +102,7 @@ describe('Health & 404', () => {
     const res = await SELF.fetch('https://api.test/health')
     expect(res.status).toBe(200)
     const body = await res.json() as any
-    expect(body.status).toBe('ok')
+    expect(body.status).toBe('healthy')
     expect(body.timestamp).toBeTruthy()
   })
 

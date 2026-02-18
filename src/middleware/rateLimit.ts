@@ -31,3 +31,4 @@ export const loginRateLimit = rateLimit({ maxRequests: 5, windowSeconds: 300, ke
 export const registerRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 3600, keyPrefix: 'register' })
 export const downloadRateLimit = rateLimit({ maxRequests: 10, windowSeconds: 300, keyPrefix: 'download' })
 export const generateRateLimit = rateLimit({ maxRequests: 5, windowSeconds: 600, keyPrefix: 'generate' })
+export const forgotPasswordRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 900, keyPrefix: 'forgot-pw' })

@@ -6,8 +6,9 @@ import type { Bindings, Variables, UserRow } from '../types'
 import { AUDIT_EVENTS } from '../types'
 import { hashPassword, verifyPassword, verifyLegacySha256 } from '../services/password'
 import { writeAuditLog } from '../services/audit'
-import { loginRateLimit, registerRateLimit } from '../middleware/rateLimit'
+import { loginRateLimit, registerRateLimit, forgotPasswordRateLimit } from '../middleware/rateLimit'
 import { requireAuth } from '../middleware/auth'
+import { sendPasswordResetEmail } from '../services/email'
 
 const auth = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -166,6 +167,64 @@ auth.patch('/me', requireAuth, async (c) => {
   }
   if (set.length) { vals.push(c.get('user').id); await c.env.DB.prepare(`UPDATE users SET ${set.join(', ')}, updated_at = datetime('now') WHERE id = ?`).bind(...vals).run() }
   return c.json({ success: true })
+})
+
+// POST /forgot-password
+auth.post('/forgot-password', forgotPasswordRateLimit, async (c) => {
+  const { email } = await c.req.json()
+  if (!email) return c.json({ success: false, error: 'E-Mail ist erforderlich' }, 400)
+
+  const db = c.env.DB
+  // Rate limit per email using KV
+  const rlKey = `pwd-reset:${email.toLowerCase()}`
+  const existing = await c.env.RATE_LIMIT.get(rlKey)
+  if (existing) {
+    return c.json({ success: true, message: 'Falls ein Konto existiert, wurde eine E-Mail gesendet.' })
+  }
+
+  const user = await db.prepare('SELECT id, first_name FROM users WHERE email = ?').bind(email.toLowerCase()).first<{ id: string; first_name: string }>()
+  // Always return success to prevent email enumeration
+  if (!user) return c.json({ success: true, message: 'Falls ein Konto existiert, wurde eine E-Mail gesendet.' })
+
+  const resetToken = crypto.randomUUID()
+  const expires = new Date(Date.now() + 3600_000).toISOString() // 1 hour
+  await db.prepare("UPDATE users SET reset_token = ?, reset_token_expires = ?, updated_at = datetime('now') WHERE id = ?")
+    .bind(resetToken, expires, user.id).run()
+
+  await c.env.RATE_LIMIT.put(rlKey, '1', { expirationTtl: 300 })
+
+  const frontendUrl = c.env.FRONTEND_URL || 'https://zfbf.info'
+  if (c.env.RESEND_API_KEY) {
+    await sendPasswordResetEmail(c.env.RESEND_API_KEY, email.toLowerCase(), user.first_name, `${frontendUrl}/passwort-zuruecksetzen?token=${resetToken}`)
+  }
+
+  await writeAuditLog(db, { userId: user.id, eventType: 'password_reset_request', detail: email, ip: c.req.header('CF-Connecting-IP') })
+  return c.json({ success: true, message: 'Falls ein Konto existiert, wurde eine E-Mail gesendet.' })
+})
+
+// POST /reset-password
+auth.post('/reset-password', async (c) => {
+  const parsed = z.object({
+    token: z.string().uuid(),
+    password: z.string().min(8)
+      .regex(/[A-Z]/, 'Mindestens ein Großbuchstabe')
+      .regex(/[a-z]/, 'Mindestens ein Kleinbuchstabe')
+      .regex(/[^A-Za-z0-9]/, 'Mindestens ein Sonderzeichen'),
+  }).safeParse(await c.req.json())
+  if (!parsed.success) return c.json({ success: false, error: 'Validierungsfehler', details: parsed.error.issues.map((e: any) => e.message) }, 400)
+
+  const db = c.env.DB
+  const user = await db.prepare("SELECT id FROM users WHERE reset_token = ? AND reset_token_expires > datetime('now')").bind(parsed.data.token).first<{ id: string }>()
+  if (!user) return c.json({ success: false, error: 'Ungültiger oder abgelaufener Token' }, 400)
+
+  const { hash, salt } = await hashPassword(parsed.data.password)
+  await db.batch([
+    db.prepare("UPDATE users SET password_hash = ?, salt = ?, hash_version = 2, reset_token = NULL, reset_token_expires = NULL, updated_at = datetime('now') WHERE id = ?").bind(hash, salt, user.id),
+    db.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ?').bind(user.id),
+  ])
+
+  await writeAuditLog(db, { userId: user.id, eventType: 'password_reset', ip: c.req.header('CF-Connecting-IP') })
+  return c.json({ success: true, message: 'Passwort erfolgreich geändert. Bitte melden Sie sich erneut an.' })
 })
 
 // POST /logout
