@@ -28,6 +28,7 @@ export type Bindings = {
   FRONTEND_URL: string
   ENVIRONMENT: string
   API_VERSION: string
+  SENTRY_DSN: string
 }
 
 // ============================================

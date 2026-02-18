@@ -1,5 +1,6 @@
 // ZFBF Worker - Modular Hono API
 import { Hono } from 'hono'
+import { Toucan } from 'toucan-js'
 import type { Bindings, Variables } from './types'
 import { securityHeaders, csrfProtection } from './middleware/security'
 import { corsMiddleware, strictCorsCheck } from './middleware/cors'
@@ -60,6 +61,10 @@ app.notFound((c) => c.json({ success: false, error: 'Endpoint nicht gefunden' },
 // Global Error Handler
 // ============================================
 app.onError((err, c) => {
+  if (c.env.SENTRY_DSN) {
+    const sentry = new Toucan({ dsn: c.env.SENTRY_DSN, request: c.req.raw })
+    sentry.captureException(err)
+  }
   return c.json({ success: false, error: c.env.ENVIRONMENT === 'production' ? 'Interner Serverfehler' : err.message }, 500)
 })
 
