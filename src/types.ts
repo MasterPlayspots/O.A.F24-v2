@@ -129,6 +129,29 @@ export interface ReportRow {
   updated_at: string
 }
 
+export interface GutscheinRow {
+  id: string
+  code: string
+  discount_type: 'percent' | 'fixed'
+  discount_value: number
+  max_uses: number
+  total_uses: number
+  is_active: number
+  valid_from: string | null
+  valid_until: string | null
+  created_by: string | null
+  created_at: string
+}
+
+export interface RefreshTokenRow {
+  id: string
+  user_id: string
+  token_hash: string
+  expires_at: string
+  revoked: number
+  created_at: string
+}
+
 // ============================================
 // Constants
 // ============================================

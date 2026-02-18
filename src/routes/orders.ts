@@ -16,10 +16,11 @@ const schema = z.object({
 
 orders.post('/create', requireAuth, async (c) => {
   const parsed = schema.safeParse(await c.req.json())
-  if (!parsed.success) return c.json({ success: false, error: 'Validierungsfehler', details: parsed.error.issues.map((e: any) => e.message) }, 400)
+  if (!parsed.success) return c.json({ success: false, error: 'Validierungsfehler', details: parsed.error.issues.map((e: z.ZodIssue) => e.message) }, 400)
 
   const { packageType, promoCode, paymentMethod } = parsed.data
   const user = c.get('user'); const db = c.env.DB; const pkg = PACKAGES[packageType]
+  if (!pkg) return c.json({ success: false, error: 'Ungültiges Paket' }, 400)
 
   let amount = pkg.price, discountAmount = 0, promoCodeId: string | null = null
 

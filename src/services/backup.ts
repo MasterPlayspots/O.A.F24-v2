@@ -37,7 +37,7 @@ export async function cleanupOldBackups(bucket: R2Bucket): Promise<number> {
     const listed = await bucket.list({ prefix: 'backups/', cursor })
     for (const obj of listed.objects) {
       const m = obj.key.match(/backups\/(\d{4}-\d{2}-\d{2})\//)
-      if (m && new Date(m[1]) < cutoff) { await bucket.delete(obj.key); deleted++ }
+      if (m?.[1] && new Date(m[1]) < cutoff) { await bucket.delete(obj.key); deleted++ }
     }
     cursor = listed.truncated ? listed.cursor : undefined
   } while (cursor)

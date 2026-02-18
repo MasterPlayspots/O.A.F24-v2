@@ -71,8 +71,8 @@ export default {
   async scheduled(event: ScheduledEvent, env: Bindings, ctx: ExecutionContext) {
     ctx.waitUntil((async () => {
       try {
-        // Daily backup at 02:00 UTC (cron: 0 2 * * *)
-        await performBackup([env.DB], env.REPORTS)
+        // Daily backup at 02:00 UTC
+        await performBackup([{ name: 'zfbf-db', db: env.DB }], env.REPORTS)
         await cleanupOldBackups(env.REPORTS)
 
         // GDPR audit log cleanup (90 days)

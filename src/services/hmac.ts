@@ -31,6 +31,6 @@ function timeSafeCompare(a: string, b: string): boolean {
   const bufA = new TextEncoder().encode(a)
   const bufB = new TextEncoder().encode(b)
   let result = 0
-  for (let i = 0; i < bufA.length; i++) result |= bufA[i] ^ bufB[i]
+  for (let i = 0; i < bufA.length; i++) result |= (bufA[i] ?? 0) ^ (bufB[i] ?? 0)
   return result === 0
 }

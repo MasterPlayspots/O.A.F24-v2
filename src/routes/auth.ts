@@ -2,7 +2,7 @@
 import { Hono } from 'hono'
 import { SignJWT } from 'jose'
 import { z } from 'zod'
-import type { Bindings, Variables, UserRow } from '../types'
+import type { Bindings, Variables, UserRow, RefreshTokenRow } from '../types'
 import { AUDIT_EVENTS } from '../types'
 import { hashPassword, verifyPassword, verifyLegacySha256 } from '../services/password'
 import { writeAuditLog } from '../services/audit'
@@ -32,7 +32,7 @@ const loginSchema = z.object({ email: z.string().email(), password: z.string().m
 // POST /register
 auth.post('/register', registerRateLimit, async (c) => {
   const parsed = registerSchema.safeParse(await c.req.json())
-  if (!parsed.success) return c.json({ success: false, error: 'Validierungsfehler', details: parsed.error.issues.map((e: any) => e.message) }, 400)
+  if (!parsed.success) return c.json({ success: false, error: 'Validierungsfehler', details: parsed.error.issues.map((e: z.ZodIssue) => e.message) }, 400)
 
   const { email, password, firstName, lastName, bafaId, company, ustId, steuernummer, isKleinunternehmer } = parsed.data
   const db = c.env.DB
@@ -110,30 +110,33 @@ auth.post('/login', loginRateLimit, async (c) => {
   })
 })
 
-// POST /refresh
+// POST /refresh - uses JOIN to avoid N+1 query
 auth.post('/refresh', async (c) => {
   const { refreshToken } = await c.req.json()
   if (!refreshToken) return c.json({ success: false, error: 'Refresh Token erforderlich' }, 400)
 
   const db = c.env.DB
   const tokenHash = await hashTokenSha256(refreshToken)
-  const stored = await db.prepare("SELECT * FROM refresh_tokens WHERE token_hash = ? AND revoked = 0 AND expires_at > datetime('now')").bind(tokenHash).first() as any
-  if (!stored) return c.json({ success: false, error: 'Ungültiger Refresh Token' }, 401)
 
-  const user = await db.prepare('SELECT * FROM users WHERE id = ?').bind(stored.user_id).first() as UserRow | null
-  if (!user) return c.json({ success: false, error: 'Benutzer nicht gefunden' }, 401)
+  const row = await db.prepare(
+    `SELECT rt.id as token_id, u.id, u.email, u.role
+     FROM refresh_tokens rt
+     INNER JOIN users u ON u.id = rt.user_id
+     WHERE rt.token_hash = ? AND rt.revoked = 0 AND rt.expires_at > datetime('now')`
+  ).bind(tokenHash).first<{ token_id: string; id: string; email: string; role: string }>()
+  if (!row) return c.json({ success: false, error: 'Ungültiger Refresh Token' }, 401)
 
   const newRefresh = crypto.randomUUID() + '-' + crypto.randomUUID()
   const newHash = await hashTokenSha256(newRefresh)
   const expiresAt = new Date(Date.now() + 7 * 24 * 3600_000).toISOString()
   const secret = new TextEncoder().encode(c.env.JWT_SECRET)
 
-  const accessToken = await new SignJWT({ userId: user.id, email: user.email, role: user.role || 'user' })
+  const accessToken = await new SignJWT({ userId: row.id, email: row.email, role: row.role || 'user' })
     .setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('30m').sign(secret)
 
   await db.batch([
-    db.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE id = ?').bind(stored.id),
-    db.prepare('INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(), user.id, newHash, expiresAt),
+    db.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE id = ?').bind(row.token_id),
+    db.prepare('INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(), row.id, newHash, expiresAt),
   ])
 
   return c.json({ success: true, token: accessToken, refreshToken: newRefresh })
@@ -143,7 +146,7 @@ auth.post('/refresh', async (c) => {
 auth.post('/verify-email', async (c) => {
   const { token } = await c.req.json()
   if (!token) return c.json({ success: false, error: 'Token erforderlich' }, 400)
-  const user = await c.env.DB.prepare('SELECT id FROM users WHERE verification_token = ?').bind(token).first() as any
+  const user = await c.env.DB.prepare('SELECT id FROM users WHERE verification_token = ?').bind(token).first<{ id: string }>()
   if (!user) return c.json({ success: false, error: 'Ungültiger Token' }, 400)
   await c.env.DB.prepare("UPDATE users SET email_verified = 1, verification_token = NULL, updated_at = datetime('now') WHERE id = ?").bind(user.id).run()
   return c.json({ success: true, message: 'E-Mail verifiziert' })

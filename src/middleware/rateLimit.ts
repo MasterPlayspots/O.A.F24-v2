@@ -20,8 +20,9 @@ export function rateLimit(config: RateLimitConfig): MiddlewareHandler<{ Bindings
         return c.json({ success: false, error: 'Zu viele Anfragen. Bitte versuchen Sie es später erneut.' }, 429)
       }
       await c.env.RATE_LIMIT.put(key, (count + 1).toString(), { expirationTtl: config.windowSeconds })
-    } catch {
-      // fail open
+    } catch (err) {
+      console.error(`[RateLimit] KV error for ${config.keyPrefix}:`, err)
+      // fail open - allow request through if KV is unavailable
     }
     await next()
   }
