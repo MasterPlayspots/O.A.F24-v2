@@ -23,12 +23,12 @@ gdpr.get('/export', requireAuth, async (c) => {
   const exportData = {
     exportedAt: new Date().toISOString(),
     dsgvoArticle: 'Art. 15 DSGVO - Auskunftsrecht',
-    user: user.results[0] || null,
-    reports: reports.results,
-    payments: payments.results,
-    orders: orders.results,
-    promoRedemptions: promoRedemptions.results,
-    recentAuditLogs: auditLogs.results,
+    user: user?.results?.[0] ?? null,
+    reports: reports?.results ?? [],
+    payments: payments?.results ?? [],
+    orders: orders?.results ?? [],
+    promoRedemptions: promoRedemptions?.results ?? [],
+    recentAuditLogs: auditLogs?.results ?? [],
   }
 
   await writeAuditLog(db, { userId, eventType: 'gdpr_export', ip: c.req.header('CF-Connecting-IP') })
