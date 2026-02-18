@@ -1,7 +1,7 @@
 // Authentication & Authorization Middleware
 import { jwtVerify } from 'jose'
 import type { MiddlewareHandler } from 'hono'
-import type { Bindings, Variables, JwtPayload, AuthUser } from '../types'
+import type { Bindings, Variables, JwtPayload } from '../types'
 
 export const requireAuth: MiddlewareHandler<{ Bindings: Bindings; Variables: Variables }> = async (c, next) => {
   const authHeader = c.req.header('Authorization')

@@ -1,5 +1,5 @@
 // Auth Routes Tests - Register, Login, Refresh, Profile
-import { describe, it, expect, beforeAll, beforeEach } from 'vitest'
+import { describe, it, expect, beforeAll } from 'vitest'
 import { env, SELF } from 'cloudflare:test'
 import { setupTestDb, createTestUser, createTestToken } from './test-utils'
 import { hashPassword } from '../services/password'
@@ -77,7 +77,7 @@ describe('POST /api/auth/register', () => {
 describe('POST /api/auth/login', () => {
   it('logs in with valid PBKDF2 credentials', async () => {
     const { hash, salt } = await hashPassword('Login#Test1')
-    const userId = await createTestUser(env.DB, {
+    await createTestUser(env.DB, {
       email: 'login-pbkdf2@example.com',
       password_hash: hash,
       salt,

@@ -1,7 +1,6 @@
 // GDPR Routes - DSGVO Art. 15 Export, Art. 17 Deletion
 import { Hono } from 'hono'
 import type { Bindings, Variables } from '../types'
-import { AUDIT_EVENTS } from '../types'
 import { requireAuth } from '../middleware/auth'
 import { writeAuditLog } from '../services/audit'
 

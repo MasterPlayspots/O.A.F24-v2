@@ -7,7 +7,7 @@
     "dev": "wrangler dev",
     "build": "esbuild src/index.ts --bundle --format=esm --outfile=dist/index.js --external:cloudflare:* --minify",
     "deploy": "pnpm build && wrangler deploy",
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -30,7 +30,9 @@
     "@cloudflare/workers-types": "^4.20250117.0",
     "@cloudflare/vitest-pool-workers": "^0.12.12",
     "esbuild": "^0.27.3",
+    "eslint": "^9",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.46.0",
     "vitest": "~3.2.4",
     "wrangler": "^4.65.0"
   }
