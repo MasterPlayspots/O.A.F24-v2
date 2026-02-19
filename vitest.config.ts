@@ -7,9 +7,8 @@ export default defineWorkersConfig({
       workers: {
         wrangler: { configPath: "./wrangler.test.toml" },
         miniflare: {
-          kvNamespaces: ["SESSIONS", "RATE_LIMIT", "CACHE", "WEBHOOK_EVENTS"],
-          r2Buckets: ["REPORTS"],
-          d1Databases: ["DB", "BAFA_DB", "BAFA_CONTENT"],
+          // D1, KV, and R2 bindings are defined in wrangler.test.toml
+          // Only provide secret values here that wrangler.test.toml doesn't include
           bindings: {
             JWT_SECRET: "test-jwt-secret-key-for-testing-only",
             UNLOCK_SECRET: "test-unlock-secret-key",
@@ -18,9 +17,6 @@ export default defineWorkersConfig({
             PAYPAL_CLIENT_ID: "test-paypal-client",
             PAYPAL_CLIENT_SECRET: "test-paypal-secret",
             RESEND_API_KEY: "re_test_fake",
-            FRONTEND_URL: "http://localhost:3000",
-            ENVIRONMENT: "test",
-            API_VERSION: "v1",
           },
         },
       },
