@@ -6,6 +6,7 @@
 
 export type Bindings = {
   DB: D1Database
+  BAFA_DB: D1Database
   BAFA_CONTENT: D1Database
 
   SESSIONS: KVNamespace
@@ -129,6 +130,62 @@ export interface ReportRow {
   created_at: string
   updated_at: string
 }
+
+// ============================================
+// BAFA Antraege Row Types (bafa_antraege D1)
+// ============================================
+
+export interface AntragRow {
+  id: string
+  branche_id: string | null
+  unternehmen_name: string
+  unternehmen_typ: string | null
+  unternehmen_mitarbeiter: number | null
+  unternehmen_umsatz: string | null
+  unternehmen_hauptproblem: string | null
+  beratungsthema: string
+  beratungsschwerpunkte: string | null
+  status: string
+  qualitaetsscore: number
+  wortanzahl: number
+  r2_key: string | null
+  bezahlt_am: string | null
+  erstellt_am: string | null
+  aktualisiert_am: string | null
+}
+
+export interface AntragBausteinRow {
+  id: number
+  antrag_id: string
+  baustein_typ: string
+  baustein_name: string | null
+  inhalt: string | null
+  inhalt_json: string | null
+  qualitaets_score: number | null
+  wortanzahl: number | null
+  version: number
+  erstellt_am: string | null
+}
+
+export interface BafaDownloadTokenRow {
+  id: string
+  antrag_id: string
+  token: string
+  gueltig_bis: string
+  downloads: number
+  max_downloads: number
+  erstellt_am: string | null
+}
+
+export const AntragStatus = {
+  PREVIEW: 'vorschau',
+  PAID: 'bezahlt',
+  GENERATED: 'generiert',
+  PENDING: 'pending',
+  APPROVED: 'bewilligt',
+  REJECTED: 'abgelehnt',
+  FAILED: 'fehlgeschlagen',
+} as const
 
 export interface GutscheinRow {
   id: string

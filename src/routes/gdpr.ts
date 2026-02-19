@@ -1,4 +1,5 @@
 // GDPR Routes - DSGVO Art. 15 Export, Art. 17 Deletion
+// Uses BAFA_DB for antraege and download_tokens
 import { Hono } from 'hono'
 import type { Bindings, Variables } from '../types'
 import { requireAuth } from '../middleware/auth'
@@ -9,7 +10,7 @@ const gdpr = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 // GET /export - DSGVO Art. 15: Right of access (Auskunftsrecht)
 gdpr.get('/export', requireAuth, async (c) => {
   const userId = c.get('user').id
-  const db = c.env.DB
+  const db = c.env.DB; const bafaDb = c.env.BAFA_DB
 
   const [user, reports, payments, orders, promoRedemptions, auditLogs] = await db.batch([
     db.prepare('SELECT id, email, first_name, last_name, company, bafa_id, ust_id, steuernummer, phone, website, bafa_status, kontingent_total, kontingent_used, created_at, updated_at, privacy_accepted_at FROM users WHERE id = ?').bind(userId),
@@ -20,11 +21,23 @@ gdpr.get('/export', requireAuth, async (c) => {
     db.prepare("SELECT event_type, detail, created_at FROM audit_logs WHERE user_id = ? ORDER BY created_at DESC LIMIT 100").bind(userId),
   ])
 
+  // Enrich with antrag data from BAFA_DB
+  const reportIds = ((reports?.results ?? []) as any[]).map((r: any) => r.id)
+  let antraegeData: any[] = []
+  if (reportIds.length > 0) {
+    const placeholders = reportIds.map(() => '?').join(',')
+    const result = await bafaDb.prepare(
+      `SELECT id, unternehmen_name, branche_id, status, qualitaetsscore, wortanzahl, erstellt_am FROM antraege WHERE id IN (${placeholders})`
+    ).bind(...reportIds).all()
+    antraegeData = result.results || []
+  }
+
   const exportData = {
     exportedAt: new Date().toISOString(),
     dsgvoArticle: 'Art. 15 DSGVO - Auskunftsrecht',
     user: user?.results?.[0] ?? null,
     reports: reports?.results ?? [],
+    antraege: antraegeData,
     payments: payments?.results ?? [],
     orders: orders?.results ?? [],
     promoRedemptions: promoRedemptions?.results ?? [],
@@ -41,11 +54,15 @@ gdpr.get('/export', requireAuth, async (c) => {
 // DELETE /account - DSGVO Art. 17: Right to erasure (Recht auf Löschung)
 gdpr.delete('/account', requireAuth, async (c) => {
   const userId = c.get('user').id
-  const db = c.env.DB
+  const db = c.env.DB; const bafaDb = c.env.BAFA_DB
 
   const deletedEmail = `deleted-${crypto.randomUUID().slice(0, 8)}@deleted.local`
 
-  // Soft-delete user and anonymize PII
+  // Get user's report IDs for BAFA_DB cleanup
+  const userReports = await db.prepare('SELECT id FROM reports WHERE user_id = ?').bind(userId).all()
+  const reportIds = (userReports.results || []).map((r: any) => r.id as string)
+
+  // Soft-delete user and anonymize PII in zfbf-db
   // Keep payment records for HGB 10-year retention (Handelsgesetzbuch §257)
   await db.batch([
     // Anonymize user data
@@ -59,11 +76,17 @@ gdpr.delete('/account', requireAuth, async (c) => {
       WHERE id = ?`).bind(deletedEmail, userId),
     // Revoke all sessions
     db.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ?').bind(userId),
-    // Invalidate download tokens
-    db.prepare("UPDATE download_tokens SET valid_until = datetime('now') WHERE report_id IN (SELECT id FROM reports WHERE user_id = ?)").bind(userId),
     // Anonymize audit logs (keep event types for compliance)
     db.prepare("UPDATE audit_logs SET ip = NULL, user_agent = NULL, detail = '[GELÖSCHT]' WHERE user_id = ?").bind(userId),
   ])
+
+  // Invalidate download tokens in BAFA_DB for user's antraege
+  if (reportIds.length > 0) {
+    const placeholders = reportIds.map(() => '?').join(',')
+    await bafaDb.prepare(
+      `UPDATE download_tokens SET gueltig_bis = datetime('now') WHERE antrag_id IN (${placeholders})`
+    ).bind(...reportIds).run()
+  }
 
   await writeAuditLog(db, { userId, eventType: 'gdpr_deletion', detail: 'Account anonymized per Art. 17 DSGVO' })
 

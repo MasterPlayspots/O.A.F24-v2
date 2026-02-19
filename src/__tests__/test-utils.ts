@@ -1,7 +1,7 @@
 // Test Utilities - DB setup, JWT generation, helpers
 import { SignJWT } from 'jose'
 
-/** Run all migration SQL on a D1 database */
+/** Run all migration SQL on zfbf-db (DB binding) */
 export async function setupTestDb(db: D1Database) {
   const statements = [
     `CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, salt TEXT, hash_version INTEGER DEFAULT 1, role TEXT DEFAULT 'user', first_name TEXT NOT NULL, last_name TEXT NOT NULL, bafa_id TEXT, company TEXT, ust_id TEXT, steuernummer TEXT, is_kleinunternehmer INTEGER DEFAULT 0, phone TEXT, website TEXT, kontingent_total INTEGER DEFAULT 3, kontingent_used INTEGER DEFAULT 0, email_verified INTEGER DEFAULT 0, verification_token TEXT, reset_token TEXT, reset_token_expires TEXT, bafa_status TEXT DEFAULT 'pending', onboarding_completed INTEGER DEFAULT 0, privacy_accepted_at TEXT, deleted_at TEXT, created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')))`,
@@ -11,10 +11,19 @@ export async function setupTestDb(db: D1Database) {
     `CREATE TABLE IF NOT EXISTS promo_redemptions (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, promo_code_id TEXT NOT NULL, order_id TEXT, discount_amount INTEGER DEFAULT 0, redeemed_at TEXT DEFAULT (datetime('now')))`,
     `CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, amount INTEGER NOT NULL, discount_amount INTEGER DEFAULT 0, final_amount INTEGER NOT NULL, reports_count INTEGER DEFAULT 1, status TEXT DEFAULT 'pending', promo_code_id TEXT, created_at TEXT DEFAULT (datetime('now')))`,
     `CREATE TABLE IF NOT EXISTS refresh_tokens (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, token_hash TEXT NOT NULL, expires_at TEXT NOT NULL, revoked INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now')))`,
-    `CREATE TABLE IF NOT EXISTS download_tokens (id TEXT PRIMARY KEY, report_id TEXT NOT NULL, token TEXT UNIQUE NOT NULL, valid_until TEXT NOT NULL, created_at TEXT DEFAULT (datetime('now')))`,
     `CREATE TABLE IF NOT EXISTS audit_logs (id TEXT PRIMARY KEY, user_id TEXT, event_type TEXT NOT NULL, detail TEXT, ip TEXT, user_agent TEXT, created_at TEXT DEFAULT (datetime('now')))`,
   ]
   await db.batch(statements.map(sql => db.prepare(sql)))
+}
+
+/** Run migration SQL on bafa_antraege (BAFA_DB binding) */
+export async function setupBafaDb(bafaDb: D1Database) {
+  const statements = [
+    `CREATE TABLE IF NOT EXISTS antraege (id TEXT PRIMARY KEY, branche_id TEXT, unternehmen_name TEXT NOT NULL, unternehmen_typ TEXT, unternehmen_mitarbeiter INTEGER, unternehmen_umsatz TEXT, unternehmen_hauptproblem TEXT, beratungsthema TEXT DEFAULT 'BAFA-Beratung', beratungsschwerpunkte TEXT, status TEXT DEFAULT 'vorschau' CHECK(status IN ('vorschau','bezahlt','generiert','pending','bewilligt','abgelehnt','fehlgeschlagen')), qualitaetsscore INTEGER DEFAULT 0, wortanzahl INTEGER DEFAULT 0, r2_key TEXT, bezahlt_am TEXT, erstellt_am TEXT DEFAULT (datetime('now')), aktualisiert_am TEXT DEFAULT (datetime('now')))`,
+    `CREATE TABLE IF NOT EXISTS antrag_bausteine (id INTEGER PRIMARY KEY AUTOINCREMENT, antrag_id TEXT NOT NULL, baustein_typ TEXT NOT NULL, baustein_name TEXT, inhalt TEXT, inhalt_json TEXT, qualitaets_score REAL, wortanzahl INTEGER, version INTEGER DEFAULT 1, erstellt_am TEXT DEFAULT (datetime('now')), FOREIGN KEY (antrag_id) REFERENCES antraege(id) ON DELETE CASCADE)`,
+    `CREATE TABLE IF NOT EXISTS download_tokens (id TEXT PRIMARY KEY, antrag_id TEXT NOT NULL, token TEXT UNIQUE NOT NULL, gueltig_bis TEXT NOT NULL, downloads INTEGER DEFAULT 0, max_downloads INTEGER DEFAULT 3, erstellt_am TEXT DEFAULT (datetime('now')), FOREIGN KEY (antrag_id) REFERENCES antraege(id) ON DELETE CASCADE)`,
+  ]
+  await bafaDb.batch(statements.map(sql => bafaDb.prepare(sql)))
 }
 
 /** Create a test user and return their ID */
@@ -32,6 +41,26 @@ export async function createTestUser(db: D1Database, opts: {
       opts.firstName || 'Test', opts.lastName || 'User',
       opts.verified !== false ? 1 : 0
     ).run()
+  return id
+}
+
+/** Create a test antrag in BAFA_DB and ownership record in DB */
+export async function createTestAntrag(db: D1Database, bafaDb: D1Database, userId: string, opts: {
+  status?: string; companyName?: string; branche?: string; isUnlocked?: boolean
+} = {}): Promise<string> {
+  const id = crypto.randomUUID()
+  const status = opts.status || 'vorschau'
+  const companyName = opts.companyName || 'Test GmbH'
+  const branche = opts.branche || 'handwerk'
+
+  // Ownership record in zfbf-db
+  await db.prepare("INSERT INTO reports (id, user_id, status, company_name, branche, is_unlocked) VALUES (?, ?, ?, ?, ?, ?)")
+    .bind(id, userId, status === 'vorschau' ? 'entwurf' : status, companyName, branche, opts.isUnlocked ? 1 : 0).run()
+
+  // Antrag in bafa_antraege
+  await bafaDb.prepare("INSERT INTO antraege (id, branche_id, unternehmen_name, status, erstellt_am, aktualisiert_am) VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))")
+    .bind(id, branche, companyName, status).run()
+
   return id
 }
 

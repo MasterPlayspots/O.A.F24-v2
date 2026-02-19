@@ -1,10 +1,11 @@
-// Reports Routes Tests - CRUD, Preview, Download
+// Reports Routes Tests - CRUD, Preview, Download (updated for bafa_antraege schema)
 import { describe, it, expect, beforeAll } from 'vitest'
 import { env, SELF } from 'cloudflare:test'
-import { setupTestDb, createTestUser, createTestToken } from './test-utils'
+import { setupTestDb, setupBafaDb, createTestUser, createTestAntrag, createTestToken } from './test-utils'
 
 beforeAll(async () => {
   await setupTestDb(env.DB)
+  await setupBafaDb(env.BAFA_DB)
 })
 
 describe('Reports CRUD', () => {
@@ -21,6 +22,11 @@ describe('Reports CRUD', () => {
       expect(res.status).toBe(200)
       expect(body.success).toBe(true)
       expect(body.reportId).toBeTruthy()
+
+      // Verify antrag was created in BAFA_DB
+      const antrag = await env.BAFA_DB.prepare('SELECT * FROM antraege WHERE id = ?').bind(body.reportId).first() as any
+      expect(antrag).toBeTruthy()
+      expect(antrag.status).toBe('vorschau')
     })
 
     it('rejects when contingent is exhausted', async () => {
@@ -51,10 +57,8 @@ describe('Reports CRUD', () => {
       const userId = await createTestUser(env.DB, { email: 'report-list@example.com' })
       const token = await createTestToken(userId, 'report-list@example.com')
 
-      // Create a report
-      const reportId = crypto.randomUUID()
-      await env.DB.prepare("INSERT INTO reports (id, user_id, status, company_name, branche) VALUES (?, ?, 'entwurf', 'TestCo', 'handwerk')")
-        .bind(reportId, userId).run()
+      // Create a report with antrag
+      await createTestAntrag(env.DB, env.BAFA_DB, userId, { companyName: 'TestCo', branche: 'handwerk' })
 
       const res = await SELF.fetch('https://api.test/api/reports', {
         headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
@@ -69,10 +73,8 @@ describe('Reports CRUD', () => {
       const user1 = await createTestUser(env.DB, { email: 'report-owner1@example.com' })
       const user2 = await createTestUser(env.DB, { email: 'report-owner2@example.com' })
 
-      const r1 = crypto.randomUUID()
-      const r2 = crypto.randomUUID()
-      await env.DB.prepare("INSERT INTO reports (id, user_id, status) VALUES (?, ?, 'entwurf')").bind(r1, user1).run()
-      await env.DB.prepare("INSERT INTO reports (id, user_id, status) VALUES (?, ?, 'entwurf')").bind(r2, user2).run()
+      const r1 = await createTestAntrag(env.DB, env.BAFA_DB, user1)
+      const r2 = await createTestAntrag(env.DB, env.BAFA_DB, user2)
 
       const token1 = await createTestToken(user1, 'report-owner1@example.com')
       const res = await SELF.fetch('https://api.test/api/reports', {
@@ -86,29 +88,33 @@ describe('Reports CRUD', () => {
   })
 
   describe('GET /api/reports/:id', () => {
-    it('returns a single report', async () => {
+    it('returns a single report with antrag and bausteine', async () => {
       const userId = await createTestUser(env.DB, { email: 'report-single@example.com' })
-      const reportId = crypto.randomUUID()
-      await env.DB.prepare("INSERT INTO reports (id, user_id, status, company_name) VALUES (?, ?, 'generiert', 'MyCo')")
-        .bind(reportId, userId).run()
+      const antragId = await createTestAntrag(env.DB, env.BAFA_DB, userId, { status: 'generiert', companyName: 'MyCo' })
       const token = await createTestToken(userId, 'report-single@example.com')
 
-      const res = await SELF.fetch(`https://api.test/api/reports/${reportId}`, {
+      // Add a baustein
+      await env.BAFA_DB.prepare("INSERT INTO antrag_bausteine (antrag_id, baustein_typ, baustein_name, inhalt, erstellt_am) VALUES (?, 'ausgangslage', 'ausgangslage', 'Test content', datetime('now'))")
+        .bind(antragId).run()
+
+      const res = await SELF.fetch(`https://api.test/api/reports/${antragId}`, {
         headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
       })
       const body = await res.json() as any
       expect(res.status).toBe(200)
-      expect(body.report.company_name).toBe('MyCo')
+      expect(body.report).toBeTruthy()
+      expect(body.antrag).toBeTruthy()
+      expect(body.antrag.unternehmen_name).toBe('MyCo')
+      expect(body.bausteine.length).toBeGreaterThanOrEqual(1)
     })
 
     it('returns 404 for other users report', async () => {
       const user1 = await createTestUser(env.DB, { email: 'report-notmine@example.com' })
       const user2 = await createTestUser(env.DB, { email: 'report-other@example.com' })
-      const reportId = crypto.randomUUID()
-      await env.DB.prepare("INSERT INTO reports (id, user_id, status) VALUES (?, ?, 'entwurf')").bind(reportId, user2).run()
+      const antragId = await createTestAntrag(env.DB, env.BAFA_DB, user2)
       const token1 = await createTestToken(user1, 'report-notmine@example.com')
 
-      const res = await SELF.fetch(`https://api.test/api/reports/${reportId}`, {
+      const res = await SELF.fetch(`https://api.test/api/reports/${antragId}`, {
         headers: { 'Authorization': `Bearer ${token1}`, 'Origin': 'https://zfbf.info' },
       })
       expect(res.status).toBe(404)
@@ -116,40 +122,47 @@ describe('Reports CRUD', () => {
   })
 
   describe('PATCH /api/reports/:id', () => {
-    it('updates allowed fields', async () => {
+    it('updates allowed fields in both databases', async () => {
       const userId = await createTestUser(env.DB, { email: 'report-patch@example.com' })
-      const reportId = crypto.randomUUID()
-      await env.DB.prepare("INSERT INTO reports (id, user_id, status) VALUES (?, ?, 'entwurf')").bind(reportId, userId).run()
+      const antragId = await createTestAntrag(env.DB, env.BAFA_DB, userId)
       const token = await createTestToken(userId, 'report-patch@example.com')
 
-      const res = await SELF.fetch(`https://api.test/api/reports/${reportId}`, {
+      const res = await SELF.fetch(`https://api.test/api/reports/${antragId}`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Origin': 'https://zfbf.info' },
         body: JSON.stringify({ company_name: 'Updated GmbH', branche: 'handel' }),
       })
       expect(res.status).toBe(200)
 
-      const report = await env.DB.prepare('SELECT company_name, branche FROM reports WHERE id = ?').bind(reportId).first() as any
+      // Verify zfbf-db ownership record
+      const report = await env.DB.prepare('SELECT company_name, branche FROM reports WHERE id = ?').bind(antragId).first() as any
       expect(report.company_name).toBe('Updated GmbH')
       expect(report.branche).toBe('handel')
+
+      // Verify bafa_antraege record
+      const antrag = await env.BAFA_DB.prepare('SELECT unternehmen_name, branche_id FROM antraege WHERE id = ?').bind(antragId).first() as any
+      expect(antrag.unternehmen_name).toBe('Updated GmbH')
+      expect(antrag.branche_id).toBe('handel')
     })
   })
 
   describe('POST /api/reports/:id/finalize', () => {
     it('finalizes report and uses contingent', async () => {
       const userId = await createTestUser(env.DB, { email: 'report-finalize@example.com' })
-      const reportId = crypto.randomUUID()
-      await env.DB.prepare("INSERT INTO reports (id, user_id, status) VALUES (?, ?, 'entwurf')").bind(reportId, userId).run()
+      const antragId = await createTestAntrag(env.DB, env.BAFA_DB, userId)
       const token = await createTestToken(userId, 'report-finalize@example.com')
 
-      const res = await SELF.fetch(`https://api.test/api/reports/${reportId}/finalize`, {
+      const res = await SELF.fetch(`https://api.test/api/reports/${antragId}/finalize`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Origin': 'https://zfbf.info' },
       })
       expect(res.status).toBe(200)
 
-      const report = await env.DB.prepare('SELECT status FROM reports WHERE id = ?').bind(reportId).first() as any
+      const report = await env.DB.prepare('SELECT status FROM reports WHERE id = ?').bind(antragId).first() as any
       expect(report.status).toBe('finalisiert')
+
+      const antrag = await env.BAFA_DB.prepare('SELECT status FROM antraege WHERE id = ?').bind(antragId).first() as any
+      expect(antrag.status).toBe('pending')
 
       const user = await env.DB.prepare('SELECT kontingent_used FROM users WHERE id = ?').bind(userId).first() as any
       expect(user.kontingent_used).toBe(1)
@@ -159,14 +172,17 @@ describe('Reports CRUD', () => {
   describe('GET /api/reports/download/:token', () => {
     it('downloads unlocked report with valid token', async () => {
       const userId = await createTestUser(env.DB, { email: 'report-download@example.com' })
-      const reportId = crypto.randomUUID()
+      const antragId = await createTestAntrag(env.DB, env.BAFA_DB, userId, { status: 'generiert', companyName: 'DownloadCo', isUnlocked: true })
+
+      // Add a baustein for content
+      await env.BAFA_DB.prepare("INSERT INTO antrag_bausteine (antrag_id, baustein_typ, baustein_name, inhalt, erstellt_am) VALUES (?, 'ausgangslage', 'ausgangslage', 'Test download content', datetime('now'))")
+        .bind(antragId).run()
+
+      // Create download token in BAFA_DB
       const dlToken = crypto.randomUUID()
       const validUntil = new Date(Date.now() + 86400_000).toISOString()
-
-      await env.DB.prepare("INSERT INTO reports (id, user_id, status, company_name, is_unlocked, ausgangslage_text) VALUES (?, ?, 'generiert', 'DownloadCo', 1, 'Test content')")
-        .bind(reportId, userId).run()
-      await env.DB.prepare('INSERT INTO download_tokens (id, report_id, token, valid_until) VALUES (?, ?, ?, ?)')
-        .bind(crypto.randomUUID(), reportId, dlToken, validUntil).run()
+      await env.BAFA_DB.prepare("INSERT INTO download_tokens (id, antrag_id, token, gueltig_bis, downloads, max_downloads, erstellt_am) VALUES (?, ?, ?, ?, 0, 3, datetime('now'))")
+        .bind(crypto.randomUUID(), antragId, dlToken, validUntil).run()
 
       const res = await SELF.fetch(`https://api.test/api/reports/download/${dlToken}`)
       expect(res.status).toBe(200)
@@ -176,14 +192,25 @@ describe('Reports CRUD', () => {
 
     it('rejects expired download token', async () => {
       const userId = await createTestUser(env.DB, { email: 'report-expired-dl@example.com' })
-      const reportId = crypto.randomUUID()
-      const dlToken = crypto.randomUUID()
-      const expiredAt = new Date(Date.now() - 86400_000).toISOString() // yesterday
+      const antragId = await createTestAntrag(env.DB, env.BAFA_DB, userId, { status: 'generiert', isUnlocked: true })
 
-      await env.DB.prepare("INSERT INTO reports (id, user_id, status, is_unlocked) VALUES (?, ?, 'generiert', 1)")
-        .bind(reportId, userId).run()
-      await env.DB.prepare('INSERT INTO download_tokens (id, report_id, token, valid_until) VALUES (?, ?, ?, ?)')
-        .bind(crypto.randomUUID(), reportId, dlToken, expiredAt).run()
+      const dlToken = crypto.randomUUID()
+      const expiredAt = new Date(Date.now() - 86400_000).toISOString()
+      await env.BAFA_DB.prepare("INSERT INTO download_tokens (id, antrag_id, token, gueltig_bis, downloads, max_downloads, erstellt_am) VALUES (?, ?, ?, ?, 0, 3, datetime('now'))")
+        .bind(crypto.randomUUID(), antragId, dlToken, expiredAt).run()
+
+      const res = await SELF.fetch(`https://api.test/api/reports/download/${dlToken}`)
+      expect(res.status).toBe(403)
+    })
+
+    it('rejects when max downloads reached', async () => {
+      const userId = await createTestUser(env.DB, { email: 'report-maxdl@example.com' })
+      const antragId = await createTestAntrag(env.DB, env.BAFA_DB, userId, { status: 'generiert', isUnlocked: true })
+
+      const dlToken = crypto.randomUUID()
+      const validUntil = new Date(Date.now() + 86400_000).toISOString()
+      await env.BAFA_DB.prepare("INSERT INTO download_tokens (id, antrag_id, token, gueltig_bis, downloads, max_downloads, erstellt_am) VALUES (?, ?, ?, ?, 3, 3, datetime('now'))")
+        .bind(crypto.randomUUID(), antragId, dlToken, validUntil).run()
 
       const res = await SELF.fetch(`https://api.test/api/reports/download/${dlToken}`)
       expect(res.status).toBe(403)

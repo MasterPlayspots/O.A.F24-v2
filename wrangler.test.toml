@@ -15,6 +15,11 @@ database_name = "zfbf-db-test"
 database_id = "test-db-id"
 
 [[d1_databases]]
+binding = "BAFA_DB"
+database_name = "bafa-antraege-test"
+database_id = "test-bafa-antraege-id"
+
+[[d1_databases]]
 binding = "BAFA_CONTENT"
 database_name = "bafa-learnings-test"
 database_id = "test-bafa-content-id"

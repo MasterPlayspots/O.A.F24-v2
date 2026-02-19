@@ -1,10 +1,11 @@
 // GDPR (DSGVO) Routes Tests - Export, Deletion, Privacy Consent
 import { describe, it, expect, beforeAll } from 'vitest'
 import { env, SELF } from 'cloudflare:test'
-import { setupTestDb, createTestUser, createTestToken } from './test-utils'
+import { setupTestDb, setupBafaDb, createTestUser, createTestToken } from './test-utils'
 
 beforeAll(async () => {
   await setupTestDb(env.DB)
+  await setupBafaDb(env.BAFA_DB)
 })
 
 describe('GET /api/user/export', () => {

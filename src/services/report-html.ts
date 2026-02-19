@@ -1,10 +1,30 @@
 // Report HTML Generation - Preview + Download with Schwarz-Rot-Gold branding
-import type { ReportRow } from '../types'
+// Uses AntragRow + AntragBausteinRow[] from bafa_antraege schema
+import type { AntragRow, AntragBausteinRow } from '../types'
 
-export function generateReportPreview(report: ReportRow, unlocked: boolean): string {
+/** Get baustein content by type */
+function getBaustein(bausteine: AntragBausteinRow[], typ: string): AntragBausteinRow | undefined {
+  return bausteine.find(b => b.baustein_typ === typ)
+}
+
+/** Get structured JSON from a baustein */
+function getStructured(baustein: AntragBausteinRow | undefined): Record<string, string> | null {
+  if (!baustein?.inhalt_json) return null
+  try { return JSON.parse(baustein.inhalt_json) } catch { return null }
+}
+
+export function generateReportPreview(antrag: AntragRow, bausteine: AntragBausteinRow[], unlocked: boolean): string {
+  const ausgangslage = getBaustein(bausteine, 'ausgangslage')
+  const beratungsinhalte = getBaustein(bausteine, 'beratungsinhalte')
+  const massnahmen = getBaustein(bausteine, 'massnahmen')
+  const ergebnisse = getBaustein(bausteine, 'ergebnisse')
+  const nachhaltigkeit = getBaustein(bausteine, 'nachhaltigkeit')
+  const ergebnisseData = getStructured(ergebnisse)
+  const nachhaltigkeitData = getStructured(nachhaltigkeit)
+
   return `<!DOCTYPE html>
 <html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>BAFA-Beratungsbericht – ${esc(report.company_name || 'Entwurf')}</title>
+<title>BAFA-Beratungsbericht – ${esc(antrag.unternehmen_name || 'Entwurf')}</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',system-ui,sans-serif;color:#1a1a1a;background:#f5f5f5;line-height:1.6}
@@ -30,39 +50,36 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid #e5e5e5;font-size:1
 <div class="container">
 <header><h1>BAFA-Beratungsbericht</h1>
 <div class="meta">
-<p><strong>Unternehmen:</strong> ${esc(report.company_name || '–')}</p>
-<p><strong>Branche:</strong> ${esc(report.branche || '–')}${report.unterbranche ? ` / ${esc(report.unterbranche)}` : ''}</p>
-<p><strong>Rechtsform:</strong> ${esc(report.company_rechtsform || '–')}</p>
-<p><strong>Standort:</strong> ${esc(report.company_plz || '')} ${esc(report.company_ort || '–')}</p>
-<p><strong>Erstellt:</strong> ${fmtDate(report.created_at)}</p>
+<p><strong>Unternehmen:</strong> ${esc(antrag.unternehmen_name || '–')}</p>
+<p><strong>Branche:</strong> ${esc(antrag.branche_id || '–')}</p>
+${antrag.unternehmen_typ ? `<p><strong>Typ:</strong> ${esc(antrag.unternehmen_typ)}</p>` : ''}
+${antrag.beratungsthema ? `<p><strong>Beratungsthema:</strong> ${esc(antrag.beratungsthema)}</p>` : ''}
+${antrag.beratungsschwerpunkte ? `<p><strong>Schwerpunkte:</strong> ${esc(antrag.beratungsschwerpunkte)}</p>` : ''}
+<p><strong>Erstellt:</strong> ${fmtDate(antrag.erstellt_am || '')}</p>
 </div></header>
-${report.ausgangslage_text ? sec('1. Ausgangslage', report.ausgangslage_text, unlocked) : ''}
-${report.beratungsinhalte_text ? sec('2. Beratungsinhalte', report.beratungsinhalte_text, unlocked) : ''}
-${report.massnahmenplan ? sec('3. Maßnahmenplan', report.massnahmenplan, unlocked) : ''}
-${report.ergebnisse_kurzfristig ? `<section><h2>4. Erwartete Ergebnisse</h2><div class="content${unlocked ? '' : ' blurred'}">
-${report.ergebnisse_kurzfristig ? `<h3>Kurzfristig</h3><p>${esc(report.ergebnisse_kurzfristig)}</p>` : ''}
-${report.ergebnisse_mittelfristig ? `<h3>Mittelfristig</h3><p>${esc(report.ergebnisse_mittelfristig)}</p>` : ''}
-${report.ergebnisse_langfristig ? `<h3>Langfristig</h3><p>${esc(report.ergebnisse_langfristig)}</p>` : ''}
-</div></section>` : ''}
-${report.nachhaltigkeit_oekonomisch ? `<section><h2>5. Nachhaltigkeit</h2><div class="content${unlocked ? '' : ' blurred'}">
-<h3>Ökonomisch</h3><p>${esc(report.nachhaltigkeit_oekonomisch)}</p>
-${report.nachhaltigkeit_oekologisch ? `<h3>Ökologisch</h3><p>${esc(report.nachhaltigkeit_oekologisch)}</p>` : ''}
-${report.nachhaltigkeit_sozial ? `<h3>Sozial</h3><p>${esc(report.nachhaltigkeit_sozial)}</p>` : ''}
-</div></section>` : ''}
-${report.qa_gesamt > 0 ? `<section><h2>Qualitätsbewertung</h2><div class="qa-grid">
-<div class="qa-item"><span>Vollständigkeit</span><span>${report.qa_vollstaendigkeit}%</span></div>
-<div class="qa-item"><span>BAFA-Konformität</span><span>${report.qa_bafa_konformitaet}%</span></div>
-<div class="qa-item"><span>Textqualität</span><span>${report.qa_textqualitaet}%</span></div>
-<div class="qa-item"><span>Plausibilität</span><span>${report.qa_plausibilitaet}%</span></div>
-<div class="qa-item total"><span>Gesamt</span><span>${report.qa_gesamt}%</span></div>
+${ausgangslage?.inhalt ? sec('1. Ausgangslage', ausgangslage.inhalt, unlocked) : ''}
+${beratungsinhalte?.inhalt ? sec('2. Beratungsinhalte', beratungsinhalte.inhalt, unlocked) : ''}
+${massnahmen?.inhalt ? sec('3. Maßnahmenplan', massnahmen.inhalt, unlocked) : ''}
+${ergebnisseData ? `<section><h2>4. Erwartete Ergebnisse</h2><div class="content${unlocked ? '' : ' blurred'}">
+${ergebnisseData.kurzfristig ? `<h3>Kurzfristig</h3><p>${esc(ergebnisseData.kurzfristig)}</p>` : ''}
+${ergebnisseData.mittelfristig ? `<h3>Mittelfristig</h3><p>${esc(ergebnisseData.mittelfristig)}</p>` : ''}
+${ergebnisseData.langfristig ? `<h3>Langfristig</h3><p>${esc(ergebnisseData.langfristig)}</p>` : ''}
+</div></section>` : (ergebnisse?.inhalt ? sec('4. Erwartete Ergebnisse', ergebnisse.inhalt, unlocked) : '')}
+${nachhaltigkeitData ? `<section><h2>5. Nachhaltigkeit</h2><div class="content${unlocked ? '' : ' blurred'}">
+<h3>Ökonomisch</h3><p>${esc(nachhaltigkeitData.oekonomisch || '')}</p>
+${nachhaltigkeitData.oekologisch ? `<h3>Ökologisch</h3><p>${esc(nachhaltigkeitData.oekologisch)}</p>` : ''}
+${nachhaltigkeitData.sozial ? `<h3>Sozial</h3><p>${esc(nachhaltigkeitData.sozial)}</p>` : ''}
+</div></section>` : (nachhaltigkeit?.inhalt ? sec('5. Nachhaltigkeit', nachhaltigkeit.inhalt, unlocked) : '')}
+${antrag.qualitaetsscore > 0 ? `<section><h2>Qualitätsbewertung</h2><div class="qa-grid">
+<div class="qa-item total"><span>Gesamtbewertung</span><span>${antrag.qualitaetsscore}%</span></div>
 </div></section>` : ''}
 ${!unlocked ? '<div class="locked"><h3>Bericht gesperrt</h3><p>Schalten Sie diesen Bericht frei.</p><a href="https://zfbf.info/dashboard/pakete">Jetzt freischalten – 49€</a></div>' : ''}
 <footer><p>Erstellt mit BAFA Creator AI – zfbf.info</p></footer>
 </div></body></html>`
 }
 
-export function generateDownloadHtml(report: ReportRow): string {
-  return generateReportPreview(report, true)
+export function generateDownloadHtml(antrag: AntragRow, bausteine: AntragBausteinRow[]): string {
+  return generateReportPreview(antrag, bausteine, true)
 }
 
 function sec(title: string, text: string, unlocked: boolean): string {

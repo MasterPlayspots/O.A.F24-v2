@@ -33,6 +33,7 @@ app.get('/', (c) => c.json({ status: 'ok', service: 'zfbf-api', version: c.env.A
 app.get('/health', async (c) => {
   const checks: Record<string, boolean> = {}
   try { await c.env.DB.prepare('SELECT 1').first(); checks.database = true } catch { checks.database = false }
+  try { await c.env.BAFA_DB.prepare('SELECT 1').first(); checks.bafa_db = true } catch { checks.bafa_db = false }
   try { await c.env.CACHE.get('health-check'); checks.kv = true } catch { checks.kv = false }
   try { await c.env.REPORTS.head('health-check'); checks.r2 = true } catch { checks.r2 = false }
   const allHealthy = Object.values(checks).every(Boolean)
@@ -77,14 +78,14 @@ export default {
     ctx.waitUntil((async () => {
       try {
         // Daily backup at 02:00 UTC
-        await performBackup([{ name: 'zfbf-db', db: env.DB }], env.REPORTS)
+        await performBackup([{ name: 'zfbf-db', db: env.DB }, { name: 'bafa_antraege', db: env.BAFA_DB }], env.REPORTS)
         await cleanupOldBackups(env.REPORTS)
 
         // GDPR audit log cleanup (90 days)
         await cleanupAuditLogs(env.DB)
 
-        // GDPR data retention cleanup
-        await cleanupExpiredData(env.DB)
+        // GDPR data retention cleanup (pass both DBs)
+        await cleanupExpiredData(env.DB, env.BAFA_DB)
 
         // Weekly learning cycle (cron: 0 3 * * 1 - Monday 03:00 UTC)
         const trigger = new Date(event.scheduledTime)
