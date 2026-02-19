@@ -8,16 +8,26 @@ cd worker
 npm install
 \`\`\`
 
-2. Create D1 database:
+2. Create D1 databases:
 \`\`\`bash
+# Main database
 npm run db:create
+
+# BAFA database (currently commented out in wrangler.toml)
+wrangler d1 create bafa_antraege
 \`\`\`
 
-3. Copy the database_id from output and update `wrangler.toml`
+3. Copy the database_id values from output and update `wrangler.toml`
+   - For the main DB, it should already be configured
+   - For BAFA_DB, uncomment lines 20-23 and replace the placeholder ID
 
 4. Run migrations:
 \`\`\`bash
+# Main database migrations
 npm run db:migrate
+
+# BAFA database migration (after creating and configuring BAFA_DB)
+wrangler d1 execute bafa_antraege --remote --file=./db/migrations/007-bafa-antraege-schema.sql
 \`\`\`
 
 5. Set secrets:
