@@ -9,7 +9,7 @@ export default defineWorkersConfig({
         miniflare: {
           kvNamespaces: ["SESSIONS", "RATE_LIMIT", "CACHE", "WEBHOOK_EVENTS"],
           r2Buckets: ["REPORTS"],
-          d1Databases: ["DB", "BAFA_CONTENT"],
+          d1Databases: ["DB", "BAFA_DB", "BAFA_CONTENT"],
           bindings: {
             JWT_SECRET: "test-jwt-secret-key-for-testing-only",
             UNLOCK_SECRET: "test-unlock-secret-key",
