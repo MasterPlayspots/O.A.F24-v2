@@ -21,7 +21,7 @@ export const csrfProtection: MiddlewareHandler = async (c, next) => {
   const host = c.req.header('Host')
   if (origin) {
     const originHost = new URL(origin).host
-    if (originHost !== host && !origin.includes('zfbf.info') && !origin.includes('localhost')) {
+    if (originHost !== host && !origin.includes('zfbf.info') && !origin.includes('localhost') && !origin.includes('.vercel.app')) {
       return c.json({ error: 'CSRF validation failed' }, 403)
     }
   }

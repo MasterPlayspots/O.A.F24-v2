@@ -4,6 +4,7 @@ import { Toucan } from 'toucan-js'
 import type { Bindings, Variables } from './types'
 import { securityHeaders, csrfProtection } from './middleware/security'
 import { corsMiddleware, strictCorsCheck } from './middleware/cors'
+import { globalRateLimit } from './middleware/rateLimit'
 import { auth } from './routes/auth'
 import { reports } from './routes/reports'
 import { branchen } from './routes/branchen'
@@ -25,6 +26,7 @@ app.use('/*', securityHeaders)
 app.use('/*', corsMiddleware)
 app.use('/api/*', strictCorsCheck)
 app.use('/api/*', csrfProtection)
+app.use('/api/*', globalRateLimit)
 
 // ============================================
 // Health Check

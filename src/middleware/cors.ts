@@ -12,20 +12,26 @@ const DEV_ORIGINS = [
   'http://localhost:3000',
   'http://localhost:5173',
   'https://v0-bafa-creator-ai.vercel.app',
-  'http://localhost:3000',
 ]
 
-function getAllowedOrigins(env?: string): string[] {
-  if (env === 'production') return PRODUCTION_ORIGINS
-  return [...PRODUCTION_ORIGINS, ...DEV_ORIGINS]
+// Vercel preview deployments use pattern: https://<project>-<hash>-<team>.vercel.app
+const VERCEL_PREVIEW_PATTERN = /^https:\/\/[a-z0-9-]+-[a-z0-9]+-[a-z0-9-]+\.vercel\.app$/
+
+function isAllowedOrigin(origin: string, env?: string): boolean {
+  if (PRODUCTION_ORIGINS.includes(origin)) return true
+  if (env !== 'production') {
+    if (DEV_ORIGINS.includes(origin)) return true
+  }
+  // Allow Vercel preview deployments for this project
+  if (VERCEL_PREVIEW_PATTERN.test(origin) && origin.includes('bafa')) return true
+  return false
 }
 
 export const corsMiddleware: MiddlewareHandler<{ Bindings: Bindings; Variables: Variables }> = async (c, next) => {
-  const allowed = getAllowedOrigins(c.env.ENVIRONMENT)
   const handler = cors({
     origin: (origin) => {
       if (!origin) return ''
-      if (allowed.includes(origin)) return origin
+      if (isAllowedOrigin(origin, c.env.ENVIRONMENT)) return origin
       return ''
     },
     allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -40,8 +46,7 @@ export const corsMiddleware: MiddlewareHandler<{ Bindings: Bindings; Variables: 
 export const strictCorsCheck: MiddlewareHandler<{ Bindings: Bindings; Variables: Variables }> = async (c, next) => {
   const origin = c.req.header('Origin')
   if (!origin) { await next(); return }
-  const allowed = getAllowedOrigins(c.env.ENVIRONMENT)
-  if (!allowed.includes(origin)) {
+  if (!isAllowedOrigin(origin, c.env.ENVIRONMENT)) {
     return c.json({ success: false, error: 'Forbidden' }, 403)
   }
   await next()
