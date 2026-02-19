@@ -8,7 +8,7 @@ import { hashPassword, verifyPassword, verifyLegacySha256 } from '../services/pa
 import { writeAuditLog } from '../services/audit'
 import { loginRateLimit, registerRateLimit, forgotPasswordRateLimit } from '../middleware/rateLimit'
 import { requireAuth } from '../middleware/auth'
-import { sendPasswordResetEmail } from '../services/email'
+import { sendPasswordResetEmail, sendVerificationCodeEmail } from '../services/email'
 
 const auth = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -50,7 +50,22 @@ auth.post('/register', registerRateLimit, async (c) => {
 
   await writeAuditLog(db, { userId: id, eventType: AUDIT_EVENTS.REGISTER, detail: `New: ${email}`, ip: c.req.header('CF-Connecting-IP'), userAgent: c.req.header('User-Agent') })
 
-  return c.json({ success: true, userId: id, message: 'Registrierung erfolgreich. Bitte prüfen Sie Ihr E-Mail-Postfach.' })
+  const verificationCode = String(Math.floor(100000 + Math.random() * 900000))
+  const codeExpires = new Date(Date.now() + 15 * 60_000).toISOString()
+  await db.prepare(
+    "UPDATE users SET email_verification_code = ?, email_verification_expires = ? WHERE id = ?"
+  ).bind(verificationCode, codeExpires, id).run()
+
+  if (c.env.RESEND_API_KEY) {
+    await sendVerificationCodeEmail(c.env.RESEND_API_KEY, email.toLowerCase(), firstName, verificationCode)
+  }
+
+  return c.json({
+    success: true,
+    userId: id,
+    requiresVerification: true,
+    message: 'Registrierung erfolgreich. Bitte geben Sie den 6-stelligen Code ein, den wir an Ihre E-Mail gesendet haben.',
+  })
 })
 
 // POST /login
@@ -150,6 +165,57 @@ auth.post('/verify-email', async (c) => {
   if (!user) return c.json({ success: false, error: 'Ungültiger Token' }, 400)
   await c.env.DB.prepare("UPDATE users SET email_verified = 1, verification_token = NULL, updated_at = datetime('now') WHERE id = ?").bind(user.id).run()
   return c.json({ success: true, message: 'E-Mail verifiziert' })
+})
+
+// POST /verify-code
+auth.post('/verify-code', async (c) => {
+  const { email, code } = await c.req.json()
+  if (!email || !code) {
+    return c.json({ success: false, error: 'E-Mail und Code sind erforderlich' }, 400)
+  }
+  const db = c.env.DB
+  const user = await db.prepare(
+    "SELECT id, email_verification_code, email_verification_expires FROM users WHERE email = ?"
+  ).bind(email.toLowerCase()).first<{
+    id: string
+    email_verification_code: string | null
+    email_verification_expires: string | null
+  }>()
+  if (!user || !user.email_verification_code) {
+    return c.json({ success: false, error: 'Ungueltiger Code' }, 400)
+  }
+  if (new Date(user.email_verification_expires!) < new Date()) {
+    return c.json({ success: false, error: 'Code abgelaufen. Bitte fordern Sie einen neuen an.' }, 400)
+  }
+  if (user.email_verification_code !== code.trim()) {
+    return c.json({ success: false, error: 'Ungueltiger Code' }, 400)
+  }
+  await db.prepare(
+    "UPDATE users SET email_verified = 1, email_verification_code = NULL, email_verification_expires = NULL, verification_token = NULL, updated_at = datetime('now') WHERE id = ?"
+  ).bind(user.id).run()
+  return c.json({ success: true, message: 'E-Mail erfolgreich verifiziert.' })
+})
+
+// POST /resend-code
+auth.post('/resend-code', registerRateLimit, async (c) => {
+  const { email } = await c.req.json()
+  if (!email) return c.json({ success: false, error: 'E-Mail ist erforderlich' }, 400)
+  const db = c.env.DB
+  const user = await db.prepare(
+    "SELECT id, first_name, email_verified FROM users WHERE email = ?"
+  ).bind(email.toLowerCase()).first<{ id: string; first_name: string; email_verified: number }>()
+  if (!user || user.email_verified) {
+    return c.json({ success: true, message: 'Falls ein Konto existiert, wurde ein neuer Code gesendet.' })
+  }
+  const newCode = String(Math.floor(100000 + Math.random() * 900000))
+  const codeExpires = new Date(Date.now() + 15 * 60_000).toISOString()
+  await db.prepare(
+    "UPDATE users SET email_verification_code = ?, email_verification_expires = ? WHERE id = ?"
+  ).bind(newCode, codeExpires, user.id).run()
+  if (c.env.RESEND_API_KEY) {
+    await sendVerificationCodeEmail(c.env.RESEND_API_KEY, email.toLowerCase(), user.first_name, newCode)
+  }
+  return c.json({ success: true, message: 'Neuer Code wurde gesendet.' })
 })
 
 // GET /me
