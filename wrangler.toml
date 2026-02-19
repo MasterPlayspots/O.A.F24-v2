@@ -3,6 +3,12 @@ main = "dist/index.js"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Cloudflare Account ID
+# Find this in the Cloudflare Dashboard: https://dash.cloudflare.com
+# → Select your account → copy the Account ID from the URL or Overview page.
+# Alternatively, set the CLOUDFLARE_ACCOUNT_ID environment variable.
+# account_id = "your-cloudflare-account-id"
+
 [vars]
 ENVIRONMENT = "production"
 API_VERSION = "v1"
