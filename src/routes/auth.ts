@@ -2,7 +2,7 @@
 import { Hono } from 'hono'
 import { SignJWT } from 'jose'
 import { z } from 'zod'
-import type { Bindings, Variables, UserRow, RefreshTokenRow } from '../types'
+import type { Bindings, Variables, UserRow } from '../types'
 import { AUDIT_EVENTS } from '../types'
 import { hashPassword, verifyPassword, verifyLegacySha256 } from '../services/password'
 import { writeAuditLog } from '../services/audit'
