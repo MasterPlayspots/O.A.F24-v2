@@ -131,9 +131,9 @@ describe('POST /api/auth/login', () => {
       headers: { 'Content-Type': 'application/json', 'Origin': 'https://zfbf.info' },
       body: JSON.stringify({ email: 'unverified@example.com', password: 'Unverified#1' }),
     })
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(403)
     const body = await res.json() as any
-    expect(body.needsVerification).toBe(true)
+    expect(body.requiresVerification).toBe(true)
   })
 
   it('auto-migrates legacy SHA-256 hash to PBKDF2', async () => {
