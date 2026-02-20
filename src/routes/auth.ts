@@ -100,7 +100,18 @@ auth.post('/login', loginRateLimit, async (c) => {
     await db.prepare("UPDATE users SET password_hash = ?, salt = ?, hash_version = 2, updated_at = datetime('now') WHERE id = ?").bind(nh, ns, user.id).run()
   }
 
-  if (!user.email_verified) return c.json({ success: false, error: 'E-Mail nicht verifiziert', needsVerification: true }, 401)
+  // If email not verified: auto-generate + send new code, redirect to verification
+  if (!user.email_verified) {
+    const verificationCode = String(Math.floor(100000 + Math.random() * 900000))
+    const codeExpires = new Date(Date.now() + 15 * 60_000).toISOString()
+    await db.prepare(
+      "UPDATE users SET email_verification_code = ?, email_verification_expires = ? WHERE id = ?"
+    ).bind(verificationCode, codeExpires, user.id).run()
+    if (c.env.RESEND_API_KEY) {
+      await sendVerificationCodeEmail(c.env.RESEND_API_KEY, user.email, user.first_name, verificationCode)
+    }
+    return c.json({ success: false, error: 'E-Mail nicht verifiziert. Ein neuer Code wurde gesendet.', requiresVerification: true }, 403)
+  }
 
   // Access token (30 min)
   const secret = new TextEncoder().encode(c.env.JWT_SECRET)
@@ -167,7 +178,7 @@ auth.post('/verify-email', async (c) => {
   return c.json({ success: true, message: 'E-Mail verifiziert' })
 })
 
-// POST /verify-code
+// POST /verify-code — validates 6-digit code, marks verified, issues JWT + refresh token
 auth.post('/verify-code', async (c) => {
   const { email, code } = await c.req.json()
   if (!email || !code) {
@@ -175,25 +186,65 @@ auth.post('/verify-code', async (c) => {
   }
   const db = c.env.DB
   const user = await db.prepare(
-    "SELECT id, email_verification_code, email_verification_expires FROM users WHERE email = ?"
+    "SELECT id, email, first_name, last_name, role, email_verified, email_verification_code, email_verification_expires, company, kontingent_total, kontingent_used FROM users WHERE email = ?"
   ).bind(email.toLowerCase()).first<{
-    id: string
-    email_verification_code: string | null
-    email_verification_expires: string | null
+    id: string; email: string; first_name: string; last_name: string; role: string
+    email_verified: number; email_verification_code: string | null
+    email_verification_expires: string | null; company: string | null
+    kontingent_total: number; kontingent_used: number
   }>()
-  if (!user || !user.email_verification_code) {
-    return c.json({ success: false, error: 'Ungueltiger Code' }, 400)
+
+  if (!user) {
+    return c.json({ success: false, error: 'Benutzer nicht gefunden' }, 404)
+  }
+
+  // Already verified — just issue tokens
+  if (user.email_verified) {
+    const secret = new TextEncoder().encode(c.env.JWT_SECRET)
+    const accessToken = await new SignJWT({ userId: user.id, email: user.email, role: user.role || 'user' })
+      .setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('30m').sign(secret)
+    return c.json({
+      success: true, alreadyVerified: true, token: accessToken,
+      user: { id: user.id, email: user.email, firstName: user.first_name, lastName: user.last_name, role: user.role || 'user', company: user.company }
+    })
+  }
+
+  if (!user.email_verification_code) {
+    return c.json({ success: false, error: 'Kein Code vorhanden. Bitte fordern Sie einen neuen an.' }, 400)
   }
   if (new Date(user.email_verification_expires!) < new Date()) {
-    return c.json({ success: false, error: 'Code abgelaufen. Bitte fordern Sie einen neuen an.' }, 400)
+    return c.json({ success: false, error: 'Code abgelaufen. Bitte fordern Sie einen neuen an.', expired: true }, 400)
   }
   if (user.email_verification_code !== code.trim()) {
-    return c.json({ success: false, error: 'Ungueltiger Code' }, 400)
+    return c.json({ success: false, error: 'Ungueltiger Code. Bitte versuchen Sie es erneut.', invalidCode: true }, 400)
   }
+
+  // Mark verified + clear code
   await db.prepare(
     "UPDATE users SET email_verified = 1, email_verification_code = NULL, email_verification_expires = NULL, verification_token = NULL, updated_at = datetime('now') WHERE id = ?"
   ).bind(user.id).run()
-  return c.json({ success: true, message: 'E-Mail erfolgreich verifiziert.' })
+
+  // Issue access token (30 min)
+  const secret = new TextEncoder().encode(c.env.JWT_SECRET)
+  const accessToken = await new SignJWT({ userId: user.id, email: user.email, role: user.role || 'user' })
+    .setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('30m').sign(secret)
+
+  // Issue refresh token (7 days)
+  const refreshRaw = crypto.randomUUID() + '-' + crypto.randomUUID()
+  const refreshHash = await hashTokenSha256(refreshRaw)
+  const expiresAt = new Date(Date.now() + 7 * 24 * 3600_000).toISOString()
+
+  await db.batch([
+    db.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ? AND revoked = 0').bind(user.id),
+    db.prepare('INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(), user.id, refreshHash, expiresAt),
+  ])
+
+  await writeAuditLog(db, { userId: user.id, eventType: 'email_verified', detail: `Code verified for ${user.email}`, ip: c.req.header('CF-Connecting-IP') })
+
+  return c.json({
+    success: true, token: accessToken, refreshToken: refreshRaw,
+    user: { id: user.id, email: user.email, firstName: user.first_name, lastName: user.last_name, role: user.role || 'user', company: user.company, kontingentTotal: user.kontingent_total, kontingentUsed: user.kontingent_used }
+  })
 })
 
 // POST /resend-code
