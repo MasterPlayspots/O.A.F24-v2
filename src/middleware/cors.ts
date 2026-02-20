@@ -16,6 +16,8 @@ const DEV_ORIGINS = [
 
 // Vercel preview deployments use pattern: https://<project>-<hash>-<team>.vercel.app
 const VERCEL_PREVIEW_PATTERN = /^https:\/\/[a-z0-9-]+-[a-z0-9]+-[a-z0-9-]+\.vercel\.app$/
+// v0.dev preview domains
+const V0_PREVIEW_PATTERN = /^https:\/\/[a-z0-9-]+\.v0\.dev$/
 
 function isAllowedOrigin(origin: string, env?: string): boolean {
   if (PRODUCTION_ORIGINS.includes(origin)) return true
@@ -24,6 +26,11 @@ function isAllowedOrigin(origin: string, env?: string): boolean {
   }
   // Allow Vercel preview deployments for this project
   if (VERCEL_PREVIEW_PATTERN.test(origin) && origin.includes('bafa')) return true
+  // Allow any v0.dev preview domain
+  if (V0_PREVIEW_PATTERN.test(origin)) return true
+  if (origin === 'https://v0.dev') return true
+  // Allow any *.vercel.app or *.vercel.sh for dev/preview
+  if (origin.endsWith('.vercel.app') || origin.endsWith('.vercel.sh')) return true
   return false
 }
 
