@@ -23,9 +23,7 @@ database_id = "6b06bad2-a074-4280-ae26-14d2057893e6"
 [[d1_databases]]
 binding = "BAFA_DB"
 database_name = "bafa_antraege"
-database_id = "8582e9dd-0000-0000-0000-000000000000"
-# NOTE: Replace database_id with the actual ID from `wrangler d1 create bafa_antraege`
-# or from Cloudflare Dashboard → Workers & Pages → D1 → bafa_antraege
+database_id = "8582e9dd-8063-4dbd-b079-f38b2bb3918f"
 
 [[d1_databases]]
 binding = "BAFA_CONTENT"
@@ -35,19 +33,19 @@ database_id = "7f5947f7-42af-455e-81ad-0c57be23b940"
 # KV Namespaces
 [[kv_namespaces]]
 binding = "SESSIONS"
-id = "8cb1b5aa11e94d8fb8e9c0a2d3e4f5a6"
+id = "8cb1b5aaf7954e7a88859f36edf8b342"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-id = "2fddaa5f22c04e9fa8b9c0a2d3e4f5b6"
+id = "2fddaa5f66a94e8eb89920c91b89e83d"
 
 [[kv_namespaces]]
 binding = "CACHE"
-id = "2edc5ca833d14fa9b8c9d0a2d3e4f5c6"
+id = "2edc5ca82a3d4e609b156a8f719c44ba"
 
 [[kv_namespaces]]
 binding = "WEBHOOK_EVENTS"
-id = "3abc6db944e25gb0c9d0e1b3e4f5d7e8"
+id = "3ed392e35d6142e9a5330a056b6f60f3"
 
 # R2 Bucket
 [[r2_buckets]]
