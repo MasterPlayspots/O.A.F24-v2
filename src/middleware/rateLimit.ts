@@ -6,7 +6,6 @@ interface RateLimitConfig {
   maxRequests: number
   windowSeconds: number
   keyPrefix: string
-  failClosed?: boolean
 }
 
 export function rateLimit(config: RateLimitConfig): MiddlewareHandler<{ Bindings: Bindings; Variables: Variables }> {
@@ -23,23 +22,17 @@ export function rateLimit(config: RateLimitConfig): MiddlewareHandler<{ Bindings
       await c.env.RATE_LIMIT.put(key, (count + 1).toString(), { expirationTtl: config.windowSeconds })
     } catch (err) {
       console.error(`[RateLimit] KV error for ${config.keyPrefix}:`, err)
-      if (config.failClosed) {
-        return c.json({ success: false, error: 'Dienst vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.' }, 503)
-      }
+      // fail open - allow request through if KV is unavailable
     }
     await next()
   }
 }
 
-export const loginRateLimit = rateLimit({ maxRequests: 5, windowSeconds: 300, keyPrefix: 'login', failClosed: true })
-export const registerRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 3600, keyPrefix: 'register', failClosed: true })
+export const loginRateLimit = rateLimit({ maxRequests: 5, windowSeconds: 300, keyPrefix: 'login' })
+export const registerRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 3600, keyPrefix: 'register' })
 export const downloadRateLimit = rateLimit({ maxRequests: 10, windowSeconds: 300, keyPrefix: 'download' })
 export const generateRateLimit = rateLimit({ maxRequests: 5, windowSeconds: 600, keyPrefix: 'generate' })
-export const forgotPasswordRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 900, keyPrefix: 'forgot-pw', failClosed: true })
-export const verifyCodeRateLimit = rateLimit({ maxRequests: 5, windowSeconds: 300, keyPrefix: 'verify-code', failClosed: true })
-export const resetPasswordRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 900, keyPrefix: 'reset-pw', failClosed: true })
-export const refreshRateLimit = rateLimit({ maxRequests: 10, windowSeconds: 60, keyPrefix: 'refresh', failClosed: true })
-export const promoValidateRateLimit = rateLimit({ maxRequests: 10, windowSeconds: 60, keyPrefix: 'promo-validate' })
+export const forgotPasswordRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 900, keyPrefix: 'forgot-pw' })
 
 // Global rate limit: 120 requests per minute per IP for all API endpoints
 export const globalRateLimit = rateLimit({ maxRequests: 120, windowSeconds: 60, keyPrefix: 'global' })

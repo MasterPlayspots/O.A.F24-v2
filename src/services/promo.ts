@@ -14,7 +14,7 @@ export async function validateAndApplyPromo(
   originalAmount: number
 ): Promise<PromoResult> {
   const g = await db.prepare(
-    "SELECT * FROM gutscheine WHERE code = ? AND is_active = 1 AND (valid_from IS NULL OR valid_from <= datetime('now')) AND (valid_until IS NULL OR valid_until > datetime('now'))"
+    "SELECT * FROM gutscheine WHERE code = ? AND is_active = 1 AND (valid_until IS NULL OR valid_until > datetime('now'))"
   ).bind(code.toUpperCase()).first<GutscheinRow>()
 
   if (!g || g.total_uses >= g.max_uses) {

@@ -13,8 +13,8 @@ export async function writeAuditLog(db: D1Database, entry: AuditEntry): Promise<
     await db.prepare(
       'INSERT INTO audit_logs (id, user_id, event_type, detail, ip, user_agent) VALUES (?, ?, ?, ?, ?, ?)'
     ).bind(crypto.randomUUID(), entry.userId || null, entry.eventType, entry.detail || null, entry.ip || null, entry.userAgent || null).run()
-  } catch (err) {
-    console.error('[Audit] writeAuditLog failed:', err)
+  } catch {
+    // audit log write failure is non-critical, silently ignored
   }
 }
 

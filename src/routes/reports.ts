@@ -199,16 +199,14 @@ reports.get('/download/:token', downloadRateLimit, async (c) => {
   ).bind(c.req.param('token')).first<{ antrag_id: string; downloads: number; max_downloads: number }>()
 
   if (!tokenRow) return c.json({ success: false, error: 'Ungültiger oder abgelaufener Download-Link' }, 403)
-
-  // Atomic increment with max check to prevent race condition
-  const updated = await bafaDb.prepare(
-    'UPDATE download_tokens SET downloads = downloads + 1 WHERE token = ? AND downloads < max_downloads'
-  ).bind(c.req.param('token')).run()
-  if (!updated.meta.changes) return c.json({ success: false, error: 'Maximale Anzahl Downloads erreicht' }, 403)
+  if (tokenRow.downloads >= tokenRow.max_downloads) return c.json({ success: false, error: 'Maximale Anzahl Downloads erreicht' }, 403)
 
   // Load antrag + bausteine
   const data = await loadAntragWithBausteine(bafaDb, tokenRow.antrag_id)
   if (!data) return c.json({ success: false, error: 'Antrag nicht gefunden' }, 404)
+
+  // Increment download counter
+  await bafaDb.prepare('UPDATE download_tokens SET downloads = downloads + 1 WHERE token = ?').bind(c.req.param('token')).run()
 
   const filename = `BAFA-Bericht_${(data.antrag.unternehmen_name || 'Bericht').replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_')}.html`
 
@@ -293,42 +291,19 @@ reports.post('/', requireAuth, async (c) => {
 })
 
 // PATCH /:id
-const patchReportSchema = z.object({
-  status: z.enum(['entwurf', 'generiert', 'finalisiert']).optional(),
-  company_name: z.string().max(200).optional(),
-  branche: z.string().max(100).optional(),
-  unterbranche: z.string().max(100).optional(),
-  unternehmen_name: z.string().max(200).optional(),
-  unternehmen_typ: z.string().max(100).optional(),
-  unternehmen_mitarbeiter: z.number().int().optional(),
-  unternehmen_umsatz: z.string().max(100).optional(),
-  unternehmen_hauptproblem: z.string().max(2000).optional(),
-  branche_id: z.string().max(100).optional(),
-  beratungsschwerpunkte: z.string().max(2000).optional(),
-  beratungsthema: z.string().max(500).optional(),
-}).strict()
-
 reports.patch('/:id', requireAuth, async (c) => {
   const antragId = c.req.param('id')
-  if (!z.string().uuid().safeParse(antragId).success) return c.json({ success: false, error: 'Ungültige Report-ID' }, 400)
-
-  const parsed = patchReportSchema.safeParse(await c.req.json())
-  if (!parsed.success) return c.json({ success: false, error: 'Validierungsfehler', details: parsed.error.issues.map((e: z.ZodIssue) => e.message) }, 400)
-  const updates = parsed.data
-
-  // Verify ownership
-  const ownership = await c.env.DB.prepare('SELECT id FROM reports WHERE id = ? AND user_id = ?').bind(antragId, c.get('user').id).first()
-  if (!ownership) return c.json({ success: false, error: 'Bericht nicht gefunden' }, 404)
+  const updates = await c.req.json()
 
   // Update ownership table (zfbf-db) for legacy fields
-  const ownershipAllowed = ['status', 'company_name', 'branche', 'unterbranche'] as const
+  const ownershipAllowed = ['status', 'company_name', 'branche', 'unterbranche']
   const ownershipSet: string[] = []; const ownershipVals: unknown[] = []
-  for (const k of ownershipAllowed) {
-    if (k in updates) { ownershipSet.push(`${k} = ?`); ownershipVals.push(updates[k as keyof typeof updates]) }
+  for (const [k, v] of Object.entries(updates)) {
+    if (ownershipAllowed.includes(k)) { ownershipSet.push(`${k} = ?`); ownershipVals.push(typeof v === 'object' ? JSON.stringify(v) : v) }
   }
   if (ownershipSet.length) {
-    ownershipVals.push(antragId)
-    await c.env.DB.prepare(`UPDATE reports SET ${ownershipSet.join(', ')}, updated_at = datetime('now') WHERE id = ?`).bind(...ownershipVals).run()
+    ownershipVals.push(antragId, c.get('user').id)
+    await c.env.DB.prepare(`UPDATE reports SET ${ownershipSet.join(', ')}, updated_at = datetime('now') WHERE id = ? AND user_id = ?`).bind(...ownershipVals).run()
   }
 
   // Update antraege table (bafa_antraege) for BAFA-specific fields
@@ -347,7 +322,7 @@ reports.patch('/:id', requireAuth, async (c) => {
   const antragSet: string[] = []; const antragVals: unknown[] = []
   for (const [k, v] of Object.entries(updates)) {
     const col = antragAllowed[k]
-    if (col) { antragSet.push(`${col} = ?`); antragVals.push(v) }
+    if (col) { antragSet.push(`${col} = ?`); antragVals.push(typeof v === 'object' ? JSON.stringify(v) : v) }
   }
   if (antragSet.length) {
     antragVals.push(antragId)
@@ -360,17 +335,10 @@ reports.patch('/:id', requireAuth, async (c) => {
 // POST /:id/finalize
 reports.post('/:id/finalize', requireAuth, async (c) => {
   const user = c.get('user'); const db = c.env.DB; const bafaDb = c.env.BAFA_DB
-  const antragId = c.req.param('id')
-  if (!z.string().uuid().safeParse(antragId).success) return c.json({ success: false, error: 'Ungültige Report-ID' }, 400)
-
-  // Verify ownership and check current status to prevent double-finalize
-  const report = await db.prepare('SELECT id, status FROM reports WHERE id = ? AND user_id = ?').bind(antragId, user.id).first<{ id: string; status: string }>()
-  if (!report) return c.json({ success: false, error: 'Bericht nicht gefunden' }, 404)
-  if (report.status === 'finalisiert') return c.json({ success: false, error: 'Bericht wurde bereits finalisiert' }, 400)
-
   const { hasQuota } = await checkKontingent(db, user.id)
   if (!hasQuota) return kontingentError(c)
 
+  const antragId = c.req.param('id')
   await db.batch([
     db.prepare("UPDATE reports SET status = 'finalisiert' WHERE id = ? AND user_id = ?").bind(antragId, user.id),
     db.prepare('UPDATE users SET kontingent_used = kontingent_used + 1 WHERE id = ?').bind(user.id),

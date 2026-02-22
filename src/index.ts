@@ -39,7 +39,7 @@ app.get('/health', async (c) => {
   try { await c.env.CACHE.get('health-check'); checks.kv = true } catch { checks.kv = false }
   try { await c.env.REPORTS.head('health-check'); checks.r2 = true } catch { checks.r2 = false }
   const allHealthy = Object.values(checks).every(Boolean)
-  return c.json({ status: allHealthy ? 'healthy' : 'degraded', timestamp: new Date().toISOString() }, allHealthy ? 200 : 503)
+  return c.json({ status: allHealthy ? 'healthy' : 'degraded', checks, timestamp: new Date().toISOString() }, allHealthy ? 200 : 503)
 })
 
 // ============================================
@@ -47,8 +47,7 @@ app.get('/health', async (c) => {
 // ============================================
 app.route('/api/auth', auth)
 app.route('/api/reports', reports)
-// TODO: Remove legacy /api/bafa alias once all consumers are migrated to /api/reports
-app.route('/api/bafa', reports)
+app.route('/api/bafa', reports) // Legacy alias for /api/reports
 app.route('/api/branchen', branchen)
 app.route('/api/promo', promo)
 app.route('/api/orders', orders)
@@ -97,8 +96,8 @@ export default {
           // TODO: Implement full learning cycle against BAFA_CONTENT D1 binding
           console.log('Weekly learning cycle triggered at', trigger.toISOString())
         }
-      } catch (err) {
-        console.error('[Cron] scheduled handler failed:', err)
+      } catch {
+        // cron failure - errors surface via Cloudflare dashboard
       }
     })())
   },

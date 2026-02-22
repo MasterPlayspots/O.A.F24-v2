@@ -4,7 +4,6 @@ import { z } from 'zod'
 import type { Bindings, Variables, GutscheinRow } from '../types'
 import { AUDIT_EVENTS } from '../types'
 import { requireAuth, requireRole } from '../middleware/auth'
-import { promoValidateRateLimit } from '../middleware/rateLimit'
 import { writeAuditLog } from '../services/audit'
 
 const promo = new Hono<{ Bindings: Bindings; Variables: Variables }>()
@@ -18,7 +17,7 @@ async function findActiveGutschein(db: D1Database, code: string): Promise<Gutsch
 }
 
 // POST /validate
-promo.post('/validate', promoValidateRateLimit, async (c) => {
+promo.post('/validate', async (c) => {
   const { code } = await c.req.json()
   if (!code) return c.json({ success: false, error: 'Code ist erforderlich' }, 400)
 
@@ -41,11 +40,10 @@ promo.post('/redeem', requireAuth, async (c) => {
   if (existing) return c.json({ success: false, error: 'Code wurde bereits eingelöst' }, 400)
 
   const redemptionId = crypto.randomUUID()
-  const batchResults = await db.batch([
-    db.prepare('UPDATE gutscheine SET total_uses = total_uses + 1 WHERE id = ? AND total_uses < max_uses').bind(g.id),
+  await db.batch([
     db.prepare('INSERT INTO promo_redemptions (id, user_id, promo_code_id, order_id, discount_amount) VALUES (?, ?, ?, ?, ?)').bind(redemptionId, user.id, g.id, orderId || null, g.discount_value),
+    db.prepare('UPDATE gutscheine SET total_uses = total_uses + 1 WHERE id = ?').bind(g.id),
   ])
-  if (!batchResults[0]?.meta.changes) return c.json({ success: false, error: 'Code wurde bereits vollständig eingelöst' }, 400)
 
   await writeAuditLog(db, { userId: user.id, eventType: AUDIT_EVENTS.PROMO_REDEEM, detail: `${code} (${g.discount_type}: ${g.discount_value})`, ip: c.req.header('CF-Connecting-IP') })
   return c.json({ success: true, redemptionId, discount: { type: g.discount_type, value: g.discount_value } })
