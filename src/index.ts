@@ -39,7 +39,7 @@ app.get('/health', async (c) => {
   try { await c.env.CACHE.get('health-check'); checks.kv = true } catch { checks.kv = false }
   try { await c.env.REPORTS.head('health-check'); checks.r2 = true } catch { checks.r2 = false }
   const allHealthy = Object.values(checks).every(Boolean)
-  return c.json({ status: allHealthy ? 'healthy' : 'degraded', checks, timestamp: new Date().toISOString() }, allHealthy ? 200 : 503)
+  return c.json({ status: allHealthy ? 'healthy' : 'degraded', timestamp: new Date().toISOString() }, allHealthy ? 200 : 503)
 })
 
 // ============================================

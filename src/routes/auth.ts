@@ -219,13 +219,11 @@ auth.post('/verify-code', verifyCodeRateLimit, async (c) => {
     return c.json({ success: false, error: 'Ungueltiger Code. Bitte versuchen Sie es erneut.', invalidCode: true }, 400)
   }
 
-  // Already verified — just issue tokens
+  // Already verified — issue full token pair
   if (user.email_verified) {
-    const secret = new TextEncoder().encode(c.env.JWT_SECRET)
-    const accessToken = await new SignJWT({ userId: user.id, email: user.email, role: user.role || 'user' })
-      .setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('30m').sign(secret)
+    const { accessToken, refreshToken } = await issueTokenPair(db, c.env.JWT_SECRET, { id: user.id, email: user.email, role: user.role || 'user' })
     return c.json({
-      success: true, alreadyVerified: true, token: accessToken,
+      success: true, alreadyVerified: true, token: accessToken, refreshToken,
       user: { id: user.id, email: user.email, firstName: user.first_name, lastName: user.last_name, role: user.role || 'user', company: user.company }
     })
   }

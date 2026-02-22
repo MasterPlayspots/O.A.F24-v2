@@ -1,7 +1,11 @@
 // PayPal Payment Service
 
-async function getAccessToken(clientId: string, clientSecret: string): Promise<string> {
-  const res = await fetch('https://api-m.paypal.com/v1/oauth2/token', {
+function getPayPalBaseUrl(sandbox = false): string {
+  return sandbox ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com'
+}
+
+async function getAccessToken(clientId: string, clientSecret: string, sandbox = false): Promise<string> {
+  const res = await fetch(`${getPayPalBaseUrl(sandbox)}/v1/oauth2/token`, {
     method: 'POST',
     headers: { Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`, 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'grant_type=client_credentials',
@@ -12,10 +16,11 @@ async function getAccessToken(clientId: string, clientSecret: string): Promise<s
 }
 
 export async function createPayPalOrder(clientId: string, clientSecret: string, params: {
-  reportId: string; userId: string; amount: number; description: string;
+  reportId: string; userId: string; amount: number; description: string; sandbox?: boolean;
 }): Promise<{ orderId: string; approveUrl: string }> {
-  const token = await getAccessToken(clientId, clientSecret)
-  const res = await fetch('https://api-m.paypal.com/v2/checkout/orders', {
+  const sandbox = params.sandbox ?? false
+  const token = await getAccessToken(clientId, clientSecret, sandbox)
+  const res = await fetch(`${getPayPalBaseUrl(sandbox)}/v2/checkout/orders`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -29,9 +34,9 @@ export async function createPayPalOrder(clientId: string, clientSecret: string, 
   return { orderId: order.id, approveUrl: order.links?.find((l: any) => l.rel === 'approve')?.href || '' }
 }
 
-export async function capturePayPalOrder(clientId: string, clientSecret: string, orderId: string): Promise<any> {
-  const token = await getAccessToken(clientId, clientSecret)
-  const res = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderId}/capture`, {
+export async function capturePayPalOrder(clientId: string, clientSecret: string, orderId: string, sandbox = false): Promise<any> {
+  const token = await getAccessToken(clientId, clientSecret, sandbox)
+  const res = await fetch(`${getPayPalBaseUrl(sandbox)}/v2/checkout/orders/${orderId}/capture`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
   })

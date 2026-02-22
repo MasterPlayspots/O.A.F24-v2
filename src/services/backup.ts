@@ -15,7 +15,7 @@ export async function performBackup(databases: { name: string; db: D1Database }[
         dump += `-- ${t.name}: ${rows.results.length} rows\n`
         for (const row of rows.results as any[]) {
           const cols = Object.keys(row)
-          const vals = cols.map(c => row[c] === null ? 'NULL' : typeof row[c] === 'number' ? row[c].toString() : `'${String(row[c]).replace(/'/g, "''")}'`)
+          const vals = cols.map(c => row[c] === null ? 'NULL' : typeof row[c] === 'number' ? row[c].toString() : `'${String(row[c]).replace(/\\/g, '\\\\').replace(/'/g, "''").replace(/\n/g, '\\n').replace(/\r/g, '\\r')}'`)
           dump += `INSERT OR REPLACE INTO "${t.name}" (${cols.map(c => `"${c}"`).join(',')}) VALUES (${vals.join(',')});\n`
         }
         dump += '\n'
