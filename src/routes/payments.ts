@@ -88,7 +88,7 @@ payments.post('/stripe/webhook', async (c) => {
 payments.post('/paypal/create-order', requireAuth, async (c) => {
   const parsed = z.object({ reportId: z.string().uuid(), promoCode: z.string().optional() }).safeParse(await c.req.json())
   if (!parsed.success) return c.json({ success: false, error: 'Ungültige Anfrage' }, 400)
-  const { reportId } = parsed.data; const user = c.get('user'); const db = c.env.DB
+  const { reportId, promoCode } = parsed.data; const user = c.get('user'); const db = c.env.DB
 
   const report = await db.prepare('SELECT id, company_name FROM reports WHERE id = ? AND user_id = ?').bind(reportId, user.id).first<{ id: string; company_name: string }>()
   if (!report) return c.json({ success: false, error: 'Bericht nicht gefunden' }, 404)
@@ -96,33 +96,59 @@ payments.post('/paypal/create-order', requireAuth, async (c) => {
   const antrag = await c.env.BAFA_DB.prepare('SELECT unternehmen_name FROM antraege WHERE id = ?').bind(reportId).first<{ unternehmen_name: string }>()
   const companyName = antrag?.unternehmen_name || report.company_name || 'Beratungsbericht'
 
+  let amount = REPORT_PRICE_CENTS
+  if (promoCode) {
+    const promo = await validateAndApplyPromo(db, promoCode, amount)
+    if (promo.valid) amount = promo.discountedAmount
+  }
+
+  if (amount === 0) {
+    await db.prepare("UPDATE reports SET is_unlocked = 1, unlock_payment_id = 'promo-free' WHERE id = ?").bind(reportId).run()
+    await c.env.BAFA_DB.prepare("UPDATE antraege SET status = 'bezahlt', bezahlt_am = datetime('now'), aktualisiert_am = datetime('now') WHERE id = ?").bind(reportId).run()
+    return c.json({ success: true, status: 'free', message: 'Bericht kostenlos freigeschaltet' })
+  }
+
   try {
-    const order = await createPayPalOrder(c.env.PAYPAL_CLIENT_ID, c.env.PAYPAL_CLIENT_SECRET, { reportId, userId: user.id, amount: REPORT_PRICE_CENTS, description: `BAFA-Bericht: ${companyName}` })
-    await db.prepare("INSERT INTO payments (id, user_id, report_id, package_type, amount, provider, provider_payment_id, status) VALUES (?, ?, ?, 'einzel', ?, 'paypal', ?, 'pending')")
-      .bind(crypto.randomUUID(), user.id, reportId, REPORT_PRICE_CENTS, order.orderId).run()
+    const order = await createPayPalOrder(c.env.PAYPAL_CLIENT_ID, c.env.PAYPAL_CLIENT_SECRET, { reportId, userId: user.id, amount, description: `BAFA-Bericht: ${companyName}` })
+    await db.prepare("INSERT INTO payments (id, user_id, report_id, package_type, amount, provider, provider_payment_id, gutschein_code, status) VALUES (?, ?, ?, 'einzel', ?, 'paypal', ?, ?, 'pending')")
+      .bind(crypto.randomUUID(), user.id, reportId, amount, order.orderId, promoCode || null).run()
     return c.json({ success: true, orderId: order.orderId, approveUrl: order.approveUrl })
   } catch { return c.json({ success: false, error: 'PayPal Order konnte nicht erstellt werden' }, 500) }
 })
 
 // POST /paypal/capture-order
 payments.post('/paypal/capture-order', requireAuth, async (c) => {
-  const { orderId } = await c.req.json()
-  if (!orderId) return c.json({ success: false, error: 'Order ID erforderlich' }, 400)
+  const parsed = z.object({ orderId: z.string().min(1) }).safeParse(await c.req.json())
+  if (!parsed.success) return c.json({ success: false, error: 'Order ID erforderlich' }, 400)
+  const { orderId } = parsed.data
   const user = c.get('user'); const db = c.env.DB; const bafaDb = c.env.BAFA_DB
+
+  // Verify payment record belongs to authenticated user
+  const pay = await db.prepare('SELECT id, report_id, amount, user_id FROM payments WHERE provider_payment_id = ? AND provider = ?').bind(orderId, 'paypal').first<{ id: string; report_id: string; amount: number; user_id: string }>()
+  if (!pay) return c.json({ success: false, error: 'Zahlung nicht gefunden' }, 404)
+  if (pay.user_id !== user.id) return c.json({ success: false, error: 'Keine Berechtigung' }, 403)
+
   try {
     const capture = await capturePayPalOrder(c.env.PAYPAL_CLIENT_ID, c.env.PAYPAL_CLIENT_SECRET, orderId)
     if (capture.status === 'COMPLETED') {
-      const pay = await db.prepare('SELECT id, report_id FROM payments WHERE provider_payment_id = ?').bind(orderId).first<{ id: string; report_id: string }>()
-      if (pay) {
-        await db.batch([
-          db.prepare("UPDATE payments SET status = 'completed' WHERE id = ?").bind(pay.id),
-          db.prepare("UPDATE reports SET is_unlocked=1, unlock_payment_id=? WHERE id=?").bind(orderId, pay.report_id),
-        ])
-        await bafaDb.prepare("UPDATE antraege SET status = 'bezahlt', bezahlt_am = datetime('now'), aktualisiert_am = datetime('now') WHERE id = ?").bind(pay.report_id).run()
-        const { token: dlToken, validUntil } = await createDownloadToken(bafaDb, pay.report_id)
-        await writeAuditLog(db, { userId: user.id, eventType: AUDIT_EVENTS.PAYMENT, detail: `PayPal ${orderId}` })
-        return c.json({ success: true, downloadToken: dlToken, expiresAt: validUntil })
+      // Verify captured amount matches expected
+      const capturedAmount = capture.purchase_units?.[0]?.payments?.captures?.[0]?.amount
+      if (capturedAmount) {
+        const capturedCents = Math.round(parseFloat(capturedAmount.value) * 100)
+        if (capturedCents !== pay.amount) {
+          console.error(`[PayPal] Amount mismatch: expected ${pay.amount}, got ${capturedCents}`)
+          return c.json({ success: false, error: 'Betrag stimmt nicht überein' }, 400)
+        }
       }
+
+      await db.batch([
+        db.prepare("UPDATE payments SET status = 'completed' WHERE id = ?").bind(pay.id),
+        db.prepare("UPDATE reports SET is_unlocked=1, unlock_payment_id=? WHERE id=?").bind(orderId, pay.report_id),
+      ])
+      await bafaDb.prepare("UPDATE antraege SET status = 'bezahlt', bezahlt_am = datetime('now'), aktualisiert_am = datetime('now') WHERE id = ?").bind(pay.report_id).run()
+      const { token: dlToken, validUntil } = await createDownloadToken(bafaDb, pay.report_id)
+      await writeAuditLog(db, { userId: user.id, eventType: AUDIT_EVENTS.PAYMENT, detail: `PayPal ${orderId}` })
+      return c.json({ success: true, downloadToken: dlToken, expiresAt: validUntil })
     }
     return c.json({ success: false, error: 'Zahlung nicht abgeschlossen' }, 400)
   } catch { return c.json({ success: false, error: 'PayPal Capture fehlgeschlagen' }, 500) }

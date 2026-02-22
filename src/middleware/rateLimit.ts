@@ -36,6 +36,10 @@ export const registerRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 3600
 export const downloadRateLimit = rateLimit({ maxRequests: 10, windowSeconds: 300, keyPrefix: 'download' })
 export const generateRateLimit = rateLimit({ maxRequests: 5, windowSeconds: 600, keyPrefix: 'generate' })
 export const forgotPasswordRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 900, keyPrefix: 'forgot-pw', failClosed: true })
+export const verifyCodeRateLimit = rateLimit({ maxRequests: 5, windowSeconds: 300, keyPrefix: 'verify-code', failClosed: true })
+export const resetPasswordRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 900, keyPrefix: 'reset-pw', failClosed: true })
+export const refreshRateLimit = rateLimit({ maxRequests: 10, windowSeconds: 60, keyPrefix: 'refresh', failClosed: true })
+export const promoValidateRateLimit = rateLimit({ maxRequests: 10, windowSeconds: 60, keyPrefix: 'promo-validate' })
 
 // Global rate limit: 120 requests per minute per IP for all API endpoints
 export const globalRateLimit = rateLimit({ maxRequests: 120, windowSeconds: 60, keyPrefix: 'global' })

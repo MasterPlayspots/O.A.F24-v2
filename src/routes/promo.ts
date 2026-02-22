@@ -4,6 +4,7 @@ import { z } from 'zod'
 import type { Bindings, Variables, GutscheinRow } from '../types'
 import { AUDIT_EVENTS } from '../types'
 import { requireAuth, requireRole } from '../middleware/auth'
+import { promoValidateRateLimit } from '../middleware/rateLimit'
 import { writeAuditLog } from '../services/audit'
 
 const promo = new Hono<{ Bindings: Bindings; Variables: Variables }>()
@@ -17,7 +18,7 @@ async function findActiveGutschein(db: D1Database, code: string): Promise<Gutsch
 }
 
 // POST /validate
-promo.post('/validate', async (c) => {
+promo.post('/validate', promoValidateRateLimit, async (c) => {
   const { code } = await c.req.json()
   if (!code) return c.json({ success: false, error: 'Code ist erforderlich' }, 400)
 

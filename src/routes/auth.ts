@@ -6,7 +6,7 @@ import type { Bindings, Variables, UserRow } from '../types'
 import { AUDIT_EVENTS } from '../types'
 import { hashPassword, verifyPassword, verifyLegacySha256 } from '../services/password'
 import { writeAuditLog } from '../services/audit'
-import { loginRateLimit, registerRateLimit, forgotPasswordRateLimit } from '../middleware/rateLimit'
+import { loginRateLimit, registerRateLimit, forgotPasswordRateLimit, verifyCodeRateLimit, resetPasswordRateLimit, refreshRateLimit } from '../middleware/rateLimit'
 import { requireAuth } from '../middleware/auth'
 import { sendPasswordResetEmail, sendVerificationCodeEmail } from '../services/email'
 
@@ -28,6 +28,12 @@ const registerSchema = z.object({
 })
 
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(1) })
+const refreshSchema = z.object({ refreshToken: z.string().min(1) })
+const patchMeSchema = z.object({
+  phone: z.string().max(50).optional(),
+  website: z.string().url().max(200).optional(),
+  onboardingCompleted: z.boolean().optional(),
+}).strict()
 
 // POST /register
 auth.post('/register', registerRateLimit, async (c) => {
@@ -50,7 +56,7 @@ auth.post('/register', registerRateLimit, async (c) => {
 
   await writeAuditLog(db, { userId: id, eventType: AUDIT_EVENTS.REGISTER, detail: `New: ${email}`, ip: c.req.header('CF-Connecting-IP'), userAgent: c.req.header('User-Agent') })
 
-  const verificationCode = String(Math.floor(100000 + Math.random() * 900000))
+  const verificationCode = String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0]! % 900000))
   const codeExpires = new Date(Date.now() + 15 * 60_000).toISOString()
   await db.prepare(
     "UPDATE users SET email_verification_code = ?, email_verification_expires = ? WHERE id = ?"
@@ -102,7 +108,7 @@ auth.post('/login', loginRateLimit, async (c) => {
 
   // If email not verified: auto-generate + send new code, redirect to verification
   if (!user.email_verified) {
-    const verificationCode = String(Math.floor(100000 + Math.random() * 900000))
+    const verificationCode = String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0]! % 900000))
     const codeExpires = new Date(Date.now() + 15 * 60_000).toISOString()
     await db.prepare(
       "UPDATE users SET email_verification_code = ?, email_verification_expires = ? WHERE id = ?"
@@ -137,9 +143,10 @@ auth.post('/login', loginRateLimit, async (c) => {
 })
 
 // POST /refresh - uses JOIN to avoid N+1 query
-auth.post('/refresh', async (c) => {
-  const { refreshToken } = await c.req.json()
-  if (!refreshToken) return c.json({ success: false, error: 'Refresh Token erforderlich' }, 400)
+auth.post('/refresh', refreshRateLimit, async (c) => {
+  const parsed = refreshSchema.safeParse(await c.req.json())
+  if (!parsed.success) return c.json({ success: false, error: 'Refresh Token erforderlich' }, 400)
+  const { refreshToken } = parsed.data
 
   const db = c.env.DB
   const tokenHash = await hashTokenSha256(refreshToken)
@@ -179,7 +186,7 @@ auth.post('/verify-email', async (c) => {
 })
 
 // POST /verify-code — validates 6-digit code, marks verified, issues JWT + refresh token
-auth.post('/verify-code', async (c) => {
+auth.post('/verify-code', verifyCodeRateLimit, async (c) => {
   const { email, code } = await c.req.json()
   if (!email || !code) {
     return c.json({ success: false, error: 'E-Mail und Code sind erforderlich' }, 400)
@@ -258,7 +265,7 @@ auth.post('/resend-code', registerRateLimit, async (c) => {
   if (!user || user.email_verified) {
     return c.json({ success: true, message: 'Falls ein Konto existiert, wurde ein neuer Code gesendet.' })
   }
-  const newCode = String(Math.floor(100000 + Math.random() * 900000))
+  const newCode = String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0]! % 900000))
   const codeExpires = new Date(Date.now() + 15 * 60_000).toISOString()
   await db.prepare(
     "UPDATE users SET email_verification_code = ?, email_verification_expires = ? WHERE id = ?"
@@ -278,13 +285,13 @@ auth.get('/me', requireAuth, async (c) => {
 
 // PATCH /me
 auth.patch('/me', requireAuth, async (c) => {
-  const updates = await c.req.json()
-  const allowed = ['phone', 'website', 'onboarding_completed']
+  const parsed = patchMeSchema.safeParse(await c.req.json())
+  if (!parsed.success) return c.json({ success: false, error: 'Validierungsfehler', details: parsed.error.issues.map((e: z.ZodIssue) => e.message) }, 400)
+  const updates = parsed.data
   const set: string[] = []; const vals: unknown[] = []
-  for (const [k, v] of Object.entries(updates)) {
-    const dk = k === 'onboardingCompleted' ? 'onboarding_completed' : k
-    if (allowed.includes(dk)) { set.push(`${dk} = ?`); vals.push(dk === 'onboarding_completed' ? (v ? 1 : 0) : v) }
-  }
+  if (updates.phone !== undefined) { set.push('phone = ?'); vals.push(updates.phone) }
+  if (updates.website !== undefined) { set.push('website = ?'); vals.push(updates.website) }
+  if (updates.onboardingCompleted !== undefined) { set.push('onboarding_completed = ?'); vals.push(updates.onboardingCompleted ? 1 : 0) }
   if (set.length) { vals.push(c.get('user').id); await c.env.DB.prepare(`UPDATE users SET ${set.join(', ')}, updated_at = datetime('now') WHERE id = ?`).bind(...vals).run() }
   return c.json({ success: true })
 })
@@ -323,7 +330,7 @@ auth.post('/forgot-password', forgotPasswordRateLimit, async (c) => {
 })
 
 // POST /reset-password
-auth.post('/reset-password', async (c) => {
+auth.post('/reset-password', resetPasswordRateLimit, async (c) => {
   const parsed = z.object({
     token: z.string().uuid(),
     password: z.string().min(8)
