@@ -6,6 +6,7 @@ interface RateLimitConfig {
   maxRequests: number
   windowSeconds: number
   keyPrefix: string
+  failClosed?: boolean
 }
 
 export function rateLimit(config: RateLimitConfig): MiddlewareHandler<{ Bindings: Bindings; Variables: Variables }> {
@@ -22,17 +23,19 @@ export function rateLimit(config: RateLimitConfig): MiddlewareHandler<{ Bindings
       await c.env.RATE_LIMIT.put(key, (count + 1).toString(), { expirationTtl: config.windowSeconds })
     } catch (err) {
       console.error(`[RateLimit] KV error for ${config.keyPrefix}:`, err)
-      // fail open - allow request through if KV is unavailable
+      if (config.failClosed) {
+        return c.json({ success: false, error: 'Dienst vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.' }, 503)
+      }
     }
     await next()
   }
 }
 
-export const loginRateLimit = rateLimit({ maxRequests: 5, windowSeconds: 300, keyPrefix: 'login' })
-export const registerRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 3600, keyPrefix: 'register' })
+export const loginRateLimit = rateLimit({ maxRequests: 5, windowSeconds: 300, keyPrefix: 'login', failClosed: true })
+export const registerRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 3600, keyPrefix: 'register', failClosed: true })
 export const downloadRateLimit = rateLimit({ maxRequests: 10, windowSeconds: 300, keyPrefix: 'download' })
 export const generateRateLimit = rateLimit({ maxRequests: 5, windowSeconds: 600, keyPrefix: 'generate' })
-export const forgotPasswordRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 900, keyPrefix: 'forgot-pw' })
+export const forgotPasswordRateLimit = rateLimit({ maxRequests: 3, windowSeconds: 900, keyPrefix: 'forgot-pw', failClosed: true })
 
 // Global rate limit: 120 requests per minute per IP for all API endpoints
 export const globalRateLimit = rateLimit({ maxRequests: 120, windowSeconds: 60, keyPrefix: 'global' })

@@ -24,13 +24,11 @@ function isAllowedOrigin(origin: string, env?: string): boolean {
   if (env !== 'production') {
     if (DEV_ORIGINS.includes(origin)) return true
   }
-  // Allow Vercel preview deployments for this project
+  // Allow Vercel preview deployments for this project only
   if (VERCEL_PREVIEW_PATTERN.test(origin) && origin.includes('bafa')) return true
-  // Allow any v0.dev preview domain
+  // Allow v0.dev preview domains for this project
   if (V0_PREVIEW_PATTERN.test(origin)) return true
   if (origin === 'https://v0.dev') return true
-  // Allow any *.vercel.app or *.vercel.sh for dev/preview
-  if (origin.endsWith('.vercel.app') || origin.endsWith('.vercel.sh')) return true
   return false
 }
 
