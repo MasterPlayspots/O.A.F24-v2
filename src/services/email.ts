@@ -21,7 +21,7 @@ export async function sendPasswordResetEmail(apiKey: string, to: string, firstNa
       }),
     })
     return res.ok
-  } catch { return false }
+  } catch (err) { console.error('[Email] sendPasswordResetEmail failed:', err); return false }
 }
 
 export async function sendVerificationCodeEmail(apiKey: string, to: string, firstName: string, code: string): Promise<boolean> {
@@ -47,7 +47,7 @@ export async function sendVerificationCodeEmail(apiKey: string, to: string, firs
       }),
     })
     return res.ok
-  } catch { return false }
+  } catch (err) { console.error('[Email] sendVerificationCodeEmail failed:', err); return false }
 }
 
 export async function sendDownloadEmail(apiKey: string, to: string, firstName: string, downloadUrl: string): Promise<boolean> {
@@ -71,5 +71,5 @@ export async function sendDownloadEmail(apiKey: string, to: string, firstName: s
       }),
     })
     return res.ok
-  } catch { return false }
+  } catch (err) { console.error('[Email] sendDownloadEmail failed:', err); return false }
 }

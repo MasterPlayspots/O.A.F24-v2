@@ -80,12 +80,21 @@ gdpr.delete('/account', requireAuth, async (c) => {
     db.prepare("UPDATE audit_logs SET ip = NULL, user_agent = NULL, detail = '[GELÖSCHT]' WHERE user_id = ?").bind(userId),
   ])
 
-  // Invalidate download tokens in BAFA_DB for user's antraege
+  // Clean up user's content in BAFA_DB
   if (reportIds.length > 0) {
     const placeholders = reportIds.map(() => '?').join(',')
-    await bafaDb.prepare(
-      `UPDATE download_tokens SET gueltig_bis = datetime('now') WHERE antrag_id IN (${placeholders})`
-    ).bind(...reportIds).run()
+    await bafaDb.batch([
+      // Delete generated content blocks
+      bafaDb.prepare(`DELETE FROM antrag_bausteine WHERE antrag_id IN (${placeholders})`).bind(...reportIds),
+      // Anonymize antrag records (keep structure for payment/audit integrity)
+      bafaDb.prepare(`UPDATE antraege SET unternehmen_name = '[GELÖSCHT]', unternehmen_typ = NULL, unternehmen_mitarbeiter = NULL, unternehmen_umsatz = NULL, unternehmen_hauptproblem = NULL, beratungsschwerpunkte = NULL, r2_key = NULL, aktualisiert_am = datetime('now') WHERE id IN (${placeholders})`).bind(...reportIds),
+      // Invalidate download tokens
+      bafaDb.prepare(`UPDATE download_tokens SET gueltig_bis = datetime('now') WHERE antrag_id IN (${placeholders})`).bind(...reportIds),
+    ])
+    // Delete R2 objects for user's reports
+    for (const id of reportIds) {
+      try { await c.env.REPORTS.delete(`reports/${id}.pdf`) } catch { /* best effort */ }
+    }
   }
 
   await writeAuditLog(db, { userId, eventType: 'gdpr_deletion', detail: 'Account anonymized per Art. 17 DSGVO' })

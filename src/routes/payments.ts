@@ -45,7 +45,7 @@ payments.post('/stripe/create-session', requireAuth, async (c) => {
     await db.prepare("INSERT INTO payments (id, user_id, report_id, package_type, amount, provider, provider_payment_id, gutschein_code, status) VALUES (?, ?, ?, 'einzel', ?, 'stripe', ?, ?, 'pending')")
       .bind(crypto.randomUUID(), user.id, reportId, amount, session.id, promoCode || null).run()
     return c.json({ success: true, sessionId: session.id, checkoutUrl: session.url })
-  } catch { return c.json({ success: false, error: 'Stripe Checkout konnte nicht erstellt werden' }, 500) }
+  } catch (err) { console.error('[Stripe] create-session failed:', err); return c.json({ success: false, error: 'Stripe Checkout konnte nicht erstellt werden' }, 500) }
 })
 
 // POST /stripe/webhook
@@ -64,7 +64,7 @@ payments.post('/stripe/webhook', async (c) => {
   if (event.type === 'checkout.session.completed') {
     const s = event.data.object; const reportId = s.metadata?.reportId; const userId = s.metadata?.userId
     if (reportId && userId) {
-      await db.prepare("UPDATE payments SET status = 'completed' WHERE provider_payment_id = ?").bind(s.id).run()
+      await db.prepare("UPDATE payments SET status = 'completed', provider_payment_id = ? WHERE provider_payment_id = ?").bind(s.payment_intent || s.id, s.id).run()
       await db.prepare("UPDATE reports SET is_unlocked=1, unlock_payment_id=? WHERE id=?").bind(s.id, reportId).run()
       await bafaDb.prepare("UPDATE antraege SET status = 'bezahlt', bezahlt_am = datetime('now'), aktualisiert_am = datetime('now') WHERE id = ?").bind(reportId).run()
       await createDownloadToken(bafaDb, reportId)
@@ -113,7 +113,7 @@ payments.post('/paypal/create-order', requireAuth, async (c) => {
     await db.prepare("INSERT INTO payments (id, user_id, report_id, package_type, amount, provider, provider_payment_id, gutschein_code, status) VALUES (?, ?, ?, 'einzel', ?, 'paypal', ?, ?, 'pending')")
       .bind(crypto.randomUUID(), user.id, reportId, amount, order.orderId, promoCode || null).run()
     return c.json({ success: true, orderId: order.orderId, approveUrl: order.approveUrl })
-  } catch { return c.json({ success: false, error: 'PayPal Order konnte nicht erstellt werden' }, 500) }
+  } catch (err) { console.error('[PayPal] create-order failed:', err); return c.json({ success: false, error: 'PayPal Order konnte nicht erstellt werden' }, 500) }
 })
 
 // POST /paypal/capture-order
@@ -151,7 +151,7 @@ payments.post('/paypal/capture-order', requireAuth, async (c) => {
       return c.json({ success: true, downloadToken: dlToken, expiresAt: validUntil })
     }
     return c.json({ success: false, error: 'Zahlung nicht abgeschlossen' }, 400)
-  } catch { return c.json({ success: false, error: 'PayPal Capture fehlgeschlagen' }, 500) }
+  } catch (err) { console.error('[PayPal] capture-order failed:', err); return c.json({ success: false, error: 'PayPal Capture fehlgeschlagen' }, 500) }
 })
 
 export { payments }

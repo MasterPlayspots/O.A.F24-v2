@@ -17,6 +17,7 @@ const registerSchema = z.object({
   password: z.string().min(8, 'Passwort muss mindestens 8 Zeichen lang sein')
     .regex(/[A-Z]/, 'Passwort muss mindestens einen Großbuchstaben enthalten')
     .regex(/[a-z]/, 'Passwort muss mindestens einen Kleinbuchstaben enthalten')
+    .regex(/[0-9]/, 'Passwort muss mindestens eine Zahl enthalten')
     .regex(/[^A-Za-z0-9]/, 'Passwort muss mindestens ein Sonderzeichen enthalten'),
   firstName: z.string().min(1).max(100),
   lastName: z.string().min(1).max(100),
@@ -336,6 +337,7 @@ auth.post('/reset-password', resetPasswordRateLimit, async (c) => {
     password: z.string().min(8)
       .regex(/[A-Z]/, 'Mindestens ein Großbuchstabe')
       .regex(/[a-z]/, 'Mindestens ein Kleinbuchstabe')
+      .regex(/[0-9]/, 'Mindestens eine Zahl')
       .regex(/[^A-Za-z0-9]/, 'Mindestens ein Sonderzeichen'),
   }).safeParse(await c.req.json())
   if (!parsed.success) return c.json({ success: false, error: 'Validierungsfehler', details: parsed.error.issues.map((e: any) => e.message) }, 400)

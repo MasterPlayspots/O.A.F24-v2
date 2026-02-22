@@ -41,10 +41,11 @@ promo.post('/redeem', requireAuth, async (c) => {
   if (existing) return c.json({ success: false, error: 'Code wurde bereits eingelöst' }, 400)
 
   const redemptionId = crypto.randomUUID()
-  await db.batch([
+  const batchResults = await db.batch([
+    db.prepare('UPDATE gutscheine SET total_uses = total_uses + 1 WHERE id = ? AND total_uses < max_uses').bind(g.id),
     db.prepare('INSERT INTO promo_redemptions (id, user_id, promo_code_id, order_id, discount_amount) VALUES (?, ?, ?, ?, ?)').bind(redemptionId, user.id, g.id, orderId || null, g.discount_value),
-    db.prepare('UPDATE gutscheine SET total_uses = total_uses + 1 WHERE id = ?').bind(g.id),
   ])
+  if (!batchResults[0]?.meta.changes) return c.json({ success: false, error: 'Code wurde bereits vollständig eingelöst' }, 400)
 
   await writeAuditLog(db, { userId: user.id, eventType: AUDIT_EVENTS.PROMO_REDEEM, detail: `${code} (${g.discount_type}: ${g.discount_value})`, ip: c.req.header('CF-Connecting-IP') })
   return c.json({ success: true, redemptionId, discount: { type: g.discount_type, value: g.discount_value } })

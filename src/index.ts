@@ -47,7 +47,8 @@ app.get('/health', async (c) => {
 // ============================================
 app.route('/api/auth', auth)
 app.route('/api/reports', reports)
-app.route('/api/bafa', reports) // Legacy alias for /api/reports
+// TODO: Remove legacy /api/bafa alias once all consumers are migrated to /api/reports
+app.route('/api/bafa', reports)
 app.route('/api/branchen', branchen)
 app.route('/api/promo', promo)
 app.route('/api/orders', orders)
@@ -96,8 +97,8 @@ export default {
           // TODO: Implement full learning cycle against BAFA_CONTENT D1 binding
           console.log('Weekly learning cycle triggered at', trigger.toISOString())
         }
-      } catch {
-        // cron failure - errors surface via Cloudflare dashboard
+      } catch (err) {
+        console.error('[Cron] scheduled handler failed:', err)
       }
     })())
   },
