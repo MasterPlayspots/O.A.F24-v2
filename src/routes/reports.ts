@@ -199,14 +199,16 @@ reports.get('/download/:token', downloadRateLimit, async (c) => {
   ).bind(c.req.param('token')).first<{ antrag_id: string; downloads: number; max_downloads: number }>()
 
   if (!tokenRow) return c.json({ success: false, error: 'Ungültiger oder abgelaufener Download-Link' }, 403)
-  if (tokenRow.downloads >= tokenRow.max_downloads) return c.json({ success: false, error: 'Maximale Anzahl Downloads erreicht' }, 403)
+
+  // Atomic increment with max check to prevent race condition
+  const updated = await bafaDb.prepare(
+    'UPDATE download_tokens SET downloads = downloads + 1 WHERE token = ? AND downloads < max_downloads'
+  ).bind(c.req.param('token')).run()
+  if (!updated.meta.changes) return c.json({ success: false, error: 'Maximale Anzahl Downloads erreicht' }, 403)
 
   // Load antrag + bausteine
   const data = await loadAntragWithBausteine(bafaDb, tokenRow.antrag_id)
   if (!data) return c.json({ success: false, error: 'Antrag nicht gefunden' }, 404)
-
-  // Increment download counter
-  await bafaDb.prepare('UPDATE download_tokens SET downloads = downloads + 1 WHERE token = ?').bind(c.req.param('token')).run()
 
   const filename = `BAFA-Bericht_${(data.antrag.unternehmen_name || 'Bericht').replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_')}.html`
 

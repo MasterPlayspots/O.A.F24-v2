@@ -1,4 +1,4 @@
--- Migration 006: Composite Indexes for Query Performance
+-- Migration 009: Composite Indexes for Query Performance
 -- Adds composite indexes for frequently-used query patterns
 
 -- Reports listing: WHERE user_id = ? ORDER BY updated_at DESC

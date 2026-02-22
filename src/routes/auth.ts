@@ -12,6 +12,34 @@ import { sendPasswordResetEmail, sendVerificationCodeEmail } from '../services/e
 
 const auth = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
+function timingSafeEqual(a: string, b: string): boolean {
+  const encoder = new TextEncoder()
+  const ab = encoder.encode(a)
+  const bb = encoder.encode(b)
+  if (ab.byteLength !== bb.byteLength) return false
+  return crypto.subtle.timingSafeEqual(ab, bb)
+}
+
+function generateVerificationCode(): { code: string; expires: string } {
+  const code = String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0]! % 900000))
+  const expires = new Date(Date.now() + 15 * 60_000).toISOString()
+  return { code, expires }
+}
+
+async function issueTokenPair(db: D1Database, jwtSecret: string, user: { id: string; email: string; role: string }): Promise<{ accessToken: string; refreshToken: string }> {
+  const secret = new TextEncoder().encode(jwtSecret)
+  const accessToken = await new SignJWT({ userId: user.id, email: user.email, role: user.role || 'user' })
+    .setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('30m').sign(secret)
+  const refreshRaw = crypto.randomUUID() + '-' + crypto.randomUUID()
+  const refreshHash = await hashTokenSha256(refreshRaw)
+  const expiresAt = new Date(Date.now() + 7 * 24 * 3600_000).toISOString()
+  await db.batch([
+    db.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ? AND revoked = 0').bind(user.id),
+    db.prepare('INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(), user.id, refreshHash, expiresAt),
+  ])
+  return { accessToken, refreshToken: refreshRaw }
+}
+
 const registerSchema = z.object({
   email: z.string().email('Ungültige E-Mail-Adresse'),
   password: z.string().min(8, 'Passwort muss mindestens 8 Zeichen lang sein')
@@ -57,8 +85,7 @@ auth.post('/register', registerRateLimit, async (c) => {
 
   await writeAuditLog(db, { userId: id, eventType: AUDIT_EVENTS.REGISTER, detail: `New: ${email}`, ip: c.req.header('CF-Connecting-IP'), userAgent: c.req.header('User-Agent') })
 
-  const verificationCode = String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0]! % 900000))
-  const codeExpires = new Date(Date.now() + 15 * 60_000).toISOString()
+  const { code: verificationCode, expires: codeExpires } = generateVerificationCode()
   await db.prepare(
     "UPDATE users SET email_verification_code = ?, email_verification_expires = ? WHERE id = ?"
   ).bind(verificationCode, codeExpires, id).run()
@@ -109,8 +136,7 @@ auth.post('/login', loginRateLimit, async (c) => {
 
   // If email not verified: auto-generate + send new code, redirect to verification
   if (!user.email_verified) {
-    const verificationCode = String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0]! % 900000))
-    const codeExpires = new Date(Date.now() + 15 * 60_000).toISOString()
+    const { code: verificationCode, expires: codeExpires } = generateVerificationCode()
     await db.prepare(
       "UPDATE users SET email_verification_code = ?, email_verification_expires = ? WHERE id = ?"
     ).bind(verificationCode, codeExpires, user.id).run()
@@ -120,25 +146,12 @@ auth.post('/login', loginRateLimit, async (c) => {
     return c.json({ success: false, error: 'E-Mail nicht verifiziert. Ein neuer Code wurde gesendet.', requiresVerification: true }, 403)
   }
 
-  // Access token (30 min)
-  const secret = new TextEncoder().encode(c.env.JWT_SECRET)
-  const accessToken = await new SignJWT({ userId: user.id, email: user.email, role: user.role || 'user' })
-    .setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('30m').sign(secret)
-
-  // Refresh token (7 days)
-  const refreshRaw = crypto.randomUUID() + '-' + crypto.randomUUID()
-  const refreshHash = await hashTokenSha256(refreshRaw)
-  const expiresAt = new Date(Date.now() + 7 * 24 * 3600_000).toISOString()
-
-  await db.batch([
-    db.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ? AND revoked = 0').bind(user.id),
-    db.prepare('INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(), user.id, refreshHash, expiresAt),
-  ])
+  const { accessToken, refreshToken } = await issueTokenPair(db, c.env.JWT_SECRET, { id: user.id, email: user.email, role: user.role || 'user' })
 
   await writeAuditLog(db, { userId: user.id, eventType: AUDIT_EVENTS.LOGIN, detail: `OK (hv:${hv}${hv === 1 ? ' migrated' : ''})`, ip, userAgent: ua })
 
   return c.json({
-    success: true, token: accessToken, refreshToken: refreshRaw,
+    success: true, token: accessToken, refreshToken,
     user: { id: user.id, email: user.email, firstName: user.first_name, lastName: user.last_name, role: user.role || 'user', company: user.company, kontingentTotal: user.kontingent_total, kontingentUsed: user.kontingent_used, bafaStatus: user.bafa_status, onboardingCompleted: user.onboarding_completed === 1 },
   })
 })
@@ -180,8 +193,8 @@ auth.post('/refresh', refreshRateLimit, async (c) => {
 auth.post('/verify-email', async (c) => {
   const { token } = await c.req.json()
   if (!token) return c.json({ success: false, error: 'Token erforderlich' }, 400)
-  const user = await c.env.DB.prepare('SELECT id FROM users WHERE verification_token = ?').bind(token).first<{ id: string }>()
-  if (!user) return c.json({ success: false, error: 'Ungültiger Token' }, 400)
+  const user = await c.env.DB.prepare("SELECT id FROM users WHERE verification_token = ? AND created_at > datetime('now', '-24 hours')").bind(token).first<{ id: string }>()
+  if (!user) return c.json({ success: false, error: 'Ungültiger oder abgelaufener Token' }, 400)
   await c.env.DB.prepare("UPDATE users SET email_verified = 1, verification_token = NULL, updated_at = datetime('now') WHERE id = ?").bind(user.id).run()
   return c.json({ success: true, message: 'E-Mail verifiziert' })
 })
@@ -203,7 +216,7 @@ auth.post('/verify-code', verifyCodeRateLimit, async (c) => {
   }>()
 
   if (!user) {
-    return c.json({ success: false, error: 'Benutzer nicht gefunden' }, 404)
+    return c.json({ success: false, error: 'Ungueltiger Code. Bitte versuchen Sie es erneut.', invalidCode: true }, 400)
   }
 
   // Already verified — just issue tokens
@@ -223,7 +236,7 @@ auth.post('/verify-code', verifyCodeRateLimit, async (c) => {
   if (new Date(user.email_verification_expires!) < new Date()) {
     return c.json({ success: false, error: 'Code abgelaufen. Bitte fordern Sie einen neuen an.', expired: true }, 400)
   }
-  if (user.email_verification_code !== code.trim()) {
+  if (!timingSafeEqual(user.email_verification_code, code.trim())) {
     return c.json({ success: false, error: 'Ungueltiger Code. Bitte versuchen Sie es erneut.', invalidCode: true }, 400)
   }
 
@@ -232,25 +245,12 @@ auth.post('/verify-code', verifyCodeRateLimit, async (c) => {
     "UPDATE users SET email_verified = 1, email_verification_code = NULL, email_verification_expires = NULL, verification_token = NULL, updated_at = datetime('now') WHERE id = ?"
   ).bind(user.id).run()
 
-  // Issue access token (30 min)
-  const secret = new TextEncoder().encode(c.env.JWT_SECRET)
-  const accessToken = await new SignJWT({ userId: user.id, email: user.email, role: user.role || 'user' })
-    .setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('30m').sign(secret)
-
-  // Issue refresh token (7 days)
-  const refreshRaw = crypto.randomUUID() + '-' + crypto.randomUUID()
-  const refreshHash = await hashTokenSha256(refreshRaw)
-  const expiresAt = new Date(Date.now() + 7 * 24 * 3600_000).toISOString()
-
-  await db.batch([
-    db.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ? AND revoked = 0').bind(user.id),
-    db.prepare('INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(), user.id, refreshHash, expiresAt),
-  ])
+  const { accessToken, refreshToken } = await issueTokenPair(db, c.env.JWT_SECRET, { id: user.id, email: user.email, role: user.role || 'user' })
 
   await writeAuditLog(db, { userId: user.id, eventType: 'email_verified', detail: `Code verified for ${user.email}`, ip: c.req.header('CF-Connecting-IP') })
 
   return c.json({
-    success: true, token: accessToken, refreshToken: refreshRaw,
+    success: true, token: accessToken, refreshToken,
     user: { id: user.id, email: user.email, firstName: user.first_name, lastName: user.last_name, role: user.role || 'user', company: user.company, kontingentTotal: user.kontingent_total, kontingentUsed: user.kontingent_used }
   })
 })
@@ -266,8 +266,7 @@ auth.post('/resend-code', registerRateLimit, async (c) => {
   if (!user || user.email_verified) {
     return c.json({ success: true, message: 'Falls ein Konto existiert, wurde ein neuer Code gesendet.' })
   }
-  const newCode = String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0]! % 900000))
-  const codeExpires = new Date(Date.now() + 15 * 60_000).toISOString()
+  const { code: newCode, expires: codeExpires } = generateVerificationCode()
   await db.prepare(
     "UPDATE users SET email_verification_code = ?, email_verification_expires = ? WHERE id = ?"
   ).bind(newCode, codeExpires, user.id).run()
