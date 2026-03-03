@@ -13,6 +13,7 @@ import { orders } from './routes/orders'
 import { payments } from './routes/payments'
 import { admin } from './routes/admin'
 import { gdpr } from './routes/gdpr'
+import { foerdermittel } from './routes/foerdermittel'
 import { performBackup, cleanupOldBackups } from './services/backup'
 import { cleanupAuditLogs } from './services/audit'
 import { cleanupExpiredData } from './services/retention'
@@ -55,6 +56,7 @@ app.route('/api/orders', orders)
 app.route('/api/payments', payments)
 app.route('/api/admin', admin)
 app.route('/api/user', gdpr)
+app.route('/api/foerdermittel', foerdermittel)
 
 // ============================================
 // 404 Handler
