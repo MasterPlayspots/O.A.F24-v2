@@ -14,7 +14,7 @@ export async function writeAuditLog(db: D1Database, entry: AuditEntry): Promise<
       'INSERT INTO audit_logs (id, user_id, event_type, detail, ip, user_agent) VALUES (?, ?, ?, ?, ?, ?)'
     ).bind(crypto.randomUUID(), entry.userId || null, entry.eventType, entry.detail || null, entry.ip || null, entry.userAgent || null).run()
   } catch {
-    // audit log write failure is non-critical, silently ignored
+    // Audit write failure is non-critical, intentionally swallowed
   }
 }
 

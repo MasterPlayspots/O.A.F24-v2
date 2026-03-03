@@ -36,7 +36,7 @@ export async function generateReportSection(ai: Ai, opts: GenerateOpts): Promise
         } catch { /* fall through */ }
       }
       return { success: true, text: res.response }
-    } catch { /* retry */ }
+    } catch { /* retry next attempt */ }
   }
 
   return { success: false, error: 'KI-Generierung fehlgeschlagen. Bitte versuchen Sie es erneut.' }

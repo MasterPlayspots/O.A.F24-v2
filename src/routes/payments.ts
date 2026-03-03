@@ -112,8 +112,16 @@ payments.post('/paypal/capture-order', requireAuth, async (c) => {
   try {
     const capture = await capturePayPalOrder(c.env.PAYPAL_CLIENT_ID, c.env.PAYPAL_CLIENT_SECRET, orderId)
     if (capture.status === 'COMPLETED') {
-      const pay = await db.prepare('SELECT id, report_id FROM payments WHERE provider_payment_id = ?').bind(orderId).first<{ id: string; report_id: string }>()
+      const pay = await db.prepare('SELECT id, report_id, amount FROM payments WHERE provider_payment_id = ?').bind(orderId).first<{ id: string; report_id: string; amount: number }>()
       if (pay) {
+        // Verify captured amount matches expected
+        const capturedAmount = capture.purchase_units?.[0]?.payments?.captures?.[0]?.amount
+        if (capturedAmount) {
+          const capturedCents = Math.round(parseFloat(capturedAmount.value) * 100)
+          if (capturedCents !== pay.amount) {
+            return c.json({ success: false, error: 'Betrag stimmt nicht überein' }, 400)
+          }
+        }
         await db.batch([
           db.prepare("UPDATE payments SET status = 'completed' WHERE id = ?").bind(pay.id),
           db.prepare("UPDATE reports SET is_unlocked=1, unlock_payment_id=? WHERE id=?").bind(orderId, pay.report_id),
