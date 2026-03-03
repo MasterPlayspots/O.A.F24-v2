@@ -24,6 +24,11 @@ binding = "BAFA_CONTENT"
 database_name = "bafa-learnings-test"
 database_id = "test-bafa-content-id"
 
+[[d1_databases]]
+binding = "FOERDER_DB"
+database_name = "foerderprogramme-test"
+database_id = "test-foerder-db-id"
+
 # KV Namespaces
 [[kv_namespaces]]
 binding = "SESSIONS"

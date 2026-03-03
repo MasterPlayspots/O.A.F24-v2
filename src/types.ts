@@ -8,6 +8,7 @@ export type Bindings = {
   DB: D1Database
   BAFA_DB: D1Database
   BAFA_CONTENT: D1Database
+  FOERDER_DB: D1Database
 
   SESSIONS: KVNamespace
   RATE_LIMIT: KVNamespace
@@ -255,3 +256,125 @@ export const AUDIT_EVENTS = {
   REPORT_GENERATE: 'report_generate',
   REPORT_DOWNLOAD: 'report_download',
 } as const
+
+// ============================================
+// Förderprogramme Row Types (foerderprogramme D1)
+// ============================================
+
+export interface FoerderprogrammRow {
+  id: number
+  url: string | null
+  titel: string | null
+  typ: string | null
+  foerderart: string | null
+  foerderbereich: string | null
+  foerdergebiet: string | null
+  foerderberechtigte: string | null
+  ansprechpartner_name: string | null
+  ansprechpartner_strasse: string | null
+  ansprechpartner_plz: string | null
+  ansprechpartner_ort: string | null
+  ansprechpartner_telefon: string | null
+  ansprechpartner_fax: string | null
+  ansprechpartner_email: string | null
+  ansprechpartner_website: string | null
+  kurztext: string | null
+  volltext: string | null
+  rechtliche_voraussetzungen: string | null
+  richtlinie_titel: string | null
+  richtlinie_datum: string | null
+  richtlinie_gueltig_ab: string | null
+  scraped_at: string | null
+}
+
+// ============================================
+// Funding Platform Row Types
+// ============================================
+
+export interface FoerdermittelProfileRow {
+  id: string
+  user_id: string
+  company_name: string
+  branche: string | null
+  standort: string | null
+  rechtsform: string | null
+  mitarbeiter_anzahl: number | null
+  jahresumsatz: number | null
+  gruendungsjahr: number | null
+  beschreibung: string | null
+  dokumente_analysiert: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface FoerdermittelMatchRow {
+  id: string
+  profile_id: string
+  programm_id: number
+  match_score: number
+  match_reasons: string | null
+  disqualifiers: string | null
+  status: string
+  created_at: string
+}
+
+export interface FoerdermittelCaseRow {
+  id: string
+  match_id: string | null
+  profile_id: string
+  programm_id: number
+  berater_id: string | null
+  phase: string
+  status: string
+  phase_data: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface FoerdermittelCaseStepRow {
+  id: string
+  case_id: string
+  phase: string
+  step_order: number
+  title: string
+  description: string | null
+  step_type: string
+  required: number
+  status: string
+  result_data: string | null
+  completed_at: string | null
+}
+
+export interface FoerdermittelFunnelTemplateRow {
+  id: string
+  programm_id: number
+  phases: string
+  generated_by: string | null
+  reviewed: number
+  created_at: string
+  updated_at: string
+}
+
+export interface FoerdermittelDokumentRow {
+  id: string
+  case_id: string
+  step_id: string | null
+  dokument_typ: string
+  dateiname: string
+  dateityp: string
+  dateigroesse: number
+  r2_key: string
+  status: string
+  ai_extraktion: string | null
+  uploaded_at: string
+}
+
+export interface FoerdermittelConversationRow {
+  id: string
+  case_id: string | null
+  profile_id: string
+  context: string
+  messages: string
+  created_at: string
+  updated_at: string
+}

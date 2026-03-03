@@ -72,3 +72,42 @@ export async function createTestToken(userId: string, email: string, role = 'use
     .setExpirationTime('30m')
     .sign(new TextEncoder().encode(secret))
 }
+
+/** Set up the foerderprogramme D1 database with test data */
+export async function setupFoerderDb(foerderDb: D1Database) {
+  await foerderDb.prepare(`CREATE TABLE IF NOT EXISTS foerderprogramme (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT, titel TEXT, typ TEXT, foerderart TEXT, foerderbereich TEXT,
+    foerdergebiet TEXT, foerderberechtigte TEXT, ansprechpartner_name TEXT,
+    ansprechpartner_strasse TEXT, ansprechpartner_plz TEXT, ansprechpartner_ort TEXT,
+    ansprechpartner_telefon TEXT, ansprechpartner_fax TEXT, ansprechpartner_email TEXT,
+    ansprechpartner_website TEXT, kurztext TEXT, volltext TEXT,
+    rechtliche_voraussetzungen TEXT, richtlinie_titel TEXT, richtlinie_datum TEXT,
+    richtlinie_gueltig_ab TEXT, scraped_at TEXT
+  )`).run()
+
+  // Insert 3 test programs
+  await foerderDb.batch([
+    foerderDb.prepare(`INSERT INTO foerderprogramme (titel, foerderart, foerderbereich, foerdergebiet, foerderberechtigte, kurztext, volltext, rechtliche_voraussetzungen)
+      VALUES ('Digitalbonus Bayern', 'Zuschuss', 'IT/Tech', 'Bayern', 'KMU', 'Digitalisierung für KMU', 'Unterstützung der Digitalisierung', 'Max 50 Mitarbeiter')`),
+    foerderDb.prepare(`INSERT INTO foerderprogramme (titel, foerderart, foerderbereich, foerdergebiet, foerderberechtigte, kurztext, volltext, rechtliche_voraussetzungen)
+      VALUES ('go-digital', 'Zuschuss', 'Dienstleistung', 'Bundesweit', 'KMU', 'BMWi Förderprogramm', 'Bundesweites Digitalisierungsprogramm', 'Max 100 Mitarbeiter')`),
+    foerderDb.prepare(`INSERT INTO foerderprogramme (titel, foerderart, foerderbereich, foerdergebiet, foerderberechtigte, kurztext, volltext, rechtliche_voraussetzungen)
+      VALUES ('KfW-Gründerkredit', 'Darlehen', 'Handel', 'Bundesweit', 'Existenzgründer', 'Kredit für Gründer', 'Darlehen bis 125.000 EUR', 'Gründung max 5 Jahre her')`),
+  ])
+}
+
+/** Set up funding platform tables in BAFA_DB */
+export async function setupFundingTables(bafaDb: D1Database) {
+  const statements = [
+    `CREATE TABLE IF NOT EXISTS foerdermittel_profile (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, company_name TEXT NOT NULL, branche TEXT, standort TEXT, rechtsform TEXT, mitarbeiter_anzahl INTEGER, jahresumsatz REAL, gruendungsjahr INTEGER, beschreibung TEXT, dokumente_analysiert TEXT, created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')))`,
+    `CREATE TABLE IF NOT EXISTS foerdermittel_matches (id TEXT PRIMARY KEY, profile_id TEXT NOT NULL, programm_id INTEGER NOT NULL, match_score INTEGER DEFAULT 0, match_reasons TEXT, disqualifiers TEXT, status TEXT DEFAULT 'matched', created_at TEXT DEFAULT (datetime('now')))`,
+    `CREATE TABLE IF NOT EXISTS foerdermittel_cases (id TEXT PRIMARY KEY, match_id TEXT, profile_id TEXT NOT NULL, programm_id INTEGER NOT NULL, berater_id TEXT, phase TEXT DEFAULT 'eligibility_check', status TEXT DEFAULT 'active', phase_data TEXT, created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')))`,
+    `CREATE TABLE IF NOT EXISTS foerdermittel_case_steps (id TEXT PRIMARY KEY, case_id TEXT NOT NULL, phase TEXT NOT NULL, step_order INTEGER NOT NULL, title TEXT NOT NULL, description TEXT, step_type TEXT NOT NULL, required INTEGER DEFAULT 1, status TEXT DEFAULT 'pending', result_data TEXT, completed_at TEXT)`,
+    `CREATE TABLE IF NOT EXISTS foerdermittel_funnel_templates (id TEXT PRIMARY KEY, programm_id INTEGER NOT NULL UNIQUE, phases TEXT NOT NULL, generated_by TEXT, reviewed INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')))`,
+    `CREATE TABLE IF NOT EXISTS foerdermittel_dokumente (id TEXT PRIMARY KEY, case_id TEXT NOT NULL, step_id TEXT, dokument_typ TEXT NOT NULL, dateiname TEXT NOT NULL, dateityp TEXT NOT NULL, dateigroesse INTEGER NOT NULL, r2_key TEXT NOT NULL, status TEXT DEFAULT 'uploaded', ai_extraktion TEXT, uploaded_at TEXT DEFAULT (datetime('now')))`,
+    `CREATE TABLE IF NOT EXISTS foerdermittel_conversations (id TEXT PRIMARY KEY, case_id TEXT, profile_id TEXT NOT NULL, context TEXT NOT NULL, messages TEXT NOT NULL DEFAULT '[]', created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')))`,
+    `CREATE TABLE IF NOT EXISTS foerdermittel_benachrichtigungen (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, case_id TEXT, typ TEXT NOT NULL, titel TEXT NOT NULL, nachricht TEXT, gelesen INTEGER DEFAULT 0, email_gesendet INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now')))`,
+  ]
+  await bafaDb.batch(statements.map(sql => bafaDb.prepare(sql)))
+}
