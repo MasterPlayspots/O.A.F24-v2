@@ -260,4 +260,33 @@ describe('Foerdermittel Notifications', () => {
     expect(body.data.notifications).toEqual([])
     expect(body.data.unread_count).toBe(0)
   })
+
+  it('returns SSE stream for notifications', async () => {
+    const userId = await createTestUser(env.DB, { email: 'fm-sse@example.com' })
+    const token = await createTestToken(userId, 'fm-sse@example.com')
+
+    const res = await SELF.fetch('https://api.test/api/foerdermittel/notifications/stream', {
+      headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
+    })
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toBe('text/event-stream')
+
+    const body = await res.text()
+    expect(body).toContain('retry: 30000')
+    expect(body).toContain('data: ')
+    expect(body).toContain('"unreadCount"')
+
+    // Parse the SSE data field
+    const dataLine = body.split('\n').find(l => l.startsWith('data: '))
+    expect(dataLine).toBeTruthy()
+    const data = JSON.parse(dataLine!.replace('data: ', ''))
+    expect(typeof data.unreadCount).toBe('number')
+  })
+
+  it('rejects unauthenticated SSE stream', async () => {
+    const res = await SELF.fetch('https://api.test/api/foerdermittel/notifications/stream', {
+      headers: { 'Origin': 'https://zfbf.info' },
+    })
+    expect(res.status).toBe(401)
+  })
 })

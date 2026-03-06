@@ -314,6 +314,30 @@ foerdermittel.get('/notifications', requireAuth, async (c) => {
   })
 })
 
+// SSE endpoint for real-time notification count
+foerdermittel.get('/notifications/stream', requireAuth, async (c) => {
+  const user = c.get('user')
+  const result = await getNotifications(user.id, c.env.BAFA_DB)
+
+  const body = [
+    'retry: 30000',
+    `id: ${Date.now()}`,
+    `data: ${JSON.stringify({ unreadCount: result.unreadCount })}`,
+    '',
+    '',
+  ].join('\n')
+
+  return new Response(body, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': c.env.FRONTEND_URL || '*',
+      'Access-Control-Allow-Credentials': 'true',
+    },
+  })
+})
+
 foerdermittel.patch('/notifications/:id/read', requireAuth, async (c) => {
   const user = c.get('user')
   const notifId = c.req.param('id')

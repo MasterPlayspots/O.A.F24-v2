@@ -61,6 +61,10 @@ bucket_name = "bafa-reports"
 [ai]
 binding = "AI"
 
+# Observability — logs & traces in Cloudflare Dashboard
+[observability]
+enabled = true
+
 # Cron Triggers
 # Daily backup at 02:00 UTC + Weekly learning cycle Monday 03:00 UTC
 [triggers]
