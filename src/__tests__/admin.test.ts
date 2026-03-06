@@ -17,7 +17,7 @@ describe('Admin Routes', () => {
       headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
     })
     expect(res.status).toBe(403)
-    const body = await res.json() as any
+    const body = await res.json() as AdminStatsResponse
     expect(body.error).toContain('Berechtigung')
   })
 
@@ -36,7 +36,7 @@ describe('Admin Routes', () => {
       headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
     })
     expect(res.status).toBe(200)
-    const body = await res.json() as any
+    const body = await res.json() as AdminStatsResponse
     expect(body.success).toBe(true)
     expect(Array.isArray(body.users)).toBe(true)
     expect(typeof body.total).toBe('number')
@@ -50,7 +50,7 @@ describe('Admin Routes', () => {
       headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
     })
     expect(res.status).toBe(200)
-    const body = await res.json() as any
+    const body = await res.json() as AdminStatsResponse
     expect(body.success).toBe(true)
     expect(body.stats).toBeTruthy()
     expect(body.stats.users).toBeTruthy()
@@ -67,11 +67,11 @@ describe('Admin Routes', () => {
       body: JSON.stringify({ role: 'admin' }),
     })
     expect(res.status).toBe(200)
-    const body = await res.json() as any
+    const body = await res.json() as AdminStatsResponse
     expect(body.success).toBe(true)
 
     // Verify the role was updated
-    const user = await env.DB.prepare('SELECT role FROM users WHERE id = ?').bind(targetId).first() as any
+    const user = await env.DB.prepare('SELECT role FROM users WHERE id = ?').bind(targetId).first() as RoleQueryResult
     expect(user.role).toBe('admin')
   })
 
@@ -96,7 +96,7 @@ describe('Admin Routes', () => {
       headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
     })
     expect(res.status).toBe(200)
-    const body = await res.json() as any
+    const body = await res.json() as AdminStatsResponse
     expect(body.success).toBe(true)
     expect(Array.isArray(body.logs)).toBe(true)
   })

@@ -41,7 +41,7 @@ describe('CORS', () => {
       headers: { 'Origin': 'https://evil.com' },
     })
     expect(res.status).toBe(403)
-    const body = await res.json() as any
+    const body = await res.json() as ApiResponse
     expect(body.success).toBe(false)
     expect(body.error).toBe('Forbidden')
   })

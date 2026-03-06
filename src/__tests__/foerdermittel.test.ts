@@ -16,7 +16,7 @@ describe('Foerdermittel Catalog', () => {
       const res = await SELF.fetch('https://api.test/api/foerdermittel/katalog?limit=2', {
         headers: { 'Origin': 'https://zfbf.info' },
       })
-      const body = await res.json() as any
+      const body = await res.json() as FoerdermittelListResponse
       expect(res.status).toBe(200)
       expect(body.success).toBe(true)
       expect(body.data.items.length).toBeLessThanOrEqual(2)
@@ -29,7 +29,7 @@ describe('Foerdermittel Catalog', () => {
       const res = await SELF.fetch('https://api.test/api/foerdermittel/katalog?search=Digital', {
         headers: { 'Origin': 'https://zfbf.info' },
       })
-      const body = await res.json() as any
+      const body = await res.json() as FoerdermittelListResponse
       expect(body.success).toBe(true)
       expect(body.data.items.length).toBeGreaterThanOrEqual(1)
       expect(body.data.items[0].titel).toContain('Digital')
@@ -39,7 +39,7 @@ describe('Foerdermittel Catalog', () => {
       const res = await SELF.fetch('https://api.test/api/foerdermittel/katalog?foerderart=Darlehen', {
         headers: { 'Origin': 'https://zfbf.info' },
       })
-      const body = await res.json() as any
+      const body = await res.json() as FoerdermittelListResponse
       expect(body.success).toBe(true)
       expect(body.data.items.every((i: any) => i.foerderart === 'Darlehen')).toBe(true)
     })
@@ -50,7 +50,7 @@ describe('Foerdermittel Catalog', () => {
       const res = await SELF.fetch('https://api.test/api/foerdermittel/katalog/1', {
         headers: { 'Origin': 'https://zfbf.info' },
       })
-      const body = await res.json() as any
+      const body = await res.json() as FoerdermittelListResponse
       expect(res.status).toBe(200)
       expect(body.success).toBe(true)
       expect(body.data.titel).toBe('Digitalbonus Bayern')
@@ -77,7 +77,7 @@ describe('Foerdermittel Catalog', () => {
       const res = await SELF.fetch('https://api.test/api/foerdermittel/katalog/filters', {
         headers: { 'Origin': 'https://zfbf.info' },
       })
-      const body = await res.json() as any
+      const body = await res.json() as FoerdermittelListResponse
       expect(res.status).toBe(200)
       expect(body.success).toBe(true)
       expect(body.data.foerderart).toContain('Zuschuss')
@@ -107,7 +107,7 @@ describe('Foerdermittel Profile', () => {
           beschreibung: 'Software-Entwicklung',
         }),
       })
-      const body = await res.json() as any
+      const body = await res.json() as FoerdermittelListResponse
       expect(res.status).toBe(201)
       expect(body.success).toBe(true)
       expect(body.data.id).toBeTruthy()
@@ -150,7 +150,7 @@ describe('Foerdermittel Profile', () => {
       const res = await SELF.fetch('https://api.test/api/foerdermittel/profile', {
         headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
       })
-      const body = await res.json() as any
+      const body = await res.json() as FoerdermittelListResponse
       expect(res.status).toBe(200)
       expect(body.success).toBe(true)
       expect(body.data.company_name).toBe('Get Test GmbH')
@@ -164,7 +164,7 @@ describe('Foerdermittel Profile', () => {
       const res = await SELF.fetch('https://api.test/api/foerdermittel/profile', {
         headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
       })
-      const body = await res.json() as any
+      const body = await res.json() as FoerdermittelListResponse
       expect(body.success).toBe(true)
       expect(body.data).toBeNull()
     })
@@ -190,7 +190,7 @@ describe('Foerdermittel Cases', () => {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Origin': 'https://zfbf.info' },
         body: JSON.stringify({ programm_id: 1 }),
       })
-      const body = await res.json() as any
+      const body = await res.json() as FoerdermittelListResponse
       expect(res.status).toBe(201)
       expect(body.success).toBe(true)
       expect(body.data.caseId).toBeTruthy()
@@ -199,7 +199,7 @@ describe('Foerdermittel Cases', () => {
       const caseRes = await SELF.fetch(`https://api.test/api/foerdermittel/cases/${body.data.caseId}`, {
         headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
       })
-      const caseBody = await caseRes.json() as any
+      const caseBody = await caseRes.json() as FoerdermittelCaseResponse
       expect(caseBody.success).toBe(true)
       expect(caseBody.data.steps.length).toBeGreaterThan(0)
       expect(caseBody.data.phase).toBe('eligibility_check')
@@ -238,7 +238,7 @@ describe('Foerdermittel Cases', () => {
       const res = await SELF.fetch('https://api.test/api/foerdermittel/cases', {
         headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
       })
-      const body = await res.json() as any
+      const body = await res.json() as FoerdermittelListResponse
       expect(body.success).toBe(true)
       expect(body.data.cases.length).toBeGreaterThanOrEqual(1)
       expect(body.data.cases[0].steps_total).toBeGreaterThan(0)
@@ -254,7 +254,7 @@ describe('Foerdermittel Notifications', () => {
     const res = await SELF.fetch('https://api.test/api/foerdermittel/notifications', {
       headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
     })
-    const body = await res.json() as any
+    const body = await res.json() as FoerdermittelListResponse
     expect(res.status).toBe(200)
     expect(body.success).toBe(true)
     expect(body.data.notifications).toEqual([])

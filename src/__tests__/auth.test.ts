@@ -3,6 +3,7 @@ import { describe, it, expect, beforeAll } from 'vitest'
 import { env, SELF } from 'cloudflare:test'
 import { setupTestDb, createTestUser, createTestToken } from './test-utils'
 import { hashPassword } from '../services/password'
+import type { AuthResponse, HashVersionQueryResult } from './test-types'
 
 beforeAll(async () => {
   await setupTestDb(env.DB)
@@ -20,7 +21,7 @@ describe('POST /api/auth/register', () => {
         lastName: 'Mustermann',
       }),
     })
-    const body = await res.json() as any
+    const body = await res.json() as AuthResponse
     expect(res.status).toBe(200)
     expect(body.success).toBe(true)
     expect(body.userId).toBeTruthy()
@@ -39,7 +40,7 @@ describe('POST /api/auth/register', () => {
       }),
     })
     expect(res.status).toBe(400)
-    const body = await res.json() as any
+    const body = await res.json() as AuthResponse
     expect(body.error).toContain('registriert')
   })
 
@@ -55,7 +56,7 @@ describe('POST /api/auth/register', () => {
       }),
     })
     expect(res.status).toBe(400)
-    const body = await res.json() as any
+    const body = await res.json() as AuthResponse
     expect(body.success).toBe(false)
   })
 
@@ -90,7 +91,7 @@ describe('POST /api/auth/login', () => {
       headers: { 'Content-Type': 'application/json', 'Origin': 'https://zfbf.info' },
       body: JSON.stringify({ email: 'login-pbkdf2@example.com', password: 'Login#Test1' }),
     })
-    const body = await res.json() as any
+    const body = await res.json() as AuthResponse
     expect(res.status).toBe(200)
     expect(body.success).toBe(true)
     expect(body.token).toBeTruthy()
@@ -132,7 +133,7 @@ describe('POST /api/auth/login', () => {
       body: JSON.stringify({ email: 'unverified@example.com', password: 'Unverified#1' }),
     })
     expect(res.status).toBe(403)
-    const body = await res.json() as any
+    const body = await res.json() as AuthResponse
     expect(body.requiresVerification).toBe(true)
   })
 
@@ -156,12 +157,12 @@ describe('POST /api/auth/login', () => {
       headers: { 'Content-Type': 'application/json', 'Origin': 'https://zfbf.info' },
       body: JSON.stringify({ email: 'legacy@example.com', password: password }),
     })
-    const body = await res.json() as any
+    const body = await res.json() as AuthResponse
     expect(res.status).toBe(200)
     expect(body.success).toBe(true)
 
     // Verify hash was upgraded
-    const user = await env.DB.prepare('SELECT hash_version, salt FROM users WHERE id = ?').bind(userId).first() as any
+    const user = await env.DB.prepare('SELECT hash_version, salt FROM users WHERE id = ?').bind(userId).first() as HashVersionQueryResult
     expect(user.hash_version).toBe(2)
     expect(user.salt).toBeTruthy()
   })
@@ -175,7 +176,7 @@ describe('GET /api/auth/me', () => {
     const res = await SELF.fetch('https://api.test/api/auth/me', {
       headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
     })
-    const body = await res.json() as any
+    const body = await res.json() as AuthResponse
     expect(res.status).toBe(200)
     expect(body.success).toBe(true)
     expect(body.user.id).toBe(userId)

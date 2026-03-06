@@ -20,7 +20,7 @@ describe('GET /api/user/export', () => {
     const res = await SELF.fetch('https://api.test/api/user/export', {
       headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
     })
-    const body = await res.json() as any
+    const body = await res.json() as ApiResponse
     expect(res.status).toBe(200)
     expect(body.success).toBe(true)
     expect(body.data.dsgvoArticle).toContain('Art. 15')
@@ -51,13 +51,13 @@ describe('DELETE /api/user/account', () => {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
     })
-    const body = await res.json() as any
+    const body = await res.json() as ApiResponse
     expect(res.status).toBe(200)
     expect(body.success).toBe(true)
     expect(body.message).toContain('gelöscht')
 
     // Verify data was anonymized
-    const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first() as any
+    const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first() as UserQueryResult
     expect(user.first_name).toBe('[GELÖSCHT]')
     expect(user.last_name).toBe('[GELÖSCHT]')
     expect(user.email).toContain('@deleted.local')
@@ -75,11 +75,11 @@ describe('POST /api/user/privacy-consent', () => {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
     })
-    const body = await res.json() as any
+    const body = await res.json() as ApiResponse
     expect(res.status).toBe(200)
     expect(body.success).toBe(true)
 
-    const user = await env.DB.prepare('SELECT privacy_accepted_at FROM users WHERE id = ?').bind(userId).first() as any
+    const user = await env.DB.prepare('SELECT privacy_accepted_at FROM users WHERE id = ?').bind(userId).first() as PrivacyQueryResult
     expect(user.privacy_accepted_at).toBeTruthy()
   })
 })

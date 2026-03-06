@@ -22,7 +22,7 @@ describe('Payment Routes', () => {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Origin': 'https://zfbf.info' },
         body: JSON.stringify({ packageType: 'einzel', promoCode: 'FREE100', paymentMethod: 'invoice' }),
       })
-      const body = await res.json() as any
+      const body = await res.json() as PaymentSessionResponse
       expect(res.status).toBe(200)
       expect(body.success).toBe(true)
       expect(body.status).toBe('completed')
@@ -38,7 +38,7 @@ describe('Payment Routes', () => {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Origin': 'https://zfbf.info' },
         body: JSON.stringify({ packageType: 'starter', paymentMethod: 'stripe' }),
       })
-      const body = await res.json() as any
+      const body = await res.json() as PaymentSessionResponse
       expect(res.status).toBe(200)
       expect(body.success).toBe(true)
       expect(body.status).toBe('pending')
@@ -75,7 +75,7 @@ describe('Payment Routes', () => {
         body: '{"type":"checkout.session.completed"}',
       })
       expect(res.status).toBe(400)
-      const body = await res.json() as any
+      const body = await res.json() as PaymentSessionResponse
       expect(body.error).toContain('signature')
     })
 
@@ -94,14 +94,14 @@ describe('Health & 404', () => {
   it('returns health check', async () => {
     const res = await SELF.fetch('https://api.test/')
     expect(res.status).toBe(200)
-    const body = await res.json() as any
+    const body = await res.json() as PaymentSessionResponse
     expect(body.status).toBe('ok')
     expect(body.service).toBe('zfbf-api')
   })
 
   it('returns /health endpoint', async () => {
     const res = await SELF.fetch('https://api.test/health')
-    const body = await res.json() as any
+    const body = await res.json() as PaymentSessionResponse
     expect(['healthy', 'degraded']).toContain(body.status)
     expect(body.timestamp).toBeTruthy()
   })
@@ -109,7 +109,7 @@ describe('Health & 404', () => {
   it('returns 404 for unknown endpoints', async () => {
     const res = await SELF.fetch('https://api.test/api/nonexistent')
     expect(res.status).toBe(404)
-    const body = await res.json() as any
+    const body = await res.json() as PaymentSessionResponse
     expect(body.success).toBe(false)
   })
 })

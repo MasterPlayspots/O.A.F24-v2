@@ -2,6 +2,7 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 import { env, SELF } from 'cloudflare:test'
 import { setupTestDb, createTestUser, createTestToken } from './test-utils'
+import type { PromoValidationResponse } from './test-types'
 
 beforeAll(async () => {
   await setupTestDb(env.DB)
@@ -22,7 +23,7 @@ describe('POST /api/promo/validate', () => {
       body: JSON.stringify({ code: 'TEST20' }),
     })
     expect(res.status).toBe(200)
-    const body = await res.json() as any
+    const body = await res.json() as PromoValidationResponse
     expect(body.success).toBe(true)
     expect(body.discount.type).toBe('percent')
     expect(body.discount.value).toBe(20)
@@ -34,7 +35,7 @@ describe('POST /api/promo/validate', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: 'test20' }),
     })
-    const body = await res.json() as any
+    const body = await res.json() as PromoValidationResponse
     expect(body.success).toBe(true)
   })
 
@@ -45,7 +46,7 @@ describe('POST /api/promo/validate', () => {
       body: JSON.stringify({ code: 'EXPIRED' }),
     })
     expect(res.status).toBe(400)
-    const body = await res.json() as any
+    const body = await res.json() as PromoValidationResponse
     expect(body.success).toBe(false)
   })
 
@@ -87,7 +88,7 @@ describe('POST /api/promo/redeem', () => {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Origin': 'https://zfbf.info' },
       body: JSON.stringify({ code: 'FIXED50' }),
     })
-    const body = await res.json() as any
+    const body = await res.json() as PromoValidationResponse
     expect(res.status).toBe(200)
     expect(body.success).toBe(true)
     expect(body.redemptionId).toBeTruthy()
@@ -109,7 +110,7 @@ describe('POST /api/promo/redeem', () => {
       body: JSON.stringify({ code: 'TEST20' }),
     })
     expect(res.status).toBe(400)
-    const body = await res.json() as any
+    const body = await res.json() as PromoValidationResponse
     expect(body.error).toContain('bereits')
   })
 
@@ -132,7 +133,7 @@ describe('Admin Promo Routes', () => {
       headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
     })
     expect(res.status).toBe(200)
-    const body = await res.json() as any
+    const body = await res.json() as PromoValidationResponse
     expect(body.success).toBe(true)
     expect(Array.isArray(body.codes)).toBe(true)
   })
@@ -152,7 +153,7 @@ describe('Admin Promo Routes', () => {
       }),
     })
     expect(res.status).toBe(200)
-    const body = await res.json() as any
+    const body = await res.json() as PromoValidationResponse
     expect(body.success).toBe(true)
     expect(body.code).toBe('NEWCODE')
   })

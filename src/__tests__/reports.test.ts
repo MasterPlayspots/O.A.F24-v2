@@ -18,13 +18,13 @@ describe('Reports CRUD', () => {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Origin': 'https://zfbf.info' },
       })
-      const body = await res.json() as any
+      const body = await res.json() as ReportCreateResponse
       expect(res.status).toBe(200)
       expect(body.success).toBe(true)
       expect(body.reportId).toBeTruthy()
 
       // Verify antrag was created in BAFA_DB
-      const antrag = await env.BAFA_DB.prepare('SELECT * FROM antraege WHERE id = ?').bind(body.reportId).first() as any
+      const antrag = await env.BAFA_DB.prepare('SELECT * FROM antraege WHERE id = ?').bind(body.reportId).first() as AntragQueryResult
       expect(antrag).toBeTruthy()
       expect(antrag.status).toBe('vorschau')
     })
@@ -39,7 +39,7 @@ describe('Reports CRUD', () => {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Origin': 'https://zfbf.info' },
       })
       expect(res.status).toBe(403)
-      const body = await res.json() as any
+      const body = await res.json() as ReportCreateResponse
       expect(body.needsUpgrade).toBe(true)
     })
 
@@ -63,7 +63,7 @@ describe('Reports CRUD', () => {
       const res = await SELF.fetch('https://api.test/api/reports', {
         headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
       })
-      const body = await res.json() as any
+      const body = await res.json() as ReportCreateResponse
       expect(res.status).toBe(200)
       expect(body.success).toBe(true)
       expect(body.reports.length).toBeGreaterThanOrEqual(1)
@@ -80,7 +80,7 @@ describe('Reports CRUD', () => {
       const res = await SELF.fetch('https://api.test/api/reports', {
         headers: { 'Authorization': `Bearer ${token1}`, 'Origin': 'https://zfbf.info' },
       })
-      const body = await res.json() as any
+      const body = await res.json() as ReportCreateResponse
       const ids = body.reports.map((r: any) => r.id)
       expect(ids).toContain(r1)
       expect(ids).not.toContain(r2)
@@ -100,7 +100,7 @@ describe('Reports CRUD', () => {
       const res = await SELF.fetch(`https://api.test/api/reports/${antragId}`, {
         headers: { 'Authorization': `Bearer ${token}`, 'Origin': 'https://zfbf.info' },
       })
-      const body = await res.json() as any
+      const body = await res.json() as ReportCreateResponse
       expect(res.status).toBe(200)
       expect(body.report).toBeTruthy()
       expect(body.antrag).toBeTruthy()
@@ -135,12 +135,12 @@ describe('Reports CRUD', () => {
       expect(res.status).toBe(200)
 
       // Verify zfbf-db ownership record
-      const report = await env.DB.prepare('SELECT company_name, branche FROM reports WHERE id = ?').bind(antragId).first() as any
+      const report = await env.DB.prepare('SELECT company_name, branche FROM reports WHERE id = ?').bind(antragId).first() as ReportQueryResult
       expect(report.company_name).toBe('Updated GmbH')
       expect(report.branche).toBe('handel')
 
       // Verify bafa_antraege record
-      const antrag = await env.BAFA_DB.prepare('SELECT unternehmen_name, branche_id FROM antraege WHERE id = ?').bind(antragId).first() as any
+      const antrag = await env.BAFA_DB.prepare('SELECT unternehmen_name, branche_id FROM antraege WHERE id = ?').bind(antragId).first() as AntragQueryResult
       expect(antrag.unternehmen_name).toBe('Updated GmbH')
       expect(antrag.branche_id).toBe('handel')
     })
@@ -158,13 +158,13 @@ describe('Reports CRUD', () => {
       })
       expect(res.status).toBe(200)
 
-      const report = await env.DB.prepare('SELECT status FROM reports WHERE id = ?').bind(antragId).first() as any
+      const report = await env.DB.prepare('SELECT status FROM reports WHERE id = ?').bind(antragId).first() as StatusQueryResult
       expect(report.status).toBe('finalisiert')
 
-      const antrag = await env.BAFA_DB.prepare('SELECT status FROM antraege WHERE id = ?').bind(antragId).first() as any
+      const antrag = await env.BAFA_DB.prepare('SELECT status FROM antraege WHERE id = ?').bind(antragId).first() as StatusQueryResult
       expect(antrag.status).toBe('pending')
 
-      const user = await env.DB.prepare('SELECT kontingent_used FROM users WHERE id = ?').bind(userId).first() as any
+      const user = await env.DB.prepare('SELECT kontingent_used FROM users WHERE id = ?').bind(userId).first() as KontingentQueryResult
       expect(user.kontingent_used).toBe(1)
     })
   })

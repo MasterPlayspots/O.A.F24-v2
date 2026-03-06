@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from "vitest"
 import { env, SELF } from "cloudflare:test"
+import type { HealthCheckResponse } from "../src/__tests__/test-types"
 
 describe("Worker Health Check", () => {
   it("should return 200 status for GET /", async () => {
@@ -18,7 +19,7 @@ describe("Worker Health Check", () => {
       method: "GET",
     })
     expect(res.status).toBe(200)
-    const body = await res.json() as any
+    const body = await res.json() as HealthCheckResponse
     expect(body).toBeDefined()
     expect(body.status).toBeDefined()
   })
@@ -28,7 +29,7 @@ describe("Worker Health Check", () => {
       method: "GET",
     })
     expect(res.status).toBe(200)
-    const body = await res.json() as any
+    const body = await res.json() as HealthCheckResponse
     expect(body.status).toBeTruthy()
   })
 })
