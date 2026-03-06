@@ -14,6 +14,7 @@ import { payments } from './routes/payments'
 import { admin } from './routes/admin'
 import { gdpr } from './routes/gdpr'
 import { foerdermittel } from './routes/foerdermittel'
+import { check } from './routes/check'
 import { performBackup, cleanupOldBackups } from './services/backup'
 import { cleanupAuditLogs } from './services/audit'
 import { cleanupExpiredData } from './services/retention'
@@ -55,6 +56,7 @@ app.route('/api/orders', orders)
 app.route('/api/payments', payments)
 app.route('/api/admin', admin)
 app.route('/api/user', gdpr)
+app.route('/api/foerdermittel/check', check)  // Must be before general /api/foerdermittel
 app.route('/api/foerdermittel', foerdermittel)
 
 // ============================================
