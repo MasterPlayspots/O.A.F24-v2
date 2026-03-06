@@ -1,16 +1,17 @@
 // Authentication & Authorization Middleware
 import { jwtVerify } from 'jose'
+import { getCookie } from 'hono/cookie'
 import type { MiddlewareHandler } from 'hono'
 import type { Bindings, Variables, JwtPayload } from '../types'
 
 export const requireAuth: MiddlewareHandler<{ Bindings: Bindings; Variables: Variables }> = async (c, next) => {
   const authHeader = c.req.header('Authorization')
-  if (!authHeader?.startsWith('Bearer ')) {
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : getCookie(c, 'access_token')
+  if (!token) {
     return c.json({ success: false, error: 'Nicht authentifiziert' }, 401)
   }
 
   try {
-    const token = authHeader.slice(7)
     const secret = new TextEncoder().encode(c.env.JWT_SECRET)
     const { payload } = await jwtVerify(token, secret)
     const jwt = payload as unknown as JwtPayload

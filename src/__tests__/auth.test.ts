@@ -94,8 +94,12 @@ describe('POST /api/auth/login', () => {
     const body = await res.json() as AuthResponse
     expect(res.status).toBe(200)
     expect(body.success).toBe(true)
-    expect(body.token).toBeTruthy()
-    expect(body.refreshToken).toBeTruthy()
+    // Tokens are now in HttpOnly cookies, not in the response body
+    expect(body.token).toBeUndefined()
+    expect(body.refreshToken).toBeUndefined()
+    const setCookies = res.headers.getSetCookie()
+    expect(setCookies.some((c: string) => c.startsWith('access_token='))).toBe(true)
+    expect(setCookies.some((c: string) => c.startsWith('refresh_token='))).toBe(true)
     expect(body.user.email).toBe('login-pbkdf2@example.com')
   })
 

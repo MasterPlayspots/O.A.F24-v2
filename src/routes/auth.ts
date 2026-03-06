@@ -1,5 +1,6 @@
 // Auth Routes - Register, Login (SHA-256→PBKDF2 auto-migration), Refresh, Verify, Profile
 import { Hono } from 'hono'
+import { setCookie, getCookie } from 'hono/cookie'
 import { SignJWT } from 'jose'
 import { z } from 'zod'
 import type { Bindings, Variables, UserRow } from '../types'
@@ -9,6 +10,13 @@ import { writeAuditLog } from '../services/audit'
 import { loginRateLimit, registerRateLimit, forgotPasswordRateLimit } from '../middleware/rateLimit'
 import { requireAuth } from '../middleware/auth'
 import { sendPasswordResetEmail, sendVerificationCodeEmail } from '../services/email'
+
+/** Set HttpOnly auth cookies on the response */
+function setAuthCookies(c: { header: (name: string, value: string, options?: { append?: boolean }) => void }, accessToken: string, refreshToken: string) {
+  const cookieOpts = 'HttpOnly; Secure; SameSite=None; Path=/'
+  c.header('Set-Cookie', `access_token=${accessToken}; ${cookieOpts}; Max-Age=1800`, { append: true })
+  c.header('Set-Cookie', `refresh_token=${refreshToken}; ${cookieOpts}; Max-Age=604800`, { append: true })
+}
 
 const auth = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -130,15 +138,17 @@ auth.post('/login', loginRateLimit, async (c) => {
 
   await writeAuditLog(db, { userId: user.id, eventType: AUDIT_EVENTS.LOGIN, detail: `OK (hv:${hv}${hv === 1 ? ' migrated' : ''})`, ip, userAgent: ua })
 
+  setAuthCookies(c, accessToken, refreshRaw)
   return c.json({
-    success: true, token: accessToken, refreshToken: refreshRaw,
+    success: true,
     user: { id: user.id, email: user.email, firstName: user.first_name, lastName: user.last_name, role: user.role || 'user', company: user.company, kontingentTotal: user.kontingent_total, kontingentUsed: user.kontingent_used, bafaStatus: user.bafa_status, onboardingCompleted: user.onboarding_completed === 1 },
   })
 })
 
 // POST /refresh - uses JOIN to avoid N+1 query
 auth.post('/refresh', async (c) => {
-  const { refreshToken } = await c.req.json()
+  // Read refresh token from cookie (preferred) or body (legacy fallback)
+  const refreshToken = getCookie(c, 'refresh_token') || (await c.req.json().catch(() => ({} as Record<string, unknown>))).refreshToken as string | undefined
   if (!refreshToken) return c.json({ success: false, error: 'Refresh Token erforderlich' }, 400)
 
   const db = c.env.DB
@@ -165,7 +175,8 @@ auth.post('/refresh', async (c) => {
     db.prepare('INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at) VALUES (?, ?, ?, ?)').bind(crypto.randomUUID(), row.id, newHash, expiresAt),
   ])
 
-  return c.json({ success: true, token: accessToken, refreshToken: newRefresh })
+  setAuthCookies(c, accessToken, newRefresh)
+  return c.json({ success: true })
 })
 
 // POST /verify-email
@@ -203,8 +214,9 @@ auth.post('/verify-code', async (c) => {
     const secret = new TextEncoder().encode(c.env.JWT_SECRET)
     const accessToken = await new SignJWT({ userId: user.id, email: user.email, role: user.role || 'user' })
       .setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('30m').sign(secret)
+    setAuthCookies(c, accessToken, '')
     return c.json({
-      success: true, alreadyVerified: true, token: accessToken,
+      success: true, alreadyVerified: true,
       user: { id: user.id, email: user.email, firstName: user.first_name, lastName: user.last_name, role: user.role || 'user', company: user.company }
     })
   }
@@ -241,8 +253,9 @@ auth.post('/verify-code', async (c) => {
 
   await writeAuditLog(db, { userId: user.id, eventType: 'email_verified', detail: `Code verified for ${user.email}`, ip: c.req.header('CF-Connecting-IP') })
 
+  setAuthCookies(c, accessToken, refreshRaw)
   return c.json({
-    success: true, token: accessToken, refreshToken: refreshRaw,
+    success: true,
     user: { id: user.id, email: user.email, firstName: user.first_name, lastName: user.last_name, role: user.role || 'user', company: user.company, kontingentTotal: user.kontingent_total, kontingentUsed: user.kontingent_used }
   })
 })
@@ -352,6 +365,10 @@ auth.post('/logout', requireAuth, async (c) => {
   const db = c.env.DB; const user = c.get('user')
   await db.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ?').bind(user.id).run()
   await writeAuditLog(db, { userId: user.id, eventType: AUDIT_EVENTS.LOGOUT, ip: c.req.header('CF-Connecting-IP'), userAgent: c.req.header('User-Agent') })
+  // Clear auth cookies
+  const clearOpts = 'HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0'
+  c.header('Set-Cookie', `access_token=; ${clearOpts}`, { append: true })
+  c.header('Set-Cookie', `refresh_token=; ${clearOpts}`, { append: true })
   return c.json({ success: true })
 })
 

@@ -783,18 +783,19 @@ export async function getDocumentsForCase(
 // ============================================
 
 export async function getNotifications(userId: string, bafaDb: D1Database): Promise<{ notifications: unknown[]; unreadCount: number }> {
-  const notifications = await bafaDb.prepare(
-    `SELECT * FROM foerdermittel_benachrichtigungen
-     WHERE user_id = ? ORDER BY created_at DESC LIMIT 50`
-  ).bind(userId).all()
-
-  const unreadCount = await bafaDb.prepare(
-    'SELECT COUNT(*) as count FROM foerdermittel_benachrichtigungen WHERE user_id = ? AND gelesen = 0'
-  ).bind(userId).first<{ count: number }>()
+  const [notifResult, countResult] = await bafaDb.batch([
+    bafaDb.prepare(
+      `SELECT * FROM foerdermittel_benachrichtigungen
+       WHERE user_id = ? ORDER BY created_at DESC LIMIT 50`
+    ).bind(userId),
+    bafaDb.prepare(
+      'SELECT COUNT(*) as count FROM foerdermittel_benachrichtigungen WHERE user_id = ? AND gelesen = 0'
+    ).bind(userId),
+  ])
 
   return {
-    notifications: notifications.results ?? [],
-    unreadCount: unreadCount?.count ?? 0,
+    notifications: notifResult?.results ?? [],
+    unreadCount: (countResult?.results?.[0] as { count: number } | undefined)?.count ?? 0,
   }
 }
 

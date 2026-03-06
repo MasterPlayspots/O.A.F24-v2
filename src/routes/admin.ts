@@ -11,8 +11,8 @@ admin.use('/*', requireAuth, requireRole('admin'))
 // GET /audit-logs
 admin.get('/audit-logs', async (c) => {
   const q = c.req.query()
-  const page = q.page ? Math.max(1, Math.min(parseInt(q.page), 10000)) : undefined
-  const limit = q.limit ? Math.max(1, Math.min(parseInt(q.limit), 100)) : undefined
+  const page = q.page ? Math.max(1, Math.min(parseInt(q.page) || 1, 10000)) : undefined
+  const limit = q.limit ? Math.max(1, Math.min(parseInt(q.limit) || 50, 100)) : undefined
   const result = await queryAuditLogs(c.env.DB, { userId: q.userId, eventType: q.eventType, from: q.from, to: q.to, page, limit })
   return c.json({ success: true, ...result })
 })
@@ -25,7 +25,7 @@ admin.post('/audit-logs/cleanup', async (c) => {
 
 // GET /users
 admin.get('/users', async (c) => {
-  const page = Math.max(1, Math.min(parseInt(c.req.query('page') || '1'), 10000)); const limit = Math.max(1, Math.min(parseInt(c.req.query('limit') || '50'), 100)); const offset = (page - 1) * limit
+  const page = Math.max(1, Math.min(parseInt(c.req.query('page') || '1') || 1, 10000)); const limit = Math.max(1, Math.min(parseInt(c.req.query('limit') || '50') || 50, 100)); const offset = (page - 1) * limit
   const count = await c.env.DB.prepare('SELECT COUNT(*) as total FROM users').first<{ total: number }>()
   const users = await c.env.DB.prepare('SELECT id, email, first_name, last_name, role, company, bafa_status, kontingent_total, kontingent_used, email_verified, created_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?').bind(limit, offset).all()
   return c.json({ success: true, users: users.results, total: count?.total || 0, page, limit })
