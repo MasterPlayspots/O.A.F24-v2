@@ -1,5 +1,10 @@
 import { z } from 'zod'
-import type { D1Database, Ai, R2Bucket } from '@cloudflare/workers-types'
+import type { D1Database, R2Bucket } from '@cloudflare/workers-types'
+
+// Workers AI type — use `any` for model name since @cloudflare/workers-types
+// may not include all available models in its AiModels interface.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Ai = { run(model: any, options: any): Promise<any> }
 import type {
   FoerderprogrammRow,
   FoerdermittelProfileRow,
@@ -82,7 +87,7 @@ export async function searchKatalog(
     ORDER BY ${sort} ASC
     LIMIT ? OFFSET ?`
   const dataResult = await foerderDb.prepare(dataSql).bind(...params, limit, offset).all<FoerderprogrammRow & { total_count: number }>()
-  const total = (dataResult.results && dataResult.results.length > 0) ? dataResult.results[0].total_count : 0
+  const total = (dataResult.results && dataResult.results.length > 0) ? (dataResult.results[0]?.total_count ?? 0) : 0
 
   return {
     items: dataResult.results ?? [],
@@ -113,10 +118,10 @@ export async function getFilterOptions(foerderDb: D1Database): Promise<FilterOpt
   ])
 
   return {
-    foerderart: (artResult.results ?? []).map((r: Record<string, unknown>) => r.foerderart),
-    foerderbereich: (bereichResult.results ?? []).map((r: Record<string, unknown>) => r.foerderbereich),
-    foerdergebiet: (gebietResult.results ?? []).map((r: Record<string, unknown>) => r.foerdergebiet),
-    foerderberechtigte: (berechtigteResult.results ?? []).map((r: Record<string, unknown>) => r.foerderberechtigte),
+    foerderart: (artResult?.results ?? []).map((r) => (r as Record<string, unknown>).foerderart),
+    foerderbereich: (bereichResult?.results ?? []).map((r) => (r as Record<string, unknown>).foerderbereich),
+    foerdergebiet: (gebietResult?.results ?? []).map((r) => (r as Record<string, unknown>).foerdergebiet),
+    foerderberechtigte: (berechtigteResult?.results ?? []).map((r) => (r as Record<string, unknown>).foerderberechtigte),
   }
 }
 

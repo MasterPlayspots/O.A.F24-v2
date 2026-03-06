@@ -1,14 +1,10 @@
 import { Hono } from 'hono'
 import type { Bindings, Variables } from '../types'
 import {
-  searchKatalog,
-  getUserProfile,
-  saveOrUpdateProfile,
   performMatching,
   saveMatches,
   getMatchesForProfile,
   processChat,
-  uploadDocument,
   getProgramById,
 } from '../services/foerdermittel'
 
@@ -104,7 +100,7 @@ check.post('/', async (c) => {
   // Generate greeting via AI
   let begruessung: string
   try {
-    const result = await c.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+    const result = await (c.env.AI as any).run('@cf/meta/llama-3.1-8b-instruct', {
       messages: [{
         role: 'user',
         content: `Du bist ein freundlicher Experte für deutsche Fördermittel. Ein Unternehmen hat gerade den Fördermittel-Check gestartet. Begrüße es und stelle 3 kurze Rückfragen, um die passenden Programme besser einzugrenzen.
@@ -231,7 +227,7 @@ check.post('/:sessionId/docs', async (c) => {
     const textContent = await file.text()
     const truncated = textContent.slice(0, 3000)
 
-    const result = await c.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+    const result = await (c.env.AI as any).run('@cf/meta/llama-3.1-8b-instruct', {
       messages: [{
         role: 'user',
         content: `Extrahiere die wichtigsten Informationen aus diesem ${typ}-Dokument als JSON-Objekt mit key-value Paaren (Deutsch). Nur die wichtigsten Fakten. Antwort NUR als JSON.
@@ -309,7 +305,7 @@ check.post('/:sessionId/analyze', async (c) => {
   // Generate summary
   let zusammenfassung: string
   try {
-    const result = await c.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+    const result = await (c.env.AI as any).run('@cf/meta/llama-3.1-8b-instruct', {
       messages: [{
         role: 'user',
         content: `Fasse die Fördermittel-Analyse kurz zusammen (2-3 Sätze, Deutsch):
@@ -368,7 +364,7 @@ check.get('/:sessionId/plan', async (c) => {
     }> = []
 
     try {
-      const result = await c.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+      const result = await (c.env.AI as any).run('@cf/meta/llama-3.1-8b-instruct', {
         messages: [{
           role: 'user',
           content: `Erstelle einen konkreten Aktionsplan (3-6 Schritte) für die Beantragung dieses Förderprogramms. Antworte NUR als JSON-Array.

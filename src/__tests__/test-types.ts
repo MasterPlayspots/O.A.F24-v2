@@ -156,6 +156,7 @@ export interface HealthCheckResponse {
   timestamp?: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CorsPreflight {
   // CORS preflight response has no body
 }
@@ -182,11 +183,11 @@ export interface PasswordTestResponse {
 // Database Query Response Types
 // ============================================
 
-export interface UserQueryResult extends Partial<UserRow> {}
+export type UserQueryResult = Partial<UserRow>
 
-export interface ReportQueryResult extends Partial<ReportRow> {}
+export type ReportQueryResult = Partial<ReportRow>
 
-export interface AntragQueryResult extends Partial<AntragRow> {}
+export type AntragQueryResult = Partial<AntragRow>
 
 export interface PaymentQueryResult {
   id: string

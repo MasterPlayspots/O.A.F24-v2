@@ -6,6 +6,7 @@ interface RateLimitConfig {
   maxRequests: number
   windowSeconds: number
   keyPrefix: string
+  failClosed?: boolean
 }
 
 export function rateLimit(config: RateLimitConfig): MiddlewareHandler<{ Bindings: Bindings; Variables: Variables }> {
