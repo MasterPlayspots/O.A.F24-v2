@@ -58,17 +58,14 @@ foerdermittel.get('/katalog', async (c) => {
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
 
-  // Count total
-  const countSql = `SELECT COUNT(*) as total FROM foerderprogramme ${whereClause}`
-  const countResult = await foerderDb.prepare(countSql).bind(...params).first<{ total: number }>()
-  const total = countResult?.total ?? 0
-
-  // Fetch page
-  const dataSql = `SELECT id, titel, typ, foerderart, foerderbereich, foerdergebiet, foerderberechtigte, kurztext
+  // Fetch page with total count in single query using window function
+  const dataSql = `SELECT id, titel, typ, foerderart, foerderbereich, foerdergebiet, foerderberechtigte, kurztext,
+    COUNT(*) OVER() as total_count
     FROM foerderprogramme ${whereClause}
     ORDER BY ${sort} ASC
     LIMIT ? OFFSET ?`
-  const dataResult = await foerderDb.prepare(dataSql).bind(...params, limit, offset).all<FoerderprogrammRow>()
+  const dataResult = await foerderDb.prepare(dataSql).bind(...params, limit, offset).all<FoerderprogrammRow & { total_count: number }>()
+  const total = (dataResult.results && dataResult.results.length > 0) ? dataResult.results[0].total_count : 0
 
   return c.json({
     success: true,
