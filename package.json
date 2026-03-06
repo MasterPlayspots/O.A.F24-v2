@@ -23,7 +23,7 @@
     "@bafa/shared": "workspace:*",
     "@noble/hashes": "^1.6.1",
     "hono": "^4.7.11",
-    "jose": "^5.9.6",
+    "jose": "6.1.3",
     "toucan-js": "^4.1.1",
     "zod": "^4.3.6"
   },

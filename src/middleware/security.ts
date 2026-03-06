@@ -20,8 +20,14 @@ export const csrfProtection: MiddlewareHandler = async (c, next) => {
   const origin = c.req.header('Origin')
   const host = c.req.header('Host')
   if (origin) {
-    const originHost = new URL(origin).host
-    if (originHost !== host && !origin.includes('zfbf.info') && !origin.includes('localhost') && !origin.includes('.vercel.app')) {
+    const originHost = new URL(origin).hostname
+    const allowedHosts = ['zfbf.info', 'www.zfbf.info', 'localhost']
+    const isVercelPreview = originHost.endsWith('.vercel.app')
+    const isDevelopment = originHost === 'localhost' || originHost === '127.0.0.1'
+
+    const isAllowed = allowedHosts.includes(originHost) || isVercelPreview || (isDevelopment && process.env.ENVIRONMENT !== 'production')
+
+    if (!isAllowed) {
       return c.json({ error: 'CSRF validation failed' }, 403)
     }
   }

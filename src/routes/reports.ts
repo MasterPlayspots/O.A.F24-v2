@@ -219,7 +219,7 @@ reports.get('/download/:token', downloadRateLimit, async (c) => {
 
 // GET / - List reports (with pagination)
 reports.get('/', requireAuth, async (c) => {
-  const page = Math.max(1, parseInt(c.req.query('page') || '1', 10))
+  const page = Math.max(1, Math.min(parseInt(c.req.query('page') || '1', 10), 10000))
   const limit = Math.min(MAX_PAGE_SIZE, Math.max(1, parseInt(c.req.query('limit') || String(DEFAULT_PAGE_SIZE), 10)))
   const offset = (page - 1) * limit
 

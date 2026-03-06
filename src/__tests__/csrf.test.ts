@@ -50,4 +50,55 @@ describe('CSRF Protection', () => {
     // Health check should still work (not under /api/*)
     expect(res.status).toBe(200)
   })
+
+  it('blocks POST requests from subdomain bypass attacks like evil-zfbf.info.com', async () => {
+    const res = await SELF.fetch('https://api.test/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Origin': 'https://evil-zfbf.info.attacker.com',
+      },
+      body: JSON.stringify({
+        email: 'bypass@example.com',
+        password: 'Secure#Pass1',
+        firstName: 'Test',
+        lastName: 'User',
+      }),
+    })
+    expect(res.status).toBe(403)
+  })
+
+  it('allows POST requests from www.zfbf.info', async () => {
+    const res = await SELF.fetch('https://api.test/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Origin': 'https://www.zfbf.info',
+      },
+      body: JSON.stringify({
+        email: `csrf-www-${crypto.randomUUID().slice(0, 8)}@example.com`,
+        password: 'Secure#Pass1',
+        firstName: 'Test',
+        lastName: 'User',
+      }),
+    })
+    expect(res.status).toBe(200)
+  })
+
+  it('allows POST requests from *.vercel.app preview deployments', async () => {
+    const res = await SELF.fetch('https://api.test/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Origin': 'https://my-preview-123.vercel.app',
+      },
+      body: JSON.stringify({
+        email: `csrf-vercel-${crypto.randomUUID().slice(0, 8)}@example.com`,
+        password: 'Secure#Pass1',
+        firstName: 'Test',
+        lastName: 'User',
+      }),
+    })
+    expect(res.status).toBe(200)
+  })
 })
