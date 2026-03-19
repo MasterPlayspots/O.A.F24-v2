@@ -1,6 +1,6 @@
 // Auth Routes - Register, Login (SHA-256→PBKDF2 auto-migration), Refresh, Verify, Profile
 import { Hono } from 'hono'
-import { setCookie, getCookie } from 'hono/cookie'
+import { getCookie } from 'hono/cookie'
 import { SignJWT } from 'jose'
 import { z } from 'zod'
 import type { Bindings, Variables, UserRow } from '../types'
