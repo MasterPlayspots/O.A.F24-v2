@@ -4,7 +4,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import type { Context } from "hono";
-import type { Bindings, Variables, AntragRow, AntragBausteinRow } from "../types";
+import type { Bindings, Variables } from "../types";
 import { AUDIT_EVENTS } from "../types";
 import { requireAuth } from "../middleware/auth";
 import { downloadRateLimit, generateRateLimit } from "../middleware/rateLimit";
@@ -14,6 +14,9 @@ import { verifyHmacSignature } from "../services/hmac";
 import { writeAuditLog } from "../services/audit";
 import { sendDownloadEmail } from "../services/email";
 import { createDownloadToken } from "../services/download";
+import * as ReportRepo from "../repositories/report.repository";
+import * as OrderRepo from "../repositories/order.repository";
+import * as UserRepo from "../repositories/user.repository";
 
 const reports = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -49,29 +52,12 @@ const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 100;
 
 async function checkKontingent(db: D1Database, userId: string): Promise<{ hasQuota: boolean }> {
-  const u = await db
-    .prepare("SELECT kontingent_total, kontingent_used FROM users WHERE id = ?")
-    .bind(userId)
-    .first<{ kontingent_total: number; kontingent_used: number }>();
+  const u = await UserRepo.getKontingent(db, userId);
   return { hasQuota: !!u && u.kontingent_total - u.kontingent_used > 0 };
 }
 
 function kontingentError(c: Context<{ Bindings: Bindings; Variables: Variables }>) {
   return c.json({ success: false, error: "Kontingent aufgebraucht", needsUpgrade: true }, 403);
-}
-
-/** Load antrag with its bausteine from BAFA_DB */
-async function loadAntragWithBausteine(
-  bafaDb: D1Database,
-  antragId: string
-): Promise<{ antrag: AntragRow; bausteine: AntragBausteinRow[] } | null> {
-  const [antragResult, bausteineResult] = await bafaDb.batch([
-    bafaDb.prepare("SELECT * FROM antraege WHERE id = ?").bind(antragId),
-    bafaDb.prepare("SELECT * FROM antrag_bausteine WHERE antrag_id = ? ORDER BY id").bind(antragId),
-  ]);
-  const antrag = antragResult?.results?.[0] as AntragRow | undefined;
-  if (!antrag) return null;
-  return { antrag, bausteine: (bausteineResult?.results ?? []) as AntragBausteinRow[] };
 }
 
 // POST /generate
@@ -95,34 +81,27 @@ reports.post("/generate", requireAuth, generateRateLimit, async (c) => {
   if (!hasQuota) return kontingentError(c);
 
   const antragId = crypto.randomUUID();
-  const cd = d.companyData || {};
 
   // Create ownership record in zfbf-db
-  await db
-    .prepare(
-      "INSERT INTO reports (id, user_id, status, company_name, branche, unterbranche) VALUES (?, ?, 'generating', ?, ?, ?)"
-    )
-    .bind(antragId, user.id, d.companyName, d.branche, d.unterbranche || null)
-    .run();
+  await ReportRepo.createOwnership(
+    db,
+    antragId,
+    user.id,
+    "generating",
+    d.companyName,
+    d.branche,
+    d.unterbranche
+  );
 
   // Create antrag in bafa_antraege with full company data
-  await bafaDb
-    .prepare(
-      `INSERT INTO antraege (id, branche_id, unternehmen_name, unternehmen_typ, unternehmen_mitarbeiter,
-      unternehmen_umsatz, unternehmen_hauptproblem, beratungsschwerpunkte, status, erstellt_am, aktualisiert_am)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'vorschau', datetime('now'), datetime('now'))`
-    )
-    .bind(
-      antragId,
-      d.branche,
-      d.companyName,
-      cd.unternehmen_typ || null,
-      cd.unternehmen_mitarbeiter || null,
-      cd.unternehmen_umsatz || null,
-      cd.unternehmen_hauptproblem || null,
-      d.beratungsschwerpunkte || null
-    )
-    .run();
+  await ReportRepo.createAntrag(
+    bafaDb,
+    antragId,
+    d.branche,
+    d.companyName,
+    d.companyData,
+    d.beratungsschwerpunkte
+  );
 
   // Generate 5 content phases via AI
   const phases = [
@@ -132,6 +111,7 @@ reports.post("/generate", requireAuth, generateRateLimit, async (c) => {
     "ergebnisse",
     "nachhaltigkeit",
   ] as const;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const results: Record<string, any> = {};
   let totalWords = 0;
 
@@ -149,13 +129,8 @@ reports.post("/generate", requireAuth, generateRateLimit, async (c) => {
     if (!r.success) {
       // Mark as failed in both databases
       await Promise.all([
-        db.prepare("UPDATE reports SET status = 'error' WHERE id = ?").bind(antragId).run(),
-        bafaDb
-          .prepare(
-            "UPDATE antraege SET status = 'fehlgeschlagen', aktualisiert_am = datetime('now') WHERE id = ?"
-          )
-          .bind(antragId)
-          .run(),
+        ReportRepo.updateOwnershipStatus(db, antragId, "error"),
+        ReportRepo.updateAntragStatus(bafaDb, antragId, "fehlgeschlagen"),
       ]);
       return c.json(
         { success: false, error: `Phase "${phase}" fehlgeschlagen`, reportId: antragId },
@@ -206,10 +181,7 @@ reports.post("/generate", requireAuth, generateRateLimit, async (c) => {
   ]);
 
   // Update ownership record status
-  await db
-    .prepare("UPDATE reports SET status = 'generiert', updated_at = datetime('now') WHERE id = ?")
-    .bind(antragId)
-    .run();
+  await ReportRepo.updateOwnershipStatus(db, antragId, "generiert");
 
   await writeAuditLog(db, {
     userId: user.id,
@@ -224,15 +196,11 @@ reports.post("/generate", requireAuth, generateRateLimit, async (c) => {
 reports.get("/preview/:id", requireAuth, async (c) => {
   const antragId = c.req.param("id");
   // Verify ownership via zfbf-db
-  const ownership = await c.env.DB.prepare(
-    "SELECT id, is_unlocked FROM reports WHERE id = ? AND user_id = ?"
-  )
-    .bind(antragId, c.get("user").id)
-    .first<{ id: string; is_unlocked: number }>();
+  const ownership = await ReportRepo.findOwnershipCompact(c.env.DB, antragId, c.get("user").id);
   if (!ownership) return c.json({ success: false, error: "Bericht nicht gefunden" }, 404);
 
   // Load antrag + bausteine from bafa_antraege
-  const data = await loadAntragWithBausteine(c.env.BAFA_DB, antragId);
+  const data = await ReportRepo.loadAntragWithBausteine(c.env.BAFA_DB, antragId);
   if (!data) return c.json({ success: false, error: "Antrag nicht gefunden" }, 404);
 
   return new Response(
@@ -251,34 +219,18 @@ reports.post("/unlock", async (c) => {
 
   const db = c.env.DB;
   const bafaDb = c.env.BAFA_DB;
-  const report = await db
-    .prepare("SELECT id, user_id, is_unlocked FROM reports WHERE id = ?")
-    .bind(reportId)
-    .first<{ id: string; user_id: string; is_unlocked: number }>();
+  const report = await ReportRepo.findByIdWithUnlockStatus(db, reportId);
   if (!report) return c.json({ success: false, error: "Bericht nicht gefunden" }, 404);
   if (report.is_unlocked === 1) return c.json({ success: true, message: "Bereits freigeschaltet" });
 
   // Update ownership record in zfbf-db
-  await db
-    .prepare(
-      "UPDATE reports SET is_unlocked=1, unlock_payment_id=?, updated_at=datetime('now') WHERE id=?"
-    )
-    .bind(paymentId, reportId)
-    .run();
+  await ReportRepo.unlockReport(db, reportId, paymentId);
   // Update antrag status in bafa_antraege
-  await bafaDb
-    .prepare(
-      "UPDATE antraege SET status = 'bezahlt', bezahlt_am = datetime('now'), aktualisiert_am = datetime('now') WHERE id = ?"
-    )
-    .bind(reportId)
-    .run();
+  await ReportRepo.updateAntragStatus(bafaDb, reportId, "bezahlt", { bezahlt: true });
 
   const { token: downloadToken, validUntil } = await createDownloadToken(bafaDb, reportId);
 
-  const user = await db
-    .prepare("SELECT email, first_name FROM users WHERE id = ?")
-    .bind(report.user_id)
-    .first<{ email: string; first_name: string }>();
+  const user = await UserRepo.findEmailAndName(db, report.user_id);
   if (user && c.env.RESEND_API_KEY)
     await sendDownloadEmail(
       c.env.RESEND_API_KEY,
@@ -298,13 +250,9 @@ reports.post("/unlock", async (c) => {
 // GET /download/:token
 reports.get("/download/:token", downloadRateLimit, async (c) => {
   const bafaDb = c.env.BAFA_DB;
+  const token = c.req.param("token");
   // Validate token and get antrag from bafa_antraege
-  const tokenRow = await bafaDb
-    .prepare(
-      "SELECT antrag_id, downloads, max_downloads FROM download_tokens WHERE token = ? AND gueltig_bis > datetime('now')"
-    )
-    .bind(c.req.param("token"))
-    .first<{ antrag_id: string; downloads: number; max_downloads: number }>();
+  const tokenRow = await OrderRepo.findValidDownloadToken(bafaDb, token);
 
   if (!tokenRow)
     return c.json({ success: false, error: "Ungültiger oder abgelaufener Download-Link" }, 403);
@@ -312,21 +260,16 @@ reports.get("/download/:token", downloadRateLimit, async (c) => {
     return c.json({ success: false, error: "Maximale Anzahl Downloads erreicht" }, 403);
 
   // Load antrag + bausteine
-  const data = await loadAntragWithBausteine(bafaDb, tokenRow.antrag_id);
+  const data = await ReportRepo.loadAntragWithBausteine(bafaDb, tokenRow.antrag_id);
   if (!data) return c.json({ success: false, error: "Antrag nicht gefunden" }, 404);
 
   // Increment download counter
-  await bafaDb
-    .prepare("UPDATE download_tokens SET downloads = downloads + 1 WHERE token = ?")
-    .bind(c.req.param("token"))
-    .run();
+  await OrderRepo.incrementDownloadCount(bafaDb, token);
 
   const filename = `BAFA-Bericht_${(data.antrag.unternehmen_name || "Bericht").replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, "_")}.html`;
 
   // Get user_id from ownership table for audit log
-  const ownership = await c.env.DB.prepare("SELECT user_id FROM reports WHERE id = ?")
-    .bind(tokenRow.antrag_id)
-    .first<{ user_id: string }>();
+  const ownership = await ReportRepo.findUserIdByReportId(c.env.DB, tokenRow.antrag_id);
   if (ownership)
     await writeAuditLog(c.env.DB, {
       userId: ownership.user_id,
@@ -354,33 +297,28 @@ reports.get("/", requireAuth, async (c) => {
   );
   const offset = (page - 1) * limit;
 
-  // Get user's report IDs from ownership table
-  const [countResult, ownershipResult] = await Promise.all([
-    c.env.DB.prepare("SELECT COUNT(*) as total FROM reports WHERE user_id = ?")
-      .bind(c.get("user").id)
-      .first<{ total: number }>(),
-    c.env.DB.prepare(
-      "SELECT id, status, company_name, branche, unterbranche, is_unlocked, created_at, updated_at FROM reports WHERE user_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?"
-    )
-      .bind(c.get("user").id, limit, offset)
-      .all(),
-  ]);
+  // Get user's reports from ownership table
+  const { reports: ownershipReports, total } = await ReportRepo.findByOwner(
+    c.env.DB,
+    c.get("user").id,
+    limit,
+    offset
+  );
 
-  const reportIds = (ownershipResult.results || []).map((r: any) => r.id);
+  const reportIds = ownershipReports.map((r) => r.id);
 
   // Enrich with antrag data from BAFA_DB if we have IDs
-  let enrichedReports = ownershipResult.results || [];
+  type EnrichedReport = ReportRepo.ReportListItem & {
+    unternehmen_name: string | null;
+    qualitaetsscore: number;
+    wortanzahl: number;
+    antrag_status: string | null;
+  };
+  let enrichedReports: (ReportRepo.ReportListItem | EnrichedReport)[] = ownershipReports;
   if (reportIds.length > 0) {
-    const placeholders = reportIds.map(() => "?").join(",");
-    const antraegeResult = await c.env.BAFA_DB.prepare(
-      `SELECT id, unternehmen_name, branche_id, status as antrag_status, qualitaetsscore, wortanzahl, erstellt_am, aktualisiert_am FROM antraege WHERE id IN (${placeholders})`
-    )
-      .bind(...reportIds)
-      .all();
-
-    const antragMap = new Map((antraegeResult.results || []).map((a: any) => [a.id, a]));
-    enrichedReports = (ownershipResult.results || []).map((r: any) => {
-      const antrag = antragMap.get(r.id) as any;
+    const antragMap = await ReportRepo.enrichReportsWithAntraege(c.env.BAFA_DB, reportIds);
+    enrichedReports = ownershipReports.map((r) => {
+      const antrag = antragMap.get(r.id);
       return {
         ...r,
         unternehmen_name: antrag?.unternehmen_name || r.company_name,
@@ -391,7 +329,6 @@ reports.get("/", requireAuth, async (c) => {
     });
   }
 
-  const total = countResult?.total || 0;
   return c.json({
     success: true,
     data: enrichedReports,
@@ -403,13 +340,11 @@ reports.get("/", requireAuth, async (c) => {
 reports.get("/:id", requireAuth, async (c) => {
   const antragId = c.req.param("id");
   // Verify ownership
-  const ownership = await c.env.DB.prepare("SELECT * FROM reports WHERE id = ? AND user_id = ?")
-    .bind(antragId, c.get("user").id)
-    .first();
+  const ownership = await ReportRepo.findById(c.env.DB, antragId, c.get("user").id);
   if (!ownership) return c.json({ success: false, error: "Bericht nicht gefunden" }, 404);
 
   // Load antrag + bausteine from BAFA_DB
-  const data = await loadAntragWithBausteine(c.env.BAFA_DB, antragId);
+  const data = await ReportRepo.loadAntragWithBausteine(c.env.BAFA_DB, antragId);
 
   return c.json({
     success: true,
@@ -429,17 +364,9 @@ reports.post("/", requireAuth, async (c) => {
 
   const id = crypto.randomUUID();
   // Create ownership record in zfbf-db
-  await db
-    .prepare("INSERT INTO reports (id, user_id, status) VALUES (?, ?, 'entwurf')")
-    .bind(id, user.id)
-    .run();
+  await ReportRepo.createOwnership(db, id, user.id, "entwurf");
   // Create antrag in bafa_antraege with vorschau status
-  await bafaDb
-    .prepare(
-      "INSERT INTO antraege (id, unternehmen_name, status, erstellt_am, aktualisiert_am) VALUES (?, '', 'vorschau', datetime('now'), datetime('now'))"
-    )
-    .bind(id)
-    .run();
+  await ReportRepo.createDraftAntrag(bafaDb, id);
 
   return c.json({ success: true, reportId: id });
 });
@@ -511,19 +438,11 @@ reports.post("/:id/finalize", requireAuth, async (c) => {
   if (!hasQuota) return kontingentError(c);
 
   const antragId = c.req.param("id");
-  await db.batch([
-    db
-      .prepare("UPDATE reports SET status = 'finalisiert' WHERE id = ? AND user_id = ?")
-      .bind(antragId, user.id),
-    db.prepare("UPDATE users SET kontingent_used = kontingent_used + 1 WHERE id = ?").bind(user.id),
-  ]);
+  // Finalize ownership + increment kontingent in one batch
+  await ReportRepo.finalizeReport(db, antragId, user.id);
+  await UserRepo.incrementKontingentUsed(db, user.id);
   // Update antrag status in bafa_antraege
-  await bafaDb
-    .prepare(
-      "UPDATE antraege SET status = 'pending', aktualisiert_am = datetime('now') WHERE id = ?"
-    )
-    .bind(antragId)
-    .run();
+  await ReportRepo.updateAntragStatus(bafaDb, antragId, "pending");
 
   return c.json({ success: true });
 });

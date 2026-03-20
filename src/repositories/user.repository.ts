@@ -2,6 +2,29 @@
 import type { UserRow } from "../types";
 
 // ============================================
+// Row types for query results
+// ============================================
+
+export interface UserListItem {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  company: string | null;
+  bafa_status: string;
+  kontingent_total: number;
+  kontingent_used: number;
+  email_verified: number;
+  created_at: string;
+}
+
+export interface UserStatsRow {
+  total: number;
+  verified: number;
+}
+
+// ============================================
 // Query types
 // ============================================
 
@@ -102,6 +125,16 @@ export async function findForVerifyCode(
     .first();
 }
 
+export async function findEmailAndName(
+  db: D1Database,
+  userId: string
+): Promise<{ email: string; first_name: string } | null> {
+  return db
+    .prepare("SELECT email, first_name FROM users WHERE id = ?")
+    .bind(userId)
+    .first<{ email: string; first_name: string }>();
+}
+
 export async function findForForgotPassword(
   db: D1Database,
   email: string
@@ -126,7 +159,7 @@ export async function listUsers(
   db: D1Database,
   limit: number,
   offset: number
-): Promise<{ users: Record<string, unknown>[]; total: number }> {
+): Promise<{ users: UserListItem[]; total: number }> {
   const [countResult, usersResult] = await Promise.all([
     db.prepare("SELECT COUNT(*) as total FROM users").first<{ total: number }>(),
     db
@@ -134,10 +167,10 @@ export async function listUsers(
         "SELECT id, email, first_name, last_name, role, company, bafa_status, kontingent_total, kontingent_used, email_verified, created_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?"
       )
       .bind(limit, offset)
-      .all(),
+      .all<UserListItem>(),
   ]);
   return {
-    users: (usersResult.results || []) as Record<string, unknown>[],
+    users: usersResult.results || [],
     total: countResult?.total || 0,
   };
 }
@@ -255,4 +288,179 @@ export async function incrementKontingentUsed(db: D1Database, userId: string): P
     .prepare("UPDATE users SET kontingent_used = kontingent_used + 1 WHERE id = ?")
     .bind(userId)
     .run();
+}
+
+// ============================================
+// GDPR Art. 15 - Data export
+// ============================================
+
+export interface GdprUserExport {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  company: string | null;
+  bafa_id: string | null;
+  ust_id: string | null;
+  steuernummer: string | null;
+  phone: string | null;
+  website: string | null;
+  bafa_status: string;
+  kontingent_total: number;
+  kontingent_used: number;
+  created_at: string;
+  updated_at: string;
+  privacy_accepted_at: string | null;
+}
+
+export interface GdprReportExport {
+  id: string;
+  status: string;
+  company_name: string | null;
+  branche: string | null;
+  unterbranche: string | null;
+  is_unlocked: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GdprPaymentExport {
+  id: string;
+  report_id: string;
+  package_type: string;
+  amount: number;
+  currency: string | null;
+  status: string;
+  provider: string;
+  created_at: string;
+}
+
+export interface GdprOrderExport {
+  id: string;
+  amount: number;
+  discount_amount: number;
+  final_amount: number;
+  reports_count: number;
+  status: string;
+  created_at: string;
+}
+
+export interface GdprPromoRedemptionExport {
+  id: string;
+  code: string;
+  discount_amount: number;
+  redeemed_at: string;
+}
+
+export interface GdprAuditLogExport {
+  event_type: string;
+  detail: string | null;
+  created_at: string;
+}
+
+export interface GdprExportData {
+  user: GdprUserExport | null;
+  reports: GdprReportExport[];
+  payments: GdprPaymentExport[];
+  orders: GdprOrderExport[];
+  promoRedemptions: GdprPromoRedemptionExport[];
+  auditLogs: GdprAuditLogExport[];
+}
+
+export async function getGdprExportData(db: D1Database, userId: string): Promise<GdprExportData> {
+  const [userResult, reportsResult, paymentsResult, ordersResult, promoResult, auditResult] =
+    await db.batch([
+      db
+        .prepare(
+          "SELECT id, email, first_name, last_name, company, bafa_id, ust_id, steuernummer, phone, website, bafa_status, kontingent_total, kontingent_used, created_at, updated_at, privacy_accepted_at FROM users WHERE id = ?"
+        )
+        .bind(userId),
+      db
+        .prepare(
+          "SELECT id, status, company_name, branche, unterbranche, is_unlocked, created_at, updated_at FROM reports WHERE user_id = ? ORDER BY created_at DESC"
+        )
+        .bind(userId),
+      db
+        .prepare(
+          "SELECT id, report_id, package_type, amount, currency, status, provider, created_at FROM payments WHERE user_id = ? ORDER BY created_at DESC"
+        )
+        .bind(userId),
+      db
+        .prepare(
+          "SELECT id, amount, discount_amount, final_amount, reports_count, status, created_at FROM orders WHERE user_id = ? ORDER BY created_at DESC"
+        )
+        .bind(userId),
+      db
+        .prepare(
+          "SELECT pr.id, g.code, pr.discount_amount, pr.redeemed_at FROM promo_redemptions pr JOIN gutscheine g ON g.id = pr.promo_code_id WHERE pr.user_id = ? ORDER BY pr.redeemed_at DESC"
+        )
+        .bind(userId),
+      db
+        .prepare(
+          "SELECT event_type, detail, created_at FROM audit_logs WHERE user_id = ? ORDER BY created_at DESC LIMIT 100"
+        )
+        .bind(userId),
+    ]);
+
+  return {
+    user: (userResult?.results?.[0] as GdprUserExport | undefined) ?? null,
+    reports: (reportsResult?.results ?? []) as GdprReportExport[],
+    payments: (paymentsResult?.results ?? []) as GdprPaymentExport[],
+    orders: (ordersResult?.results ?? []) as GdprOrderExport[],
+    promoRedemptions: (promoResult?.results ?? []) as GdprPromoRedemptionExport[],
+    auditLogs: (auditResult?.results ?? []) as GdprAuditLogExport[],
+  };
+}
+
+export async function acceptPrivacy(db: D1Database, userId: string): Promise<void> {
+  await db
+    .prepare(
+      "UPDATE users SET privacy_accepted_at = datetime('now'), updated_at = datetime('now') WHERE id = ?"
+    )
+    .bind(userId)
+    .run();
+}
+
+// ============================================
+// Admin stats
+// ============================================
+
+export async function getUserStats(db: D1Database): Promise<UserStatsRow> {
+  const row = await db
+    .prepare(
+      "SELECT COUNT(*) as total, SUM(CASE WHEN email_verified=1 THEN 1 ELSE 0 END) as verified FROM users"
+    )
+    .first<UserStatsRow>();
+  return row || { total: 0, verified: 0 };
+}
+
+// ============================================
+// GDPR Art. 17 - Anonymize
+// ============================================
+
+export async function anonymizeUser(
+  db: D1Database,
+  userId: string,
+  deletedEmail: string
+): Promise<void> {
+  await db.batch([
+    db
+      .prepare(
+        `UPDATE users SET
+      email = ?, first_name = '[GELÖSCHT]', last_name = '[GELÖSCHT]',
+      company = NULL, phone = NULL, website = NULL, bafa_id = NULL,
+      ust_id = NULL, steuernummer = NULL,
+      password_hash = '', salt = NULL,
+      verification_token = NULL, reset_token = NULL, reset_token_expires = NULL,
+      deleted_at = datetime('now'), updated_at = datetime('now')
+      WHERE id = ?`
+      )
+      .bind(deletedEmail, userId),
+    db.prepare("UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ?").bind(userId),
+    db
+      .prepare(
+        "UPDATE audit_logs SET ip = NULL, user_agent = NULL, detail = '[GELÖSCHT]' WHERE user_id = ?"
+      )
+      .bind(userId),
+  ]);
 }

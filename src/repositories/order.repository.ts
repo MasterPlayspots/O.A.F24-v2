@@ -2,6 +2,16 @@
 // and download_tokens / refresh_tokens
 
 // ============================================
+// Row types for query results
+// ============================================
+
+export interface PaymentStatsRow {
+  total: number;
+  completed: number;
+  revenue: number;
+}
+
+// ============================================
 // Payments
 // ============================================
 
@@ -177,4 +187,24 @@ export async function incrementDownloadCount(bafaDb: D1Database, token: string):
     .prepare("UPDATE download_tokens SET downloads = downloads + 1 WHERE token = ?")
     .bind(token)
     .run();
+}
+
+// ============================================
+// Admin stats
+// ============================================
+
+export async function getPaymentStats(db: D1Database): Promise<PaymentStatsRow> {
+  const row = await db
+    .prepare(
+      "SELECT COUNT(*) as total, SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN status='completed' THEN amount ELSE 0 END) as revenue FROM payments"
+    )
+    .first<PaymentStatsRow>();
+  return row || { total: 0, completed: 0, revenue: 0 };
+}
+
+export async function getActivePromoCount(db: D1Database): Promise<number> {
+  const row = await db
+    .prepare("SELECT COUNT(*) as total FROM gutscheine WHERE is_active = 1")
+    .first<{ total: number }>();
+  return row?.total || 0;
 }
