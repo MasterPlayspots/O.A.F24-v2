@@ -1,4 +1,5 @@
 // AI Generation Service - Cloudflare AI
+import { log } from "./logger";
 
 const SYSTEM_PROMPT = `Du bist ein erfahrener BAFA-Beratungsexperte, der professionelle Beratungsberichte
 für das Bundesamt für Wirtschaft und Ausfuhrkontrolle (BAFA) erstellt.
@@ -44,32 +45,24 @@ export async function generateReportSection(
       const duration = Date.now() - startTime;
 
       if (!res?.response) {
-        console.log(
-          JSON.stringify({
-            level: "warn",
-            event: "ai_generation",
-            model,
-            phase: opts.phase,
-            duration_ms: duration,
-            success: false,
-            attempt: attempt + 1,
-            reason: "empty_response",
-          })
-        );
-        continue;
-      }
-
-      console.log(
-        JSON.stringify({
-          level: "info",
-          event: "ai_generation",
+        log("warn", "ai_generation", {
           model,
           phase: opts.phase,
           duration_ms: duration,
-          success: true,
+          success: false,
           attempt: attempt + 1,
-        })
-      );
+          reason: "empty_response",
+        });
+        continue;
+      }
+
+      log("info", "ai_generation", {
+        model,
+        phase: opts.phase,
+        duration_ms: duration,
+        success: true,
+        attempt: attempt + 1,
+      });
 
       if (opts.phase === "ergebnisse" || opts.phase === "nachhaltigkeit") {
         try {
@@ -82,30 +75,22 @@ export async function generateReportSection(
       return { success: true, text: res.response };
     } catch (err) {
       const duration = Date.now() - startTime;
-      console.log(
-        JSON.stringify({
-          level: "error",
-          event: "ai_generation",
-          model,
-          phase: opts.phase,
-          duration_ms: duration,
-          success: false,
-          attempt: attempt + 1,
-          error: err instanceof Error ? err.message : "unknown",
-        })
-      );
+      log("error", "ai_generation", {
+        model,
+        phase: opts.phase,
+        duration_ms: duration,
+        success: false,
+        attempt: attempt + 1,
+        error: err instanceof Error ? err.message : "unknown",
+      });
     }
   }
 
-  console.log(
-    JSON.stringify({
-      level: "error",
-      event: "ai_generation_exhausted",
-      model,
-      phase: opts.phase,
-      max_attempts: 2,
-    })
-  );
+  log("error", "ai_generation_exhausted", {
+    model,
+    phase: opts.phase,
+    max_attempts: 2,
+  });
 
   return { success: false, error: "KI-Generierung fehlgeschlagen. Bitte versuchen Sie es erneut." };
 }
@@ -129,28 +114,20 @@ export async function generateReportSectionStream(
       stream: true,
     });
 
-    console.log(
-      JSON.stringify({
-        level: "info",
-        event: "ai_stream_start",
-        model,
-        phase: opts.phase,
-        latency_ms: Date.now() - startTime,
-      })
-    );
+    log("info", "ai_stream_start", {
+      model,
+      phase: opts.phase,
+      latency_ms: Date.now() - startTime,
+    });
 
     return stream as unknown as ReadableStream;
   } catch (err) {
-    console.log(
-      JSON.stringify({
-        level: "error",
-        event: "ai_stream_error",
-        model,
-        phase: opts.phase,
-        duration_ms: Date.now() - startTime,
-        error: err instanceof Error ? err.message : "unknown",
-      })
-    );
+    log("error", "ai_stream_error", {
+      model,
+      phase: opts.phase,
+      duration_ms: Date.now() - startTime,
+      error: err instanceof Error ? err.message : "unknown",
+    });
     // Return a stream with error message
     return new ReadableStream({
       start(controller) {
