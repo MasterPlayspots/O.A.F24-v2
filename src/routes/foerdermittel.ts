@@ -22,7 +22,8 @@ const foerdermittel = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 const katalogQuerySchema = z.object({
   page: z.coerce.number().min(1).default(1),
-  limit: z.coerce.number().min(1).max(50).default(20),
+  pageSize: z.coerce.number().min(1).max(50).default(20),
+  limit: z.coerce.number().min(1).max(50).optional(), // backward compat
   foerderart: z.string().optional(),
   foerderbereich: z.string().optional(),
   foerdergebiet: z.string().optional(),
@@ -43,7 +44,8 @@ foerdermittel.get("/katalog", async (c) => {
 
   const {
     page,
-    limit,
+    pageSize: ps,
+    limit: legacyLimit,
     foerderart,
     foerderbereich,
     foerdergebiet,
@@ -51,6 +53,7 @@ foerdermittel.get("/katalog", async (c) => {
     search,
     sort,
   } = parsed.data;
+  const limit = legacyLimit ?? ps;
   const offset = (page - 1) * limit;
   const foerderDb = c.env.FOERDER_DB;
 
@@ -90,23 +93,24 @@ foerdermittel.get("/katalog", async (c) => {
   const total = countResult?.total ?? 0;
 
   // Fetch page
+  const pageSize = limit;
   const dataSql = `SELECT id, titel, typ, foerderart, foerderbereich, foerdergebiet, foerderberechtigte, kurztext
     FROM foerderprogramme ${whereClause}
     ORDER BY ${sort} ASC
     LIMIT ? OFFSET ?`;
   const dataResult = await foerderDb
     .prepare(dataSql)
-    .bind(...params, limit, offset)
+    .bind(...params, pageSize, offset)
     .all<FoerderprogrammRow>();
 
   return c.json({
     success: true,
-    data: {
-      items: dataResult.results ?? [],
+    data: dataResult.results ?? [],
+    pagination: {
       total,
       page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
     },
   });
 });

@@ -1,0 +1,265 @@
+// Report Repository - Data access layer for reports (zfbf-db) and antraege (bafa_antraege)
+import type { AntragRow, AntragBausteinRow } from "../types";
+
+// ============================================
+// Ownership table (zfbf-db / DB)
+// ============================================
+
+export interface ReportOwnership {
+  id: string;
+  user_id: string;
+  status: string;
+  company_name: string | null;
+  branche: string | null;
+  unterbranche: string | null;
+  is_unlocked: number;
+  unlock_payment_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function findByOwner(
+  db: D1Database,
+  userId: string,
+  limit: number,
+  offset: number
+): Promise<{ reports: Record<string, unknown>[]; total: number }> {
+  const [countResult, reportsResult] = await Promise.all([
+    db
+      .prepare("SELECT COUNT(*) as total FROM reports WHERE user_id = ?")
+      .bind(userId)
+      .first<{ total: number }>(),
+    db
+      .prepare(
+        "SELECT id, status, company_name, branche, unterbranche, is_unlocked, created_at, updated_at FROM reports WHERE user_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?"
+      )
+      .bind(userId, limit, offset)
+      .all(),
+  ]);
+  return {
+    reports: (reportsResult.results || []) as Record<string, unknown>[],
+    total: countResult?.total || 0,
+  };
+}
+
+export async function findById(
+  db: D1Database,
+  reportId: string,
+  userId?: string
+): Promise<ReportOwnership | null> {
+  if (userId) {
+    return db
+      .prepare("SELECT * FROM reports WHERE id = ? AND user_id = ?")
+      .bind(reportId, userId)
+      .first<ReportOwnership>();
+  }
+  return db.prepare("SELECT * FROM reports WHERE id = ?").bind(reportId).first<ReportOwnership>();
+}
+
+export async function findOwnershipCompact(
+  db: D1Database,
+  reportId: string,
+  userId: string
+): Promise<{ id: string; is_unlocked: number } | null> {
+  return db
+    .prepare("SELECT id, is_unlocked FROM reports WHERE id = ? AND user_id = ?")
+    .bind(reportId, userId)
+    .first<{ id: string; is_unlocked: number }>();
+}
+
+export async function findOwnershipForPayment(
+  db: D1Database,
+  reportId: string,
+  userId: string
+): Promise<{ id: string; company_name: string } | null> {
+  return db
+    .prepare("SELECT id, company_name FROM reports WHERE id = ? AND user_id = ?")
+    .bind(reportId, userId)
+    .first<{ id: string; company_name: string }>();
+}
+
+export async function findUserIdByReportId(
+  db: D1Database,
+  reportId: string
+): Promise<{ user_id: string } | null> {
+  return db
+    .prepare("SELECT user_id FROM reports WHERE id = ?")
+    .bind(reportId)
+    .first<{ user_id: string }>();
+}
+
+export async function createOwnership(
+  db: D1Database,
+  id: string,
+  userId: string,
+  status: string,
+  companyName?: string | null,
+  branche?: string | null,
+  unterbranche?: string | null
+): Promise<void> {
+  await db
+    .prepare(
+      "INSERT INTO reports (id, user_id, status, company_name, branche, unterbranche) VALUES (?, ?, ?, ?, ?, ?)"
+    )
+    .bind(id, userId, status, companyName || null, branche || null, unterbranche || null)
+    .run();
+}
+
+export async function updateOwnershipStatus(
+  db: D1Database,
+  reportId: string,
+  status: string
+): Promise<void> {
+  await db
+    .prepare("UPDATE reports SET status = ?, updated_at = datetime('now') WHERE id = ?")
+    .bind(status, reportId)
+    .run();
+}
+
+export async function unlockReport(
+  db: D1Database,
+  reportId: string,
+  paymentId: string
+): Promise<void> {
+  await db
+    .prepare(
+      "UPDATE reports SET is_unlocked=1, unlock_payment_id=?, updated_at=datetime('now') WHERE id=?"
+    )
+    .bind(paymentId, reportId)
+    .run();
+}
+
+export async function lockReport(db: D1Database, reportId: string): Promise<void> {
+  await db.prepare("UPDATE reports SET is_unlocked = 0 WHERE id = ?").bind(reportId).run();
+}
+
+export async function finalizeReport(
+  db: D1Database,
+  reportId: string,
+  userId: string
+): Promise<void> {
+  await db
+    .prepare("UPDATE reports SET status = 'finalisiert' WHERE id = ? AND user_id = ?")
+    .bind(reportId, userId)
+    .run();
+}
+
+// ============================================
+// Antrag table (bafa_antraege / BAFA_DB)
+// ============================================
+
+export async function findAntragName(
+  bafaDb: D1Database,
+  antragId: string
+): Promise<{ unternehmen_name: string } | null> {
+  return bafaDb
+    .prepare("SELECT unternehmen_name FROM antraege WHERE id = ?")
+    .bind(antragId)
+    .first<{ unternehmen_name: string }>();
+}
+
+export async function loadAntragWithBausteine(
+  bafaDb: D1Database,
+  antragId: string
+): Promise<{ antrag: AntragRow; bausteine: AntragBausteinRow[] } | null> {
+  const [antragResult, bausteineResult] = await bafaDb.batch([
+    bafaDb.prepare("SELECT * FROM antraege WHERE id = ?").bind(antragId),
+    bafaDb.prepare("SELECT * FROM antrag_bausteine WHERE antrag_id = ? ORDER BY id").bind(antragId),
+  ]);
+  const antrag = antragResult?.results?.[0] as AntragRow | undefined;
+  if (!antrag) return null;
+  return { antrag, bausteine: (bausteineResult?.results ?? []) as AntragBausteinRow[] };
+}
+
+export async function createAntrag(
+  bafaDb: D1Database,
+  id: string,
+  brancheId: string,
+  companyName: string,
+  companyData?: {
+    unternehmen_typ?: string | null;
+    unternehmen_mitarbeiter?: number | null;
+    unternehmen_umsatz?: string | null;
+    unternehmen_hauptproblem?: string | null;
+  },
+  beratungsschwerpunkte?: string | null
+): Promise<void> {
+  await bafaDb
+    .prepare(
+      `INSERT INTO antraege (id, branche_id, unternehmen_name, unternehmen_typ, unternehmen_mitarbeiter,
+      unternehmen_umsatz, unternehmen_hauptproblem, beratungsschwerpunkte, status, erstellt_am, aktualisiert_am)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'vorschau', datetime('now'), datetime('now'))`
+    )
+    .bind(
+      id,
+      brancheId,
+      companyName,
+      companyData?.unternehmen_typ || null,
+      companyData?.unternehmen_mitarbeiter || null,
+      companyData?.unternehmen_umsatz || null,
+      companyData?.unternehmen_hauptproblem || null,
+      beratungsschwerpunkte || null
+    )
+    .run();
+}
+
+export async function createDraftAntrag(bafaDb: D1Database, id: string): Promise<void> {
+  await bafaDb
+    .prepare(
+      "INSERT INTO antraege (id, unternehmen_name, status, erstellt_am, aktualisiert_am) VALUES (?, '', 'vorschau', datetime('now'), datetime('now'))"
+    )
+    .bind(id)
+    .run();
+}
+
+export async function updateAntragStatus(
+  bafaDb: D1Database,
+  antragId: string,
+  status: string,
+  extra?: { bezahlt?: boolean; wortanzahl?: number }
+): Promise<void> {
+  if (extra?.bezahlt) {
+    await bafaDb
+      .prepare(
+        "UPDATE antraege SET status = ?, bezahlt_am = datetime('now'), aktualisiert_am = datetime('now') WHERE id = ?"
+      )
+      .bind(status, antragId)
+      .run();
+  } else if (extra?.wortanzahl !== undefined) {
+    await bafaDb
+      .prepare(
+        "UPDATE antraege SET status = ?, wortanzahl = ?, aktualisiert_am = datetime('now') WHERE id = ?"
+      )
+      .bind(status, extra.wortanzahl, antragId)
+      .run();
+  } else {
+    await bafaDb
+      .prepare("UPDATE antraege SET status = ?, aktualisiert_am = datetime('now') WHERE id = ?")
+      .bind(status, antragId)
+      .run();
+  }
+}
+
+export async function resetAntragPayment(bafaDb: D1Database, antragId: string): Promise<void> {
+  await bafaDb
+    .prepare(
+      "UPDATE antraege SET status = 'vorschau', bezahlt_am = NULL, aktualisiert_am = datetime('now') WHERE id = ?"
+    )
+    .bind(antragId)
+    .run();
+}
+
+export async function enrichReportsWithAntraege(
+  bafaDb: D1Database,
+  reportIds: string[]
+): Promise<Map<string, Record<string, unknown>>> {
+  if (reportIds.length === 0) return new Map();
+  const placeholders = reportIds.map(() => "?").join(",");
+  const result = await bafaDb
+    .prepare(
+      `SELECT id, unternehmen_name, branche_id, status as antrag_status, qualitaetsscore, wortanzahl, erstellt_am, aktualisiert_am FROM antraege WHERE id IN (${placeholders})`
+    )
+    .bind(...reportIds)
+    .all();
+  return new Map((result.results || []).map((a: any) => [a.id, a]));
+}
