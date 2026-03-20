@@ -61,6 +61,10 @@ bucket_name = "bafa-reports"
 [ai]
 binding = "AI"
 
+# Observability — logs & traces in Cloudflare Dashboard
+[observability]
+enabled = true
+
 # Cron Triggers
 # Daily backup at 02:00 UTC + Weekly learning cycle Monday 03:00 UTC
 [triggers]
@@ -74,3 +78,12 @@ crons = ["0 2 * * *", "0 3 * * 1"]
 # PAYPAL_CLIENT_ID
 # PAYPAL_CLIENT_SECRET
 # RESEND_API_KEY
+
+# Preview environment for feature branch PRs
+# Inherits D1, KV, R2, and AI bindings from base config
+[env.preview]
+name = "bafa-creator-ai-worker-preview"
+[env.preview.vars]
+ENVIRONMENT = "preview"
+API_VERSION = "v1-preview"
+FRONTEND_URL = "https://v0-bafa-creator-ai-preview.vercel.app"

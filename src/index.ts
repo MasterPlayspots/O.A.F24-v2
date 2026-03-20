@@ -18,6 +18,7 @@ import { foerdermittel } from "./routes/foerdermittel";
 import { performBackup, cleanupOldBackups } from "./services/backup";
 import { cleanupAuditLogs } from "./services/audit";
 import { cleanupExpiredData } from "./services/retention";
+import { log } from "./services/logger";
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -134,9 +135,79 @@ export default {
           // Weekly learning cycle (cron: 0 3 * * 1 - Monday 03:00 UTC)
           const trigger = new Date(event.scheduledTime);
           if (trigger.getUTCDay() === 1 && trigger.getUTCHours() === 3) {
-            // Learning cycle runs weekly - placeholder for bafa_learnings analysis
-            // TODO: Implement full learning cycle against BAFA_CONTENT D1 binding
-            console.log("Weekly learning cycle triggered at", trigger.toISOString());
+            log("info", "weekly_learning_cycle_start", {
+              scheduledTime: trigger.toISOString(),
+            });
+
+            // Query learnings from the last 7 days, grouped by branche
+            const recentLearnings = await env.BAFA_CONTENT.prepare(
+              `SELECT branche, outcome, feedback, created_at
+               FROM bafa_learnings
+               WHERE deleted_at IS NULL
+                 AND created_at >= datetime('now', '-7 days')
+               ORDER BY branche, created_at DESC`
+            ).all<{
+              branche: string | null;
+              outcome: string;
+              feedback: string | null;
+              created_at: string;
+            }>();
+
+            // Aggregate insights per branche
+            const branchenMap = new Map<
+              string,
+              {
+                total: number;
+                approved: number;
+                rejected: number;
+                feedbacks: string[];
+              }
+            >();
+
+            for (const row of recentLearnings.results || []) {
+              const key = row.branche || "_unknown";
+              const entry = branchenMap.get(key) || {
+                total: 0,
+                approved: 0,
+                rejected: 0,
+                feedbacks: [],
+              };
+              entry.total++;
+              if (row.outcome === "approved") entry.approved++;
+              else entry.rejected++;
+              if (row.feedback) entry.feedbacks.push(row.feedback);
+              branchenMap.set(key, entry);
+            }
+
+            // Store aggregated learnings in KV per branche
+            let branchenProcessed = 0;
+            for (const [branche, stats] of branchenMap) {
+              const kvPayload = {
+                branche,
+                period: {
+                  from: new Date(Date.now() - 7 * 86400000).toISOString(),
+                  to: trigger.toISOString(),
+                },
+                total: stats.total,
+                approved: stats.approved,
+                rejected: stats.rejected,
+                approvalRate:
+                  stats.total > 0 ? Math.round((stats.approved / stats.total) * 100) : 0,
+                recentFeedbacks: stats.feedbacks.slice(0, 20),
+                updatedAt: trigger.toISOString(),
+              };
+              await env.CACHE.put(
+                `learnings:${branche}`,
+                JSON.stringify(kvPayload),
+                { expirationTtl: 60 * 60 * 24 * 14 } // 14 days TTL
+              );
+              branchenProcessed++;
+            }
+
+            log("info", "weekly_learning_cycle_complete", {
+              totalLearnings: (recentLearnings.results || []).length,
+              branchenProcessed,
+            });
           }
         } catch {
           // cron failure - errors surface via Cloudflare dashboard

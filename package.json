@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "echo 'Worker runs on Cloudflare – skipping local dev'",
+    "dev": "wrangler dev --local --persist-to .wrangler/state",
     "build": "esbuild src/index.ts --bundle --format=esm --outfile=dist/index.js --external:cloudflare:* --minify",
     "deploy": "pnpm build && wrangler deploy",
     "lint": "eslint src",
@@ -23,7 +23,7 @@
     "@bafa/shared": "workspace:*",
     "@noble/hashes": "^1.6.1",
     "hono": "^4.12.8",
-    "jose": "^5.9.6",
+    "jose": "6.1.3",
     "toucan-js": "^4.1.1",
     "zod": "^4.3.6"
   },

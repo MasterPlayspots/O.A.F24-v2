@@ -33,8 +33,8 @@ admin.post("/audit-logs/cleanup", async (c) => {
 
 // GET /users
 admin.get("/users", async (c) => {
-  const page = parseInt(c.req.query("page") || "1");
-  const limit = Math.min(parseInt(c.req.query("limit") || "50"), 100);
+  const page = Math.min(10000, Math.max(1, parseInt(c.req.query("page") || "1") || 1));
+  const limit = Math.min(Math.max(1, parseInt(c.req.query("limit") || "50") || 50), 100);
   const offset = (page - 1) * limit;
   const { users, total } = await UserRepo.listUsers(c.env.DB, limit, offset);
   return c.json({ success: true, users, total, page, limit });
