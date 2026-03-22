@@ -40,6 +40,35 @@ admin.get("/users", async (c) => {
   return c.json({ success: true, users, total, page, limit });
 });
 
+// PATCH /users/:id (profile update)
+admin.patch("/users/:id", async (c) => {
+  const userId = c.req.param("id");
+  const body = await c.req.json();
+  const allowed: (keyof UserRepo.UpdateProfileParams)[] = [
+    "first_name",
+    "last_name",
+    "company",
+    "phone",
+    "email",
+  ];
+  const params: UserRepo.UpdateProfileParams = {};
+  for (const key of allowed) {
+    if (key in body) {
+      (params as Record<string, unknown>)[key] = body[key];
+    }
+  }
+  if (Object.keys(params).length === 0) {
+    return c.json({ success: false, error: "Keine Felder zum Aktualisieren" }, 400);
+  }
+  await UserRepo.updateProfile(c.env.DB, userId, params);
+  await writeAuditLog(c.env.DB, {
+    userId: c.get("user").id,
+    eventType: AUDIT_EVENTS.ROLE_CHANGE,
+    detail: `profile update ${userId}: ${Object.keys(params).join(", ")}`,
+  });
+  return c.json({ success: true });
+});
+
 // PATCH /users/:id/role
 admin.patch("/users/:id/role", async (c) => {
   const { role } = await c.req.json();

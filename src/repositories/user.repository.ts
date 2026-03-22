@@ -285,6 +285,55 @@ export async function updateRole(db: D1Database, userId: string, role: string): 
     .run();
 }
 
+export interface UpdateProfileParams {
+  first_name?: string;
+  last_name?: string;
+  company?: string | null;
+  phone?: string | null;
+  email?: string;
+}
+
+export async function updateProfile(
+  db: D1Database,
+  userId: string,
+  params: UpdateProfileParams
+): Promise<void> {
+  const sets: string[] = [];
+  const values: (string | null)[] = [];
+
+  if (params.first_name !== undefined) {
+    sets.push("first_name = ?");
+    values.push(params.first_name);
+  }
+  if (params.last_name !== undefined) {
+    sets.push("last_name = ?");
+    values.push(params.last_name);
+  }
+  if (params.company !== undefined) {
+    sets.push("company = ?");
+    values.push(params.company);
+  }
+  if (params.phone !== undefined) {
+    sets.push("phone = ?");
+    values.push(params.phone);
+  }
+  if (params.email !== undefined) {
+    sets.push("email = ?");
+    values.push(params.email.toLowerCase());
+  }
+
+  if (sets.length === 0) return;
+
+  sets.push("updated_at = datetime('now')");
+  const sql = `UPDATE users SET ${sets.join(", ")} WHERE id = ?`;
+  values.push(userId);
+
+  await db
+    .prepare(sql)
+    .bind(...values)
+    .run();
+}
+
 export async function incrementKontingentUsed(db: D1Database, userId: string): Promise<void> {
   await db
     .prepare("UPDATE users SET kontingent_used = kontingent_used + 1 WHERE id = ?")
