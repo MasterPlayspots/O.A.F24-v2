@@ -35,6 +35,7 @@ export interface CreateUserParams {
   salt: string;
   firstName: string;
   lastName: string;
+  role?: "unternehmen" | "berater";
   bafaId?: string | null;
   company?: string | null;
   ustId?: string | null;
@@ -183,7 +184,7 @@ export async function create(db: D1Database, params: CreateUserParams): Promise<
   await db
     .prepare(
       `INSERT INTO users (id, email, password_hash, salt, hash_version, first_name, last_name, role, bafa_id, company, ust_id, steuernummer, is_kleinunternehmer, verification_token)
-     VALUES (?, ?, ?, ?, 2, ?, ?, 'user', ?, ?, ?, ?, ?, ?)`
+     VALUES (?, ?, ?, ?, 2, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       params.id,
@@ -192,6 +193,7 @@ export async function create(db: D1Database, params: CreateUserParams): Promise<
       params.salt,
       params.firstName,
       params.lastName,
+      params.role || "unternehmen",
       params.bafaId || null,
       params.company || null,
       params.ustId || null,
