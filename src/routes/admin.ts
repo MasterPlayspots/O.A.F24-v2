@@ -137,4 +137,58 @@ admin.get("/stats", async (c) => {
   });
 });
 
+// GET /check-foerdermittel — batch URL check of all aktiv programs
+admin.get("/check-foerdermittel", async (c) => {
+  const batch = parseInt(c.req.query("batch") || "0");
+  const batchSize = 50;
+  const offset = batch * batchSize;
+  const foerderDb = c.env.FOERDER_DB;
+
+  const programs = await foerderDb
+    .prepare(
+      "SELECT id, url FROM foerderprogramme WHERE status = 'aktiv' AND url IS NOT NULL ORDER BY id LIMIT ? OFFSET ?"
+    )
+    .bind(batchSize, offset)
+    .all();
+
+  if (!programs.results?.length) {
+    const counts = await foerderDb
+      .prepare("SELECT status, COUNT(*) as anzahl FROM foerderprogramme GROUP BY status")
+      .all();
+    return c.json({ done: true, batch, summary: counts.results });
+  }
+
+  const results = await Promise.all(
+    (programs.results as { id: number; url: string }[]).map(async (p) => {
+      try {
+        const res = await fetch(p.url, {
+          method: "HEAD",
+          redirect: "follow",
+          signal: AbortSignal.timeout(8000),
+        });
+        return { id: p.id, status: res.status };
+      } catch {
+        return { id: p.id, status: 0 };
+      }
+    })
+  );
+
+  const dead = results.filter((r) => r.status === 404 || r.status === 410);
+  for (const d of dead) {
+    await foerderDb
+      .prepare("UPDATE foerderprogramme SET status = 'abgelaufen' WHERE id = ?")
+      .bind(d.id)
+      .run();
+  }
+
+  return c.json({
+    batch,
+    checked: results.length,
+    alive: results.filter((r) => r.status === 200).length,
+    dead: dead.map((d) => d.id),
+    errors: results.filter((r) => r.status !== 200 && r.status !== 404 && r.status !== 410).length,
+    nextBatch: batch + 1,
+  });
+});
+
 export { admin };
