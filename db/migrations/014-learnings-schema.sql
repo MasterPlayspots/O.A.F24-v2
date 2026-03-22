@@ -15,3 +15,4 @@ CREATE INDEX IF NOT EXISTS idx_learnings_report ON bafa_learnings(report_id);
 CREATE INDEX IF NOT EXISTS idx_learnings_branche ON bafa_learnings(branche);
 CREATE INDEX IF NOT EXISTS idx_learnings_outcome ON bafa_learnings(outcome);
 CREATE INDEX IF NOT EXISTS idx_learnings_created ON bafa_learnings(created_at);
+CREATE INDEX IF NOT EXISTS idx_learnings_deleted ON bafa_learnings(deleted_at);
