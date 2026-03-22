@@ -58,8 +58,8 @@ foerdermittel.get("/katalog", async (c) => {
   const offset = (page - 1) * limit;
   const foerderDb = c.env.FOERDER_DB;
 
-  // Build dynamic WHERE clauses
-  const conditions: string[] = [];
+  // Build dynamic WHERE clauses — only show active programs by default
+  const conditions: string[] = ["status != 'abgelaufen'"];
   const params: (string | number)[] = [];
 
   if (foerderart) {
@@ -126,16 +126,16 @@ foerdermittel.get("/katalog/filters", async (c) => {
 
   const [artResult, bereichResult, gebietResult, berechtigteResult] = await foerderDb.batch([
     foerderDb.prepare(
-      "SELECT DISTINCT foerderart FROM foerderprogramme WHERE foerderart IS NOT NULL ORDER BY foerderart"
+      "SELECT DISTINCT foerderart FROM foerderprogramme WHERE foerderart IS NOT NULL AND status != 'abgelaufen' ORDER BY foerderart"
     ),
     foerderDb.prepare(
-      "SELECT DISTINCT foerderbereich FROM foerderprogramme WHERE foerderbereich IS NOT NULL ORDER BY foerderbereich"
+      "SELECT DISTINCT foerderbereich FROM foerderprogramme WHERE foerderbereich IS NOT NULL AND status != 'abgelaufen' ORDER BY foerderbereich"
     ),
     foerderDb.prepare(
-      "SELECT DISTINCT foerdergebiet FROM foerderprogramme WHERE foerdergebiet IS NOT NULL ORDER BY foerdergebiet"
+      "SELECT DISTINCT foerdergebiet FROM foerderprogramme WHERE foerdergebiet IS NOT NULL AND status != 'abgelaufen' ORDER BY foerdergebiet"
     ),
     foerderDb.prepare(
-      "SELECT DISTINCT foerderberechtigte FROM foerderprogramme WHERE foerderberechtigte IS NOT NULL ORDER BY foerderberechtigte"
+      "SELECT DISTINCT foerderberechtigte FROM foerderprogramme WHERE foerderberechtigte IS NOT NULL AND status != 'abgelaufen' ORDER BY foerderberechtigte"
     ),
   ]);
 
