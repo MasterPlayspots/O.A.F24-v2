@@ -255,6 +255,7 @@ export const AUDIT_EVENTS = {
   REPORT_UNLOCK: "report_unlock",
   REPORT_GENERATE: "report_generate",
   REPORT_DOWNLOAD: "report_download",
+  USER_DELETE: "user_delete",
 } as const;
 
 // ============================================

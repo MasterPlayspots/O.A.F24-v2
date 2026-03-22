@@ -83,6 +83,35 @@ admin.patch("/users/:id/role", async (c) => {
   return c.json({ success: true });
 });
 
+// DELETE /users/:id (soft-delete: anonymize + set deleted_at)
+admin.delete("/users/:id", async (c) => {
+  const targetId = c.req.param("id");
+  const adminUser = c.get("user");
+
+  // Prevent self-deletion
+  if (targetId === adminUser.id) {
+    return c.json({ success: false, error: "Eigenen Account kann man nicht loeschen" }, 400);
+  }
+
+  // Check target user exists
+  const target = await UserRepo.findById(c.env.DB, targetId);
+  if (!target) {
+    return c.json({ success: false, error: "Benutzer nicht gefunden" }, 404);
+  }
+
+  // Soft-delete via anonymization (GDPR-compliant)
+  const deletedEmail = `deleted+${targetId.slice(0, 8)}@removed.local`;
+  await UserRepo.anonymizeUser(c.env.DB, targetId, deletedEmail);
+
+  await writeAuditLog(c.env.DB, {
+    userId: adminUser.id,
+    eventType: AUDIT_EVENTS.USER_DELETE,
+    detail: `soft-deleted user ${targetId} (was: ${target.email})`,
+  });
+
+  return c.json({ success: true });
+});
+
 // GET /stats
 admin.get("/stats", async (c) => {
   const [userStats, reportStats, paymentStats, activePromos, antragStats, bausteinCount] =
