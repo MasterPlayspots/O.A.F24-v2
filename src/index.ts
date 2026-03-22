@@ -15,6 +15,9 @@ import { verifyPayment } from "./routes/verify-payment";
 import { admin } from "./routes/admin";
 import { gdpr } from "./routes/gdpr";
 import { foerdermittel } from "./routes/foerdermittel";
+import { forum } from "./routes/forum";
+import { nachrichten } from "./routes/nachrichten";
+import { netzwerk } from "./routes/netzwerk";
 import { performBackup, cleanupOldBackups } from "./services/backup";
 import { cleanupAuditLogs } from "./services/audit";
 import { cleanupExpiredData } from "./services/retention";
@@ -84,6 +87,9 @@ app.route("/api", verifyPayment); // POST /api/verify-payment
 app.route("/api/admin", admin);
 app.route("/api/user", gdpr);
 app.route("/api/foerdermittel", foerdermittel);
+app.route("/api/forum", forum);
+app.route("/api/nachrichten", nachrichten);
+app.route("/api/netzwerk", netzwerk);
 
 // ============================================
 // 404 Handler
