@@ -23,7 +23,13 @@ export const csrfProtection: MiddlewareHandler = async (c, next) => {
   const origin = c.req.header("Origin");
   const host = c.req.header("Host");
   if (origin) {
-    const allowedHosts = ["zfbf.info", "www.zfbf.info", "localhost"];
+    const allowedHosts = [
+      "zfbf.info",
+      "www.zfbf.info",
+      "fund24.info",
+      "www.fund24.info",
+      "localhost",
+    ];
     try {
       const originHost = new URL(origin).hostname;
       if (

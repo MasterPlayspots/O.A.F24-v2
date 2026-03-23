@@ -18,6 +18,7 @@ import { foerdermittel } from "./routes/foerdermittel";
 import { forum } from "./routes/forum";
 import { nachrichten } from "./routes/nachrichten";
 import { netzwerk } from "./routes/netzwerk";
+import { check } from "./routes/check";
 import { performBackup, cleanupOldBackups } from "./services/backup";
 import { cleanupAuditLogs } from "./services/audit";
 import { cleanupExpiredData } from "./services/retention";
@@ -90,6 +91,7 @@ app.route("/api/foerdermittel", foerdermittel);
 app.route("/api/forum", forum);
 app.route("/api/nachrichten", nachrichten);
 app.route("/api/netzwerk", netzwerk);
+app.route("/api/check", check);
 
 // ============================================
 // 404 Handler

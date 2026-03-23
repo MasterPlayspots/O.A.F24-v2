@@ -7,6 +7,7 @@ import {
   processChat,
   getProgramById,
 } from "../services/foerdermittel";
+import { scrapeCompanyFromUrl } from "../services/scraper";
 
 /**
  * /check routes — Wizard-based Fördermittel-Check flow.
@@ -38,6 +39,7 @@ const check = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 // ============================================
 check.post("/", async (c) => {
   const body = (await c.req.json()) as {
+    url?: string;
     firmenname?: string;
     rechtsform?: string;
     branche?: string;
@@ -52,7 +54,27 @@ check.post("/", async (c) => {
     email?: string;
   };
 
-  if (!body.firmenname) {
+  // If URL provided, scrape company data and merge
+  let scrapedData: Record<string, unknown> | null = null;
+  let sourceUrl: string | null = null;
+  const formData = { ...body };
+
+  if (body.url) {
+    try {
+      const scraped = await scrapeCompanyFromUrl(body.url);
+      scrapedData = scraped as Record<string, unknown>;
+      sourceUrl = body.url;
+      // Scraped data fills in missing fields, manual input takes priority
+      if (!formData.firmenname && scraped.firmenname) formData.firmenname = scraped.firmenname;
+      if (!formData.rechtsform && scraped.rechtsform) formData.rechtsform = scraped.rechtsform;
+      if (!formData.bundesland && scraped.bundesland) formData.bundesland = scraped.bundesland;
+      if (!formData.plz && scraped.plz) formData.plz = scraped.plz;
+    } catch {
+      // Scraping failed, continue with manual data
+    }
+  }
+
+  if (!formData.firmenname) {
     return c.json({ success: false, error: "Firmenname erforderlich" }, 400);
   }
 
@@ -68,14 +90,14 @@ check.post("/", async (c) => {
     .bind(
       profileId,
       `check-${sessionId}`,
-      body.firmenname,
-      body.branche || null,
-      body.bundesland || null,
-      body.rechtsform || null,
-      body.mitarbeiter || null,
-      body.jahresumsatz || null,
-      body.gruendungsjahr || null,
-      body.vorhaben_details || body.vorhaben || null
+      formData.firmenname,
+      formData.branche || null,
+      formData.bundesland || null,
+      formData.rechtsform || null,
+      formData.mitarbeiter || null,
+      formData.jahresumsatz || null,
+      formData.gruendungsjahr || null,
+      formData.vorhaben_details || formData.vorhaben || null
     )
     .run();
 
@@ -83,13 +105,13 @@ check.post("/", async (c) => {
   const conditions: string[] = [];
   const params: string[] = [];
 
-  if (body.bundesland) {
+  if (formData.bundesland) {
     conditions.push("(foerdergebiet LIKE ? OR foerdergebiet LIKE ?)");
-    params.push(`%${body.bundesland}%`, "%Bundesweit%");
+    params.push(`%${formData.bundesland}%`, "%Bundesweit%");
   }
-  if (body.branche) {
+  if (formData.branche) {
     conditions.push("foerderbereich LIKE ?");
-    params.push(`%${body.branche}%`);
+    params.push(`%${formData.branche}%`);
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
@@ -110,10 +132,10 @@ check.post("/", async (c) => {
           role: "user",
           content: `Du bist ein freundlicher Experte für deutsche Fördermittel. Ein Unternehmen hat gerade den Fördermittel-Check gestartet. Begrüße es und stelle 3 kurze Rückfragen, um die passenden Programme besser einzugrenzen.
 
-UNTERNEHMEN: ${body.firmenname}
-BRANCHE: ${body.branche || "k.A."}
-BUNDESLAND: ${body.bundesland || "k.A."}
-VORHABEN: ${body.vorhaben || "k.A."}
+UNTERNEHMEN: ${formData.firmenname}
+BRANCHE: ${formData.branche || "k.A."}
+BUNDESLAND: ${formData.bundesland || "k.A."}
+VORHABEN: ${formData.vorhaben || "k.A."}
 VORFILTER-TREFFER: ${vorfilterCount} Programme
 
 Antworte auf Deutsch, freundlich und professionell. Verwende Markdown für Formatierung. Nenne die Anzahl der vorläufigen Treffer.`,
@@ -124,16 +146,16 @@ Antworte auf Deutsch, freundlich und professionell. Verwende Markdown für Forma
 
     begruessung =
       result.response ||
-      `Willkommen zum Fördermittel-Check für **${body.firmenname}**! Basierend auf Ihren Angaben kommen ca. **${vorfilterCount} Förderprogramme** in Frage.\n\nUm die passenden Programme zu finden, habe ich ein paar Fragen:\n\n1. Haben Sie in den letzten 3 Jahren bereits Fördermittel erhalten?\n2. Wann planen Sie mit der Umsetzung zu beginnen?\n3. Befindet sich Ihr Unternehmen in wirtschaftlichen Schwierigkeiten?`;
+      `Willkommen zum Fördermittel-Check für **${formData.firmenname}**! Basierend auf Ihren Angaben kommen ca. **${vorfilterCount} Förderprogramme** in Frage.\n\nUm die passenden Programme zu finden, habe ich ein paar Fragen:\n\n1. Haben Sie in den letzten 3 Jahren bereits Fördermittel erhalten?\n2. Wann planen Sie mit der Umsetzung zu beginnen?\n3. Befindet sich Ihr Unternehmen in wirtschaftlichen Schwierigkeiten?`;
   } catch {
-    begruessung = `Willkommen zum Fördermittel-Check für **${body.firmenname}**! Basierend auf Ihren Angaben kommen ca. **${vorfilterCount} Förderprogramme** in Frage.\n\nUm die passenden Programme zu finden, habe ich ein paar Fragen:\n\n1. Haben Sie in den letzten 3 Jahren bereits Fördermittel erhalten?\n2. Wann planen Sie mit der Umsetzung zu beginnen?\n3. Befindet sich Ihr Unternehmen in wirtschaftlichen Schwierigkeiten?`;
+    begruessung = `Willkommen zum Fördermittel-Check für **${formData.firmenname}**! Basierend auf Ihren Angaben kommen ca. **${vorfilterCount} Förderprogramme** in Frage.\n\nUm die passenden Programme zu finden, habe ich ein paar Fragen:\n\n1. Haben Sie in den letzten 3 Jahren bereits Fördermittel erhalten?\n2. Wann planen Sie mit der Umsetzung zu beginnen?\n3. Befindet sich Ihr Unternehmen in wirtschaftlichen Schwierigkeiten?`;
   }
 
   // Store session in KV (24h TTL)
   const session: CheckSession = {
     profileId,
     conversationId: null,
-    formData: body as Record<string, unknown>,
+    formData: formData as Record<string, unknown>,
     vorfilterCount,
     step: 2,
     createdAt: new Date().toISOString(),
@@ -145,6 +167,8 @@ Antworte auf Deutsch, freundlich und professionell. Verwende Markdown für Forma
     session_id: sessionId,
     vorfilter_treffer: vorfilterCount,
     begruessung,
+    scraped_data: scrapedData,
+    source_url: sourceUrl,
   });
 });
 
