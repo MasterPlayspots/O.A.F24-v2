@@ -1408,4 +1408,19 @@ foerdermittel.get("/favorites/:programId/check", requireAuth, async (c) => {
   return c.json({ success: true, data: { isFavorite: isFav } });
 });
 
+// GET /program-documents/:programId — fetch required documents for a program
+foerdermittel.get("/program-documents/:programId", requireAuth, async (c) => {
+  const { programId } = c.req.param();
+  const foerderDb = c.env.FOERDER_DB;
+
+  const { results } = await foerderDb
+    .prepare(
+      "SELECT * FROM program_documents WHERE program_id = ? OR program_id = '*' ORDER BY required DESC, document_name ASC"
+    )
+    .bind(programId)
+    .all();
+
+  return c.json({ documents: results || [] });
+});
+
 export { foerdermittel };
