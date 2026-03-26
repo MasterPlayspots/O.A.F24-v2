@@ -93,6 +93,19 @@ payments.post("/stripe/webhook", async (c) => {
     const reportId = s.metadata?.reportId as string | undefined;
     const userId = s.metadata?.userId as string | undefined;
     if (reportId && userId) {
+      // Verify paid amount matches stored order
+      const storedPayment = await OrderRepo.findByProviderPaymentId(db, s.id);
+      if (storedPayment) {
+        const paidCents = s.amount_total as number | undefined;
+        if (paidCents !== undefined && paidCents !== storedPayment.amount) {
+          await writeAuditLog(db, {
+            userId,
+            eventType: AUDIT_EVENTS.PAYMENT,
+            detail: `Amount mismatch: paid ${paidCents} vs expected ${storedPayment.amount} for ${reportId}`,
+          });
+          return c.json({ received: true, error: "Amount mismatch" });
+        }
+      }
       await OrderRepo.updatePaymentStatus(db, s.id, "completed");
       await ReportRepo.unlockReport(db, reportId, s.id);
       await ReportRepo.updateAntragStatus(bafaDb, reportId, "bezahlt", { bezahlt: true });

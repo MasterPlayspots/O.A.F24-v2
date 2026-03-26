@@ -77,8 +77,10 @@ reports.post("/generate", requireAuth, generateRateLimit, async (c) => {
   const db = c.env.DB;
   const bafaDb = c.env.BAFA_DB;
   const d = parsed.data;
-  const { hasQuota } = await checkKontingent(db, user.id);
-  if (!hasQuota) return kontingentError(c);
+
+  // Atomically reserve one kontingent unit to prevent race conditions
+  const reserved = await UserRepo.reserveKontingent(db, user.id);
+  if (!reserved) return kontingentError(c);
 
   const antragId = crypto.randomUUID();
 
@@ -127,10 +129,11 @@ reports.post("/generate", requireAuth, generateRateLimit, async (c) => {
       phase,
     });
     if (!r.success) {
-      // Mark as failed in both databases
+      // Mark as failed in both databases and release reserved kontingent
       await Promise.all([
         ReportRepo.updateOwnershipStatus(db, antragId, "error"),
         ReportRepo.updateAntragStatus(bafaDb, antragId, "fehlgeschlagen"),
+        UserRepo.releaseKontingent(db, user.id),
       ]);
       return c.json(
         { success: false, error: `Phase "${phase}" fehlgeschlagen`, reportId: antragId },
@@ -438,9 +441,10 @@ reports.post("/:id/finalize", requireAuth, async (c) => {
   if (!hasQuota) return kontingentError(c);
 
   const antragId = c.req.param("id");
-  // Finalize ownership + increment kontingent in one batch
+  // Finalize ownership + atomically reserve kontingent
   await ReportRepo.finalizeReport(db, antragId, user.id);
-  await UserRepo.incrementKontingentUsed(db, user.id);
+  const reserved = await UserRepo.reserveKontingent(db, user.id);
+  if (!reserved) return kontingentError(c);
   // Update antrag status in bafa_antraege
   await ReportRepo.updateAntragStatus(bafaDb, antragId, "pending");
 

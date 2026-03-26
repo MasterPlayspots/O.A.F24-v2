@@ -183,8 +183,8 @@ export async function listUsers(
 export async function create(db: D1Database, params: CreateUserParams): Promise<void> {
   await db
     .prepare(
-      `INSERT INTO users (id, email, password_hash, salt, hash_version, first_name, last_name, role, bafa_id, company, ust_id, steuernummer, is_kleinunternehmer, verification_token)
-     VALUES (?, ?, ?, ?, 2, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO users (id, email, password_hash, salt, hash_version, first_name, last_name, role, bafa_id, company, ust_id, steuernummer, is_kleinunternehmer, verification_token, privacy_accepted_at)
+     VALUES (?, ?, ?, ?, 2, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`
     )
     .bind(
       params.id,
@@ -337,6 +337,27 @@ export async function updateProfile(
 export async function incrementKontingentUsed(db: D1Database, userId: string): Promise<void> {
   await db
     .prepare("UPDATE users SET kontingent_used = kontingent_used + 1 WHERE id = ?")
+    .bind(userId)
+    .run();
+}
+
+/** Atomically reserve one kontingent unit. Returns true if reserved, false if quota exhausted. */
+export async function reserveKontingent(db: D1Database, userId: string): Promise<boolean> {
+  const result = await db
+    .prepare(
+      "UPDATE users SET kontingent_used = kontingent_used + 1 WHERE id = ? AND kontingent_used < kontingent_total"
+    )
+    .bind(userId)
+    .run();
+  return (result.meta?.changes ?? 0) > 0;
+}
+
+/** Release a previously reserved kontingent unit (e.g. on generation failure). */
+export async function releaseKontingent(db: D1Database, userId: string): Promise<void> {
+  await db
+    .prepare(
+      "UPDATE users SET kontingent_used = MAX(0, kontingent_used - 1) WHERE id = ?"
+    )
     .bind(userId)
     .run();
 }

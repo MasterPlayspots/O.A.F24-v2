@@ -66,6 +66,12 @@ export const forgotPasswordRateLimit = rateLimit({
   keyPrefix: "forgot-pw",
 });
 
+export const verifyEmailRateLimit = rateLimit({
+  maxRequests: 5,
+  windowSeconds: 300,
+  keyPrefix: "verify-email",
+});
+
 // Global rate limit: 120 requests per minute per IP for all API endpoints
 export const globalRateLimit = rateLimit({
   maxRequests: 120,

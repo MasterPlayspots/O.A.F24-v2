@@ -10,6 +10,7 @@ import {
   loginRateLimit,
   registerRateLimit,
   forgotPasswordRateLimit,
+  verifyEmailRateLimit,
 } from "../middleware/rateLimit";
 import { requireAuth } from "../middleware/auth";
 import { sendPasswordResetEmail, sendVerificationCodeEmail } from "../services/email";
@@ -34,6 +35,9 @@ const registerSchema = z.object({
   ustId: z.string().optional(),
   steuernummer: z.string().optional(),
   isKleinunternehmer: z.boolean().optional(),
+  privacyAccepted: z.literal(true, {
+    error: "Datenschutzerklärung muss akzeptiert werden",
+  }),
 });
 
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(1) });
@@ -271,7 +275,7 @@ auth.post("/refresh", async (c) => {
 });
 
 // POST /verify-email
-auth.post("/verify-email", async (c) => {
+auth.post("/verify-email", verifyEmailRateLimit, async (c) => {
   const { token } = await c.req.json();
   if (!token) return c.json({ success: false, error: "Token erforderlich" }, 400);
   const user = await UserRepo.findByVerificationToken(c.env.DB, token);
@@ -281,7 +285,7 @@ auth.post("/verify-email", async (c) => {
 });
 
 // POST /verify-code -- validates 6-digit code, marks verified, issues JWT + refresh token
-auth.post("/verify-code", async (c) => {
+auth.post("/verify-code", verifyEmailRateLimit, async (c) => {
   const { email, code } = await c.req.json();
   if (!email || !code) {
     return c.json({ success: false, error: "E-Mail und Code sind erforderlich" }, 400);
