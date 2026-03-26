@@ -51,11 +51,6 @@ const unlockSchema = z.object({
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 100;
 
-async function checkKontingent(db: D1Database, userId: string): Promise<{ hasQuota: boolean }> {
-  const u = await UserRepo.getKontingent(db, userId);
-  return { hasQuota: !!u && u.kontingent_total - u.kontingent_used > 0 };
-}
-
 function kontingentError(c: Context<{ Bindings: Bindings; Variables: Variables }>) {
   return c.json({ success: false, error: "Kontingent aufgebraucht", needsUpgrade: true }, 403);
 }
@@ -357,13 +352,11 @@ reports.get("/:id", requireAuth, async (c) => {
   });
 });
 
-// POST / - Create draft
+// POST / - Create draft (no quota charge — quota reserved on generate/finalize)
 reports.post("/", requireAuth, async (c) => {
   const user = c.get("user");
   const db = c.env.DB;
   const bafaDb = c.env.BAFA_DB;
-  const { hasQuota } = await checkKontingent(db, user.id);
-  if (!hasQuota) return kontingentError(c);
 
   const id = crypto.randomUUID();
   // Create ownership record in zfbf-db
@@ -437,14 +430,13 @@ reports.post("/:id/finalize", requireAuth, async (c) => {
   const user = c.get("user");
   const db = c.env.DB;
   const bafaDb = c.env.BAFA_DB;
-  const { hasQuota } = await checkKontingent(db, user.id);
-  if (!hasQuota) return kontingentError(c);
 
-  const antragId = c.req.param("id");
-  // Finalize ownership + atomically reserve kontingent
-  await ReportRepo.finalizeReport(db, antragId, user.id);
+  // Atomically reserve kontingent BEFORE any state changes
   const reserved = await UserRepo.reserveKontingent(db, user.id);
   if (!reserved) return kontingentError(c);
+
+  const antragId = c.req.param("id");
+  await ReportRepo.finalizeReport(db, antragId, user.id);
   // Update antrag status in bafa_antraege
   await ReportRepo.updateAntragStatus(bafaDb, antragId, "pending");
 

@@ -36,7 +36,7 @@ promo.post('/redeem', requireAuth, async (c) => {
   const g = await findActiveGutschein(db, code)
   if (!g) return c.json({ success: false, error: 'Ungültiger oder abgelaufener Code' }, 400)
 
-  // Use INSERT OR IGNORE with unique constraint to prevent race conditions
+  // Use INSERT OR IGNORE with unique constraint to prevent per-user race conditions
   const redemptionId = crypto.randomUUID()
   const insertResult = await db
     .prepare('INSERT OR IGNORE INTO promo_redemptions (id, user_id, promo_code_id, order_id, discount_amount) VALUES (?, ?, ?, ?, ?)')
@@ -45,7 +45,16 @@ promo.post('/redeem', requireAuth, async (c) => {
   if ((insertResult.meta?.changes ?? 0) === 0) {
     return c.json({ success: false, error: 'Code wurde bereits eingelöst' }, 400)
   }
-  await db.prepare('UPDATE gutscheine SET total_uses = total_uses + 1 WHERE id = ?').bind(g.id).run()
+  // Atomically enforce global max_uses cap
+  const updateResult = await db
+    .prepare('UPDATE gutscheine SET total_uses = total_uses + 1 WHERE id = ? AND total_uses < max_uses')
+    .bind(g.id)
+    .run()
+  if ((updateResult.meta?.changes ?? 0) === 0) {
+    // Global cap hit — rollback the redemption
+    await db.prepare('DELETE FROM promo_redemptions WHERE id = ?').bind(redemptionId).run()
+    return c.json({ success: false, error: 'Code ist nicht mehr verfügbar' }, 400)
+  }
 
   await writeAuditLog(db, { userId: user.id, eventType: AUDIT_EVENTS.PROMO_REDEEM, detail: `${code} (${g.discount_type}: ${g.discount_value})`, ip: c.req.header('CF-Connecting-IP') })
   return c.json({ success: true, redemptionId, discount: { type: g.discount_type, value: g.discount_value } })
