@@ -19,6 +19,7 @@ describe("POST /api/auth/register", () => {
         password: "Secure#Pass1",
         firstName: "Max",
         lastName: "Mustermann",
+        privacyAccepted: true,
       }),
     });
     const body = (await res.json()) as AuthResponse;
@@ -37,6 +38,7 @@ describe("POST /api/auth/register", () => {
         password: "Secure#Pass1",
         firstName: "A",
         lastName: "B",
+        privacyAccepted: true,
       }),
     });
     expect(res.status).toBe(400);

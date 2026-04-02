@@ -28,6 +28,7 @@ export type Bindings = {
   RESEND_API_KEY: string;
 
   FRONTEND_URL: string;
+  FUND24_URL: string;
   ENVIRONMENT: string;
   API_VERSION: string;
   SENTRY_DSN: string;
@@ -385,4 +386,27 @@ export interface FoerdermittelConversationRow {
   messages: string;
   created_at: string;
   updated_at: string;
+}
+
+// ============================================
+// WebAuthn & Magic Link Types
+// ============================================
+
+export interface PasskeyCredential {
+  id: string;
+  user_id: string;
+  credential_id: string;
+  public_key: string;
+  counter: number;
+  device_type: string | null;
+  transports: string | null;
+  created_at: string;
+}
+
+export interface MagicLinkToken {
+  token: string;
+  email: string;
+  expires_at: string;
+  used: number;
+  created_at: string;
 }

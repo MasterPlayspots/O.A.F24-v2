@@ -8,6 +8,8 @@ const PRODUCTION_ORIGINS = [
   "https://www.zfbf.info",
   "https://fund24.info",
   "https://www.fund24.info",
+  "https://fund24.io",
+  "https://www.fund24.io",
 ];
 
 const DEV_ORIGINS = [

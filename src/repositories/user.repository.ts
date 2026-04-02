@@ -355,9 +355,7 @@ export async function reserveKontingent(db: D1Database, userId: string): Promise
 /** Release a previously reserved kontingent unit (e.g. on generation failure). */
 export async function releaseKontingent(db: D1Database, userId: string): Promise<void> {
   await db
-    .prepare(
-      "UPDATE users SET kontingent_used = MAX(0, kontingent_used - 1) WHERE id = ?"
-    )
+    .prepare("UPDATE users SET kontingent_used = MAX(0, kontingent_used - 1) WHERE id = ?")
     .bind(userId)
     .run();
 }

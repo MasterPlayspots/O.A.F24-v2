@@ -6,6 +6,8 @@ import { securityHeaders, csrfProtection } from "./middleware/security";
 import { corsMiddleware, strictCorsCheck } from "./middleware/cors";
 import { globalRateLimit } from "./middleware/rateLimit";
 import { auth } from "./routes/auth";
+import { webauthn } from "./routes/auth/webauthn";
+import { magicLink } from "./routes/auth/magic-link";
 import { reports } from "./routes/reports";
 import { branchen } from "./routes/branchen";
 import { promo } from "./routes/promo";
@@ -78,6 +80,8 @@ app.get("/health", async (c) => {
 // Route Mounting
 // ============================================
 app.route("/api/auth", auth);
+app.route("/api/auth/webauthn", webauthn);
+app.route("/api/auth/magic-link", magicLink);
 app.route("/api/reports", reports);
 app.route("/api/bafa", reports); // Legacy alias for /api/reports
 app.route("/api/branchen", branchen);

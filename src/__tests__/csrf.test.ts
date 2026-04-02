@@ -38,6 +38,7 @@ describe("CSRF Protection", () => {
         password: "Secure#Pass1",
         firstName: "Test",
         lastName: "User",
+        privacyAccepted: true,
       }),
     });
     expect(res.status).toBe(200);
@@ -80,6 +81,7 @@ describe("CSRF Protection", () => {
         password: "Secure#Pass1",
         firstName: "Test",
         lastName: "User",
+        privacyAccepted: true,
       }),
     });
     expect(res.status).toBe(200);

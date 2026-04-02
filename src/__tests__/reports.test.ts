@@ -50,13 +50,17 @@ describe("Reports CRUD", () => {
         .run();
       const token = await createTestToken(userId, "report-noquota@example.com");
 
-      const res = await SELF.fetch("https://api.test/api/reports", {
+      const res = await SELF.fetch("https://api.test/api/reports/generate", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Origin: "https://zfbf.info",
         },
+        body: JSON.stringify({
+          branche: "handwerk",
+          companyName: "NoquotaCo",
+        }),
       });
       expect(res.status).toBe(403);
       const body = (await res.json()) as any;
