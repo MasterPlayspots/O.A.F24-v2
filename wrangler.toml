@@ -10,11 +10,10 @@ compatibility_flags = ["nodejs_compat"]
 # account_id = "your-cloudflare-account-id"
 
 [vars]
+
 ENVIRONMENT = "production"
 API_VERSION = "v1"
-# Both Fund24 and ZFBF frontends connect to this worker
 FRONTEND_URL = "https://zfbf.info"
-FUND24_URL = "https://fund24.io"
 
 # D1 Databases
 [[d1_databases]]
