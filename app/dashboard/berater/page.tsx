@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/store/authStore';
 import { useVerifiedGuard } from '@/lib/hooks/useVerifiedGuard';
 import { useMount } from '@/lib/hooks/useMount';
@@ -28,7 +27,6 @@ interface ProjektWithDetails extends TrackerVorgang {
 }
 
 export default function BeraterDashboardPage() {
-  const router = useRouter();
   const { token, istBerater } = useAuth();
   const { loading: guardLoading } = useVerifiedGuard();
   const isMounted = useMount();
@@ -45,8 +43,8 @@ export default function BeraterDashboardPage() {
         setFehler('');
         const result = await getDashboard('berater', token);
         setData(result as DashboardBerater);
-      } catch (error: any) {
-        setFehler(error?.message || 'Fehler beim Laden der Daten');
+      } catch (error) {
+        setFehler(error instanceof Error ? error.message : 'Fehler beim Laden der Daten');
       } finally {
         setLadet(false);
       }
@@ -67,8 +65,8 @@ export default function BeraterDashboardPage() {
           neueAnfragen: ((prev.neueAnfragen as AnfrageWithDetails[]) || []).filter((a: AnfrageWithDetails) => a.id !== anfrageId),
         };
       });
-    } catch (error: any) {
-      setFehler(error?.message || 'Fehler beim Akzeptieren');
+    } catch (error) {
+      setFehler(error instanceof Error ? error.message : 'Fehler beim Akzeptieren');
     } finally {
       setProcessing(null);
     }
@@ -86,8 +84,8 @@ export default function BeraterDashboardPage() {
           neueAnfragen: ((prev.neueAnfragen as AnfrageWithDetails[]) || []).filter((a: AnfrageWithDetails) => a.id !== anfrageId),
         };
       });
-    } catch (error: any) {
-      setFehler(error?.message || 'Fehler beim Ablehnen');
+    } catch (error) {
+      setFehler(error instanceof Error ? error.message : 'Fehler beim Ablehnen');
     } finally {
       setProcessing(null);
     }

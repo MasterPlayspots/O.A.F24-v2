@@ -30,7 +30,7 @@ export default async function NewsArticlePage({ params }: PageProps) {
   let article
   try {
     article = await getNewsArtikel(slug)
-  } catch (error) {
+  } catch {
     notFound()
   }
 
@@ -89,6 +89,7 @@ export default async function NewsArticlePage({ params }: PageProps) {
           {/* Featured Image */}
           {article.titelbildUrl && (
             <div className="mb-8 rounded-lg overflow-hidden h-96 bg-gray-200">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={article.titelbildUrl}
                 alt={article.titel}

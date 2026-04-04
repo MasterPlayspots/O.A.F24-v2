@@ -90,8 +90,8 @@ export default function DienstleistungenPage() {
         await addDienstleistung(entry, token!);
       }
       router.push('/dashboard/berater');
-    } catch (error: any) {
-      setFehler(error?.message || 'Ein Fehler ist aufgetreten');
+    } catch (error) {
+      setFehler(error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten');
     } finally {
       setLadet(false);
     }

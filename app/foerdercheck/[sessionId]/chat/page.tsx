@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/lib/store/authStore'
 import { useVerifiedGuard } from '@/lib/hooks/useVerifiedGuard'
 import { getCheck, chatNachricht } from '@/lib/api/check'
-import type { CheckSession, ChatNachricht } from '@/lib/types'
+import type { CheckSession, ChatNachricht, CheckErgebnis } from '@/lib/types'
 import { SchrittAnzeige } from '@/components/shared/SchrittAnzeige'
 import { LadeSpinner } from '@/components/shared/LadeSpinner'
 import { FehlerBox } from '@/components/shared/FehlerBox'
@@ -18,7 +18,7 @@ const SCHRITTE = ['Angaben', 'Chat', 'Dokumente', 'Analyse', 'Ergebnisse']
 
 interface CombinedCheck extends CheckSession {
   nachrichten: ChatNachricht[]
-  ergebnisse: any[]
+  ergebnisse: CheckErgebnis[]
 }
 
 export default function ChatPage() {
@@ -205,7 +205,7 @@ export default function ChatPage() {
                 onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault()
-                    handleSendMessage(e as any)
+                    handleSendMessage(e as unknown as React.FormEvent<HTMLFormElement>)
                   }
                 }}
                 placeholder="Schreiben Sie Ihre Antwort... (Enter zum Senden, Shift+Enter für Zeilenumbruch)"

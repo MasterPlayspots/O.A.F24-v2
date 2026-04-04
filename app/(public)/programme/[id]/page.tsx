@@ -17,7 +17,7 @@ export default async function ProgrammDetailPage({
   let programm;
   try {
     programm = await getProgramm(Number(id));
-  } catch (error) {
+  } catch {
     notFound();
   }
 

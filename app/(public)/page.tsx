@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { getStats } from '@/lib/api/fund24'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 export const revalidate = 3600
 

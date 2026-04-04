@@ -21,7 +21,7 @@ import { LadeSpinner } from '@/components/shared/LadeSpinner'
 import { FehlerBox } from '@/components/shared/FehlerBox'
 import { marked } from 'marked'
 import sanitizeHtml from 'sanitize-html'
-import { Edit, Trash2, Plus, ArrowLeft } from 'lucide-react'
+import { Edit, Plus, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import type { NewsArtikel } from '@/lib/types'
 

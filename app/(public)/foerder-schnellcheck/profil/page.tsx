@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 import { LadeSpinner } from '@/components/shared/LadeSpinner'
 import { FehlerBox } from '@/components/shared/FehlerBox'
 import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { ArrowRight, TrendingUp, Zap } from 'lucide-react'
 
 export default function ProfilPage() {

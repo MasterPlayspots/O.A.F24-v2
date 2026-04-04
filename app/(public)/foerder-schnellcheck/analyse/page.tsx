@@ -20,7 +20,6 @@ export default function AnalysePage() {
   const store = usePreCheck()
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0)
   const [error, setError] = useState<string | null>(null)
-  const [isPolling, setIsPolling] = useState(true)
 
   useEffect(() => {
     // Redirect guard
@@ -37,7 +36,7 @@ export default function AnalysePage() {
     const pollInterval = setInterval(async () => {
       try {
         const response = await ladeStatus(store.sessionId!)
-        const status = response.status as any
+        const status = response.status as string
 
         // Update phase index
         const phaseIndex = PHASES.findIndex((p) => p.value === status)
@@ -47,10 +46,8 @@ export default function AnalysePage() {
 
         // Check for completion
         if (status === 'profil_ready') {
-          setIsPolling(false)
           router.push('/foerder-schnellcheck/profil')
         } else if (status === 'fehler') {
-          setIsPolling(false)
           setError('Analyse konnte nicht abgeschlossen werden. Bitte versuchen Sie es später erneut.')
         }
       } catch (err) {

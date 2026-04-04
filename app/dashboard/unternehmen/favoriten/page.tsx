@@ -42,8 +42,8 @@ export default function FavoritenPage() {
           id: String(id),
           programm_name: 'Förderprogramm',
         })));
-      } catch (error: any) {
-        setFehler(error?.message || 'Fehler beim Laden der Favoriten');
+      } catch (error) {
+        setFehler(error instanceof Error ? error.message : 'Fehler beim Laden der Favoriten');
       } finally {
         setLadet(false);
       }
@@ -58,8 +58,8 @@ export default function FavoritenPage() {
       setLoescht(id);
       await removeFavorit(parseInt(id, 10), token);
       setFavoriten(favoriten.filter((f: FavoritItem) => f.id !== id));
-    } catch (error: any) {
-      setFehler(error?.message || 'Fehler beim Löschen');
+    } catch (error) {
+      setFehler(error instanceof Error ? error.message : 'Fehler beim Löschen');
     } finally {
       setLoescht(null);
     }

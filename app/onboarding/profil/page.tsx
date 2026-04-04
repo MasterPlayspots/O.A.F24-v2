@@ -69,7 +69,6 @@ export default function ProfilPage() {
   const { token } = useAuth();
   const [fehler, setFehler] = useState('');
   const [ladet, setLadet] = useState(false);
-  const [bioCount, setBioCount] = useState(0);
 
   const {
     register,
@@ -78,6 +77,7 @@ export default function ProfilPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(schema) as any,
     defaultValues: {
       displayName: '',
@@ -88,8 +88,8 @@ export default function ProfilPage() {
     },
   });
 
-  const selectedBranchen = watch('branchen');
   const bioValue = watch('bio');
+  const bioCount = bioValue?.length || 0;
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
@@ -101,8 +101,8 @@ export default function ProfilPage() {
       setLadet(true);
       await updateBeraterProfil(data, token);
       router.push('/onboarding/expertise');
-    } catch (error: any) {
-      setFehler(error?.message || 'Ein Fehler ist aufgetreten');
+    } catch (error) {
+      setFehler(error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten');
     } finally {
       setLadet(false);
     }

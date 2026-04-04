@@ -1,14 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/store/authStore';
 import { useVerifiedGuard } from '@/lib/hooks/useVerifiedGuard';
 import { useMount } from '@/lib/hooks/useMount';
 import { getDashboard } from '@/lib/api/check';
 import { DashboardUnternehmen, CheckSession } from '@/lib/types';
-import { LadeSpinner } from '@/components/shared/LadeSpinner';
 import { FehlerBox } from '@/components/shared/FehlerBox';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -25,7 +23,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronRight, FileText, Mail, Star, TrendingUp } from 'lucide-react';
 
 export default function UnternehmenDashboardPage() {
-  const router = useRouter();
   const { token, istUnternehmen } = useAuth();
   const { loading: guardLoading } = useVerifiedGuard();
   const isMounted = useMount();
@@ -41,8 +38,8 @@ export default function UnternehmenDashboardPage() {
         setFehler('');
         const result = await getDashboard('unternehmen', token);
         setData(result as DashboardUnternehmen);
-      } catch (error: any) {
-        setFehler(error?.message || 'Fehler beim Laden der Daten');
+      } catch (error) {
+        setFehler(error instanceof Error ? error.message : 'Fehler beim Laden der Daten');
       } finally {
         setLadet(false);
       }

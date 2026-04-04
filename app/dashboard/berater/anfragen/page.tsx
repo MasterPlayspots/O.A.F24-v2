@@ -18,10 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle, XCircle, Mail } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 
 interface AnfrageWithDetails extends Anfrage {
   unternehmen_name?: string;
@@ -47,8 +47,8 @@ export default function BeraterAnfragenPage() {
         const result = await getAnfragen(token, 'berater');
         const anfrageData = Array.isArray(result) ? result : (result.anfragen || []);
         setAnfragen(anfrageData as AnfrageWithDetails[]);
-      } catch (error: any) {
-        setFehler(error?.message || 'Fehler beim Laden der Anfragen');
+      } catch (error) {
+        setFehler(error instanceof Error ? error.message : 'Fehler beim Laden der Anfragen');
       } finally {
         setLadet(false);
       }
@@ -65,8 +65,8 @@ export default function BeraterAnfragenPage() {
       setAnfragen(anfragen.map((a: AnfrageWithDetails) =>
         a.id === anfrageId ? { ...a, status: 'angenommen' } : a
       ));
-    } catch (error: any) {
-      setFehler(error?.message || 'Fehler beim Akzeptieren');
+    } catch (error) {
+      setFehler(error instanceof Error ? error.message : 'Fehler beim Akzeptieren');
     } finally {
       setProcessing(null);
     }
@@ -80,8 +80,8 @@ export default function BeraterAnfragenPage() {
       setAnfragen(anfragen.map((a: AnfrageWithDetails) =>
         a.id === anfrageId ? { ...a, status: 'abgelehnt' } : a
       ));
-    } catch (error: any) {
-      setFehler(error?.message || 'Fehler beim Ablehnen');
+    } catch (error) {
+      setFehler(error instanceof Error ? error.message : 'Fehler beim Ablehnen');
     } finally {
       setProcessing(null);
     }
@@ -108,7 +108,7 @@ export default function BeraterAnfragenPage() {
     );
   }
 
-  const getStatusBadgeColor = (status: string) => {
+  const getStatusBadgeColor = (status: string): BadgeProps['variant'] => {
     switch (status) {
       case 'offen':
         return 'secondary';
@@ -246,7 +246,7 @@ export default function BeraterAnfragenPage() {
                           </TableCell>
                           <TableCell>{anfrage.dienstleistung_name || '-'}</TableCell>
                           <TableCell>
-                            <Badge variant={getStatusBadgeColor(anfrage.status) as any}>
+                            <Badge variant={getStatusBadgeColor(anfrage.status)}>
                               {getStatusLabel(anfrage.status)}
                             </Badge>
                           </TableCell>

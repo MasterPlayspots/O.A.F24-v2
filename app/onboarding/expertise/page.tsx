@@ -86,8 +86,8 @@ export default function ExpertisePage() {
         await addExpertise(entry, token!);
       }
       router.push('/onboarding/dienstleistungen');
-    } catch (error: any) {
-      setFehler(error?.message || 'Ein Fehler ist aufgetreten');
+    } catch (error) {
+      setFehler(error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten');
     } finally {
       setLadet(false);
     }

@@ -173,7 +173,7 @@ export default function AdminProvisionenPage() {
         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
           Nach Status filtern
         </label>
-        <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as any)}>
+        <Select value={statusFilter} onValueChange={(val: string | null) => setStatusFilter((val ?? '') as ProvisionStatus | '')}>
           <SelectTrigger className="mt-1">
             <SelectValue placeholder="Alle Status" />
           </SelectTrigger>
@@ -242,8 +242,8 @@ export default function AdminProvisionenPage() {
                   <TableCell>
                     <Select
                       value={prov.status}
-                      onValueChange={(val) =>
-                        handleStatusChange(prov.id, val as ProvisionStatus)
+                      onValueChange={(val: string | null) =>
+                        handleStatusChange(prov.id, (val ?? prov.status) as ProvisionStatus)
                       }
                       disabled={updatingId === prov.id}
                     >

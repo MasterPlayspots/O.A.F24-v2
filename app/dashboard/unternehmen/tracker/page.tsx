@@ -6,14 +6,12 @@ import { useVerifiedGuard } from '@/lib/hooks/useVerifiedGuard';
 import { useMount } from '@/lib/hooks/useMount';
 import { getTracker, updateTrackerPhase } from '@/lib/api/check';
 import { TrackerVorgang, TrackerPhase } from '@/lib/types';
-import { LadeSpinner } from '@/components/shared/LadeSpinner';
 import { FehlerBox } from '@/components/shared/FehlerBox';
 import { LeererZustand } from '@/components/shared/LeererZustand';
-import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { GripVertical, FileText } from 'lucide-react';
+import { GripVertical } from 'lucide-react';
 
 interface TrackerItem extends TrackerVorgang {
   unternehmen_name?: string;
@@ -44,8 +42,8 @@ export default function UnternehmenTrackerPage() {
         setFehler('');
         const { vorgaenge } = await getTracker(token);
         setItems(vorgaenge || []);
-      } catch (error: any) {
-        setFehler(error?.message || 'Fehler beim Laden des Trackers');
+      } catch (error) {
+        setFehler(error instanceof Error ? error.message : 'Fehler beim Laden des Trackers');
       } finally {
         setLadet(false);
       }
@@ -72,8 +70,8 @@ export default function UnternehmenTrackerPage() {
     try {
       if (!token) throw new Error('Kein Token');
       await updateTrackerPhase(draggableId, newPhase, token);
-    } catch (error: any) {
-      setFehler(error?.message || 'Fehler beim Aktualisieren');
+    } catch (error) {
+      setFehler(error instanceof Error ? error.message : 'Fehler beim Aktualisieren');
       setOptimistic((prev) => {
         const copy = { ...prev };
         delete copy[draggableId];

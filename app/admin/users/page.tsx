@@ -77,8 +77,8 @@ export default function AdminUsersPage() {
     }
     try {
       setUpdatingId(userId)
-      await updateAdminUser(userId, { role: newRole as any }, token)
-      setUsers(users.map((u) => (u.id === userId ? { ...u, role: newRole as any } : u)))
+      await updateAdminUser(userId, { role: newRole as Nutzer['role'] }, token)
+      setUsers(users.map((u) => (u.id === userId ? { ...u, role: newRole as Nutzer['role'] } : u)))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Update')
     } finally {

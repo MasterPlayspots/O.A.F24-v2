@@ -31,7 +31,7 @@ function ProgrammSkeleton() {
 
 export function ProgrammListe({
   filterOptions,
-  initialFilter,
+  initialFilter: _initialFilter,
 }: ProgrammListeProps) {
   const [offset, setOffset] = useState(0)
   const [bundesland, setBundesland] = useState('')

@@ -102,6 +102,7 @@ export default function NewsPage() {
                 <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col cursor-pointer">
                   {article.titelbildUrl && (
                     <div className="h-48 overflow-hidden bg-gray-200">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={article.titelbildUrl}
                         alt={article.titel}

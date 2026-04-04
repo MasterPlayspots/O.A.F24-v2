@@ -18,10 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileUp, File, Euro, AlertCircle } from 'lucide-react';
+import { FileUp, File, AlertCircle } from 'lucide-react';
 
 interface ProvisionVertrag extends Provision {
   unternehmen_name?: string;
@@ -45,10 +45,10 @@ export default function AbwicklungPage() {
       try {
         setFehler('');
         const result = await getProvisionVertraege(token);
-        const vertraegeData = Array.isArray(result) ? result : (result as any).provisionen || [];
+        const vertraegeData = Array.isArray(result) ? result : (result as { provisionen: ProvisionVertrag[] }).provisionen || [];
         setVertraege(vertraegeData);
-      } catch (error: any) {
-        setFehler(error?.message || 'Fehler beim Laden der Provisionen');
+      } catch (error) {
+        setFehler(error instanceof Error ? error.message : 'Fehler beim Laden der Provisionen');
       } finally {
         setLadet(false);
       }
@@ -77,10 +77,10 @@ export default function AbwicklungPage() {
       formData.append('file', file);
       await uploadAbwicklungDokument(vertragId, formData, token);
       const result = await getProvisionVertraege(token);
-      const vertraegeData = Array.isArray(result) ? result : (result as any).provisionen || [];
+      const vertraegeData = Array.isArray(result) ? result : (result as { provisionen: ProvisionVertrag[] }).provisionen || [];
       setVertraege(vertraegeData);
-    } catch (error: any) {
-      setFehler(error?.message || 'Fehler beim Upload');
+    } catch (error) {
+      setFehler(error instanceof Error ? error.message : 'Fehler beim Upload');
     } finally {
       setUploading(null);
     }
@@ -111,7 +111,7 @@ export default function AbwicklungPage() {
     );
   }
 
-  const getStatusBadgeColor = (status: string) => {
+  const getStatusBadgeColor = (status: string): BadgeProps['variant'] => {
     switch (status) {
       case 'offen':
         return 'secondary';
@@ -182,7 +182,7 @@ export default function AbwicklungPage() {
                         })}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={getStatusBadgeColor(vertrag.status) as any}>
+                        <Badge variant={getStatusBadgeColor(vertrag.status)}>
                           {getStatusLabel(vertrag.status)}
                         </Badge>
                       </TableCell>

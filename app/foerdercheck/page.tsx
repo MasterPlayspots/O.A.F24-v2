@@ -96,6 +96,7 @@ export default function FoerdercheckPage() {
     setValue,
     formState: { errors },
   } = useForm<FormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(formSchema) as any,
   })
 

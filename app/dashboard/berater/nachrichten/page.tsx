@@ -51,8 +51,8 @@ export default function NachrichtenPage() {
         if (accepted.length > 0 && !selectedAnfrageId) {
           setSelectedAnfrageId(accepted[0].id);
         }
-      } catch (error: any) {
-        setFehler(error?.message || 'Fehler beim Laden der Anfragen');
+      } catch (error) {
+        setFehler(error instanceof Error ? error.message : 'Fehler beim Laden der Anfragen');
       } finally {
         setLadet(false);
       }
@@ -68,8 +68,8 @@ export default function NachrichtenPage() {
       try {
         const { nachrichten: nachrichtenData } = await getNachrichten(selectedAnfrageId, token);
         setNachrichten(nachrichtenData || []);
-      } catch (error: any) {
-        setFehler(error?.message || 'Fehler beim Laden der Nachrichten');
+      } catch (error) {
+        setFehler(error instanceof Error ? error.message : 'Fehler beim Laden der Nachrichten');
       }
     };
 
@@ -92,8 +92,8 @@ export default function NachrichtenPage() {
       setNachrichtText('');
       const { nachrichten: nachrichtenData } = await getNachrichten(selectedAnfrageId, token);
       setNachrichten(nachrichtenData || []);
-    } catch (error: any) {
-      setFehler(error?.message || 'Fehler beim Senden');
+    } catch (error) {
+      setFehler(error instanceof Error ? error.message : 'Fehler beim Senden');
     } finally {
       setSende(false);
     }

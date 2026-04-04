@@ -6,7 +6,6 @@ import { useVerifiedGuard } from '@/lib/hooks/useVerifiedGuard';
 import { useMount } from '@/lib/hooks/useMount';
 import { getAnfragen } from '@/lib/api/check';
 import { Anfrage } from '@/lib/types';
-import { LadeSpinner } from '@/components/shared/LadeSpinner';
 import { FehlerBox } from '@/components/shared/FehlerBox';
 import { LeererZustand } from '@/components/shared/LeererZustand';
 import { Card } from '@/components/ui/card';
@@ -18,10 +17,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Mail } from 'lucide-react';
+
 
 interface AnfrageWithDetails extends Anfrage {
   berater_name?: string;
@@ -46,8 +45,8 @@ export default function UnternehmenAnfragenPage() {
         const result = await getAnfragen(token, 'unternehmen');
         const anfragenData = Array.isArray(result) ? result : (result.anfragen || []);
         setAnfragen(anfragenData as AnfrageWithDetails[]);
-      } catch (error: any) {
-        setFehler(error?.message || 'Fehler beim Laden der Anfragen');
+      } catch (error) {
+        setFehler(error instanceof Error ? error.message : 'Fehler beim Laden der Anfragen');
       } finally {
         setLadet(false);
       }
@@ -77,7 +76,7 @@ export default function UnternehmenAnfragenPage() {
     );
   }
 
-  const getStatusBadgeColor = (status: string) => {
+  const getStatusBadgeColor = (status: string): BadgeProps['variant'] => {
     switch (status) {
       case 'offen':
         return 'secondary';
@@ -137,7 +136,7 @@ export default function UnternehmenAnfragenPage() {
                       </TableCell>
                       <TableCell>{anfrage.nachricht || '-'}</TableCell>
                       <TableCell>
-                        <Badge variant={getStatusBadgeColor(anfrage.status) as any}>
+                        <Badge variant={getStatusBadgeColor(anfrage.status)}>
                           {getStatusLabel(anfrage.status)}
                         </Badge>
                       </TableCell>

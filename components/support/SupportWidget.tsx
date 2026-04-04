@@ -19,11 +19,11 @@ export function SupportWidget() {
             </button>
           </div>
           <div className="space-y-3">
-            <a href="tel:+4900000000000" className="flex items-center gap-3 rounded-lg p-2 text-sm hover:bg-muted">
+            <a href="tel:+4915129617192" className="flex items-center gap-3 rounded-lg p-2 text-sm hover:bg-muted">
               <Phone size={16} className="text-primary" />
               <div>
                 <p className="font-medium">Telefon</p>
-                <p className="text-xs text-muted-foreground">+49 (0) XX XXXXXXXX</p>
+                <p className="text-xs text-muted-foreground">+49 1512 9617192</p>
               </div>
             </a>
             <a href="mailto:support@fund24.io" className="flex items-center gap-3 rounded-lg p-2 text-sm hover:bg-muted">

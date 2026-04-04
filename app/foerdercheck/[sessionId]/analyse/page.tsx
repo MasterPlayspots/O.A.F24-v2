@@ -6,7 +6,6 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@/lib/store/authStore'
 import { useVerifiedGuard } from '@/lib/hooks/useVerifiedGuard'
 import { getCheck } from '@/lib/api/check'
-import type { CheckSession, ChatNachricht, CheckErgebnis } from '@/lib/types'
 import { SchrittAnzeige } from '@/components/shared/SchrittAnzeige'
 import { LadeSpinner } from '@/components/shared/LadeSpinner'
 import { Button } from '@/components/ui/button'
@@ -23,11 +22,6 @@ const PHASES = [
   'Kombinations-Optimierer kalkuliert...',
   'Finanzierungsarchitekt erstellt Plan...',
 ]
-
-interface CombinedCheck extends CheckSession {
-  nachrichten: ChatNachricht[]
-  ergebnisse: CheckErgebnis[]
-}
 
 export default function AnalysePage() {
   const { loading } = useVerifiedGuard()
@@ -108,7 +102,7 @@ export default function AnalysePage() {
         if (data.status === 'ergebnis') {
           router.push(`/foerdercheck/${sessionId}/ergebnisse`)
         }
-      } catch (err) {
+      } catch {
         // Ignore errors on initial check
       }
     }
