@@ -10,7 +10,5 @@ function requireEnv(key: string): string {
 
 export const API = {
   CHECK:    requireEnv('NEXT_PUBLIC_CHECK_API_URL'),
-  SEMANTIC: requireEnv('NEXT_PUBLIC_SEMANTIC_API_URL'),
   FUND24:   requireEnv('NEXT_PUBLIC_FUND24_API_URL'),
-  ZFBF:     requireEnv('NEXT_PUBLIC_ZFBF_API_URL'),
 } as const
