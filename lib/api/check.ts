@@ -37,14 +37,13 @@ export async function chatNachricht(
 export async function dokumenteHochladen(
   sessionId: string, formData: FormData, token: string
 ): Promise<{ ok: boolean }> {
-  // Direkt fetch — kein Content-Type Header (Browser setzt Boundary):
-  const res = await fetch(`${API.CHECK}/api/checks/${sessionId}/docs`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData,
-  })
-  if (!res.ok) throw new Error('Upload fehlgeschlagen')
-  return res.json()
+  // apiCall erkennt FormData und entfernt Content-Type automatisch:
+  return apiCall<{ ok: boolean }>(
+    API.CHECK,
+    `/api/checks/${sessionId}/docs`,
+    { method: 'POST', body: formData },
+    token
+  )
 }
 
 export async function schwarmStarten(sessionId: string, token: string): Promise<{ ok: boolean }> {
@@ -203,13 +202,14 @@ export async function getProvisionVertraege(token: string): Promise<{ provisione
 export async function uploadAbwicklungDokument(
   provisionId: string, formData: FormData, token: string
 ): Promise<{ ok: boolean }> {
-  const res = await fetch(`${API.CHECK}/api/berater/abwicklung/upload`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData,
-  })
-  if (!res.ok) throw new Error('Upload fehlgeschlagen')
-  return res.json()
+  // provisionId mitgeben, damit der Worker die Datei zuordnen kann:
+  formData.set('provisionId', provisionId)
+  return apiCall<{ ok: boolean }>(
+    API.CHECK,
+    `/api/berater/abwicklung/upload`,
+    { method: 'POST', body: formData },
+    token
+  )
 }
 
 // ── ADMIN ────────────────────────────────────────────────────

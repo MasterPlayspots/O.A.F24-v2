@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# fund24 — Frontend (Next.js 15)
 
-## Getting Started
+Web-Frontend der fund24-Plattform: KI-gestützter Fördermittel-Check für deutsche Unternehmen, Berater-Marktplatz und Vorgangs-Tracker.
 
-First, run the development server:
+## Architektur
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+fund24 (dieses Repo, Next.js 15 / App Router)
+   │
+   ├──> foerdermittel-check-api    (Cloudflare Worker · Auth, Checks, Anfragen, Tracker, Berater, Admin, News)
+   ├──> fund24-api                  (Cloudflare Worker · Förderprogramm-Katalog, Filter, Stats)
+   ├──> fund24-semantic-search      (Cloudflare Worker · Embedding-Suche)
+   └──> zfbf-api                    (Cloudflare Worker · ZFBF-Daten)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Backend liegt in separaten Cloudflare-Worker-Repos. Daten in Cloudflare D1.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+git clone https://github.com/MasterPlayspots/O.A.F24-v2 fund24
+cd fund24
+npm install
+cp .env.example .env.local   # Worker-URLs eintragen
+npm run dev
+```
 
-## Learn More
+App läuft auf <http://localhost:3000>.
 
-To learn more about Next.js, take a look at the following resources:
+## Environment Variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Siehe `.env.example`. In **Vercel** müssen folgende Variablen für die Production-Umgebung gesetzt sein:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Variable | Zweck |
+|---|---|
+| `NEXT_PUBLIC_CHECK_API_URL` | foerdermittel-check-api Worker |
+| `NEXT_PUBLIC_FUND24_API_URL` | fund24-api Worker |
+| `NEXT_PUBLIC_SEMANTIC_API_URL` | fund24-semantic-search Worker |
+| `NEXT_PUBLIC_ZFBF_API_URL` | zfbf-api Worker |
+| `JWT_SECRET` *(server-only!)* | Muss mit dem Secret des check-api Workers übereinstimmen — wird von der Next.js-Middleware zur Token-Verifikation genutzt |
 
-## Deploy on Vercel
+## Skripte
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Befehl | Aktion |
+|---|---|
+| `npm run dev` | Dev-Server (Turbopack) |
+| `npm run build` | Production-Build |
+| `npm run start` | Start des Production-Builds |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript ohne Emit |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Auth-Flow
+
+1. Login-/Register-Form ruft den Worker auf und erhält ein JWT.
+2. Frontend sendet das JWT an `POST /api/session` (Next.js Route Handler).
+3. Route Handler setzt das Token als **HttpOnly-Cookie** `fund24-token` (SameSite=Lax, Secure in Production).
+4. Die Next.js-Middleware liest das Cookie auf jeder geschützten Route, verifiziert die Signatur (`jose.jwtVerify` gegen `JWT_SECRET`) und prüft für `/admin` zusätzlich `role=admin`.
+5. Logout ruft `DELETE /api/session` auf, das das Cookie löscht.
+
+## Verzeichnisstruktur
+
+```
+app/
+  (auth)/        Login, Register, Verify, Passwort-Reset
+  (public)/      Landing, Programme, Berater, News, Legal, Pricing, Schnellcheck
+  admin/         Admin-Dashboard (role=admin)
+  dashboard/     Dashboards für unternehmen + berater
+  foerdercheck/  Vollständiger Fördercheck-Flow
+  onboarding/    Berater-Onboarding
+  api/session/   HttpOnly-Cookie-Set/Delete
+components/      shadcn/ui + Domain-Komponenten
+lib/
+  api/           Worker-Clients (auth, check, fund24, precheck)
+  store/         Zustand-Stores
+  types.ts       Domain-Typen
+middleware.ts    JWT-Middleware
+```
+
+## Deployment
+
+Auto-Deploy via Vercel bei Push auf `main`. Siehe `DEPLOY.md` für Erst-Setup (Env-Vars, Worker-Secrets, JWT-Rotation).

@@ -90,7 +90,7 @@ npm i -g wrangler
 wrangler login
 
 # JWT Secret setzen (bereits generiert)
-echo "f9f3d8a0553d3cf121b8530112fd9e2afd07c94a52aee0d92863a4bf43bafe62" | wrangler secret put JWT_SECRET --name foerdermittel-check-api
+echo "<REDACTED-ROTATED-2026-04-07>" | wrangler secret put JWT_SECRET --name foerdermittel-check-api
 
 # Anthropic API Key setzen (NEUEN Key verwenden — siehe Schritt 5!)
 echo "DEIN_NEUER_API_KEY" | wrangler secret put ANTHROPIC_API_KEY --name foerdermittel-check-api
@@ -104,7 +104,7 @@ echo "noreply@fund24.io" | wrangler secret put RESEND_FROM_EMAIL --name foerderm
 
 | Secret | Worker | Status |
 |---|---|---|
-| `JWT_SECRET` | foerdermittel-check-api | Bereit: `f9f3d8a0...fe62` |
+| `JWT_SECRET` | foerdermittel-check-api | Bereit: `<REDACTED>` |
 | `ANTHROPIC_API_KEY` | foerdermittel-check-api | NEUEN Key erstellen (alter ist kompromittiert!) |
 | `RESEND_API_KEY` | foerdermittel-check-api | Noch einzurichten (Schritt 4) |
 | `RESEND_FROM_EMAIL` | foerdermittel-check-api | Noch einzurichten (Schritt 4) |
@@ -202,7 +202,7 @@ Nach dem Deployment diese Punkte prüfen:
 | Was | Wo | Status |
 |---|---|---|
 | Vercel Env Vars (5x) | Vercel Dashboard | Noch zu setzen |
-| JWT_SECRET | CF Worker Secret | `f9f3d8a0...fe62` — bereit |
+| JWT_SECRET | CF Worker Secret | `<REDACTED>` — bereit |
 | ANTHROPIC_API_KEY | CF Worker Secret | NEUEN Key erstellen! |
 | RESEND_API_KEY | CF Worker Secret | Resend Account nötig |
 | RESEND_FROM_EMAIL | CF Worker Secret | Nach Domain-Verifizierung |
