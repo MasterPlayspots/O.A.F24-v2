@@ -78,7 +78,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-10 border-t pt-6 text-center text-xs text-muted-foreground">
-          &copy; 2026 fund24 GmbH &middot; Alle Rechte vorbehalten
+          &copy; 2026 Fröba Sales Solutions UG (haftungsbeschränkt) &middot; Alle Rechte vorbehalten
         </div>
       </div>
     </footer>
