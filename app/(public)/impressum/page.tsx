@@ -23,17 +23,17 @@ export default function ImpressumPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Verantwortlicher im Sinne des TMG und MDStV</h3>
               <div className="bg-gray-50 rounded-lg p-6 space-y-2 text-gray-700">
                 <p>
-                  <strong>fund24 GmbH</strong>
+                  <strong>Fröba Sales Solutions UG (haftungsbeschränkt)</strong>
                 </p>
                 <p>
-                  Musterstraße 123<br />
-                  10115 Berlin<br />
+                  Johann-Nikolaus-Zitter Str. 31<br />
+                  96317 Kronach<br />
                   Deutschland
                 </p>
                 <p>
                   <strong>Vertreten durch:</strong><br />
-                  Max Mustermann (Geschäftsführer)<br />
-                  Mustafa Musterfrau (Geschäftsführerin)
+                  Kevin Fröba (Geschäftsführer)<br />
+                  
                 </p>
               </div>
             </div>
@@ -43,13 +43,13 @@ export default function ImpressumPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Kontaktdaten</h3>
               <div className="bg-gray-50 rounded-lg p-6 space-y-2 text-gray-700">
                 <p>
-                  <strong>Telefon:</strong> +49 (0) 30 1234567
+                  <strong>Telefon:</strong> +49 151 29617192
                 </p>
                 <p>
-                  <strong>E-Mail:</strong> info@fund24.de
+                  <strong>E-Mail:</strong> info@fund24.io
                 </p>
                 <p>
-                  <strong>Webseite:</strong> www.fund24.de
+                  <strong>Webseite:</strong> www.fund24.io
                 </p>
               </div>
             </div>
@@ -59,9 +59,9 @@ export default function ImpressumPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Registereintrag</h3>
               <div className="bg-gray-50 rounded-lg p-6 space-y-2 text-gray-700">
                 <p>
-                  <strong>Handelsregister:</strong> Amtsgericht Charlottenburg, Berlin<br />
-                  <strong>Registernummer:</strong> HRB 123456 B<br />
-                  <strong>USt-ID:</strong> DE123456789
+                  <strong>Handelsregister:</strong> Amtsgericht Coburg<br />
+                  <strong>Registernummer:</strong> HRB-Nr. wird nachgereicht<br />
+                  <strong>USt-ID:</strong> beantragt
                 </p>
               </div>
             </div>
@@ -71,7 +71,7 @@ export default function ImpressumPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Umsatzsteuer-Identifikationsnummer</h3>
               <div className="bg-gray-50 rounded-lg p-6 space-y-2 text-gray-700">
                 <p>
-                  <strong>USt-IdNr.:</strong> DE 123 456 789<br />
+                  <strong>USt-IdNr.:</strong> beantragt<br />
                   Gemäß § 27a Umsatzsteuergesetz (UStG)
                 </p>
               </div>
@@ -86,9 +86,9 @@ export default function ImpressumPage() {
                 </p>
                 <p>
                   <strong>Zuständige Behörde:</strong><br />
-                  Industrie- und Handelskammer Berlin<br />
-                  Kurfürstendamm 33<br />
-                  10719 Berlin
+                  Industrie- und Handelskammer für Oberfranken Bayreuth<br />
+                  Bahnhofstraße 25<br />
+                  95444 Bayreuth
                 </p>
               </div>
             </div>

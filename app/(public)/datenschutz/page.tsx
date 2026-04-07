@@ -19,16 +19,16 @@ export default function DatenschutzPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Verantwortlicher für die Datenverarbeitung</h2>
           <div className="bg-gray-50 rounded-lg p-6 text-gray-700 space-y-2">
             <p>
-              <strong>fund24 GmbH</strong>
+              <strong>Fröba Sales Solutions UG (haftungsbeschränkt)</strong>
             </p>
             <p>
-              Musterstraße 123<br />
-              10115 Berlin<br />
+              Johann-Nikolaus-Zitter Str. 31<br />
+              96317 Kronach<br />
               Deutschland
             </p>
             <p>
-              <strong>E-Mail:</strong> datenschutz@fund24.de<br />
-              <strong>Telefon:</strong> +49 (0) 30 1234567
+              <strong>E-Mail:</strong> info@fund24.io<br />
+              <strong>Telefon:</strong> +49 151 29617192
             </p>
           </div>
         </section>
@@ -160,7 +160,7 @@ export default function DatenschutzPage() {
               <li><strong>Widerspruch (Art. 21 DSGVO):</strong> Sie können der Verarbeitung widersprechen.</li>
             </ul>
             <p className="mt-4">
-              Um Ihre Rechte wahrzunehmen, kontaktieren Sie bitte: <strong>datenschutz@fund24.de</strong>
+              Um Ihre Rechte wahrzunehmen, kontaktieren Sie bitte: <strong>info@fund24.io</strong>
             </p>
           </div>
         </section>
@@ -266,8 +266,8 @@ export default function DatenschutzPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-gray-700">
             <p>
               <strong>Datenschutzbeauftragter:</strong><br />
-              E-Mail: datenschutz@fund24.de<br />
-              Telefon: +49 (0) 30 1234567
+              E-Mail: info@fund24.io<br />
+              Telefon: +49 151 29617192
             </p>
             <p className="mt-4">
               Wir beantworten Datenschutzfragen innerhalb von 30 Tagen.

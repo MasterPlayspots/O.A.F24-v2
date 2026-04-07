@@ -19,7 +19,7 @@ export default function AGBPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Geltungsbereich und Vertragsgegenstand</h2>
           <div className="space-y-4 text-gray-700">
             <p>
-              Diese AGB regeln das Verhältnis zwischen fund24 GmbH (nachfolgend &bdquo;Dienstleister&ldquo; genannt) und den Nutzer der fund24-Plattform (nachfolgend &bdquo;Nutzer&ldquo; oder &bdquo;Kunde&ldquo; genannt).
+              Diese AGB regeln das Verhältnis zwischen Fröba Sales Solutions UG (haftungsbeschränkt) (nachfolgend &bdquo;Dienstleister&ldquo; genannt) und den Nutzer der fund24-Plattform (nachfolgend &bdquo;Nutzer&ldquo; oder &bdquo;Kunde&ldquo; genannt).
             </p>
             <p>
               Die fund24-Plattform ist ein digitales Werkzeug zur Verwaltung, Dokumentation und Abwicklung von Förderanträgen. Der Dienstleister stellt diese Plattform als Software-as-a-Service (SaaS) bereit.
@@ -215,11 +215,11 @@ export default function AGBPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">13. Kontakt und Fragen</h2>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-gray-700">
             <p>
-              <strong>fund24 GmbH</strong><br />
-              Musterstraße 123<br />
-              10115 Berlin<br />
-              E-Mail: kontakt@fund24.de<br />
-              Telefon: +49 (0) 30 1234567
+              <strong>Fröba Sales Solutions UG (haftungsbeschränkt)</strong><br />
+              Johann-Nikolaus-Zitter Str. 31<br />
+              96317 Kronach<br />
+              E-Mail: info@fund24.io<br />
+              Telefon: +49 151 29617192
             </p>
           </div>
         </section>
