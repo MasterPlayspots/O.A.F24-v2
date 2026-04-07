@@ -8,6 +8,7 @@ import { useMount } from '@/lib/hooks/useMount'
 import { useAuth } from '@/lib/store/authStore'
 import { logout as apiLogout } from '@/lib/api/auth'
 import { Badge } from '@/components/ui/badge'
+import { NotificationsBell } from '@/components/shared/NotificationsBell'
 
 const NAV_LINKS = [
   { href: '/programme', label: 'Programme' },
@@ -87,6 +88,7 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          {mounted && nutzer && <NotificationsBell />}
           {mounted && nutzer ? (
             <div className="relative" ref={dropdownRef}>
               <button

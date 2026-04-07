@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/store/authStore'
 import { getAdminDashboard } from '@/lib/api/check'
+import { listPendingCerts, approveCert, rejectCert, type CertPending } from '@/lib/api/fund24'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { LadeSpinner } from '@/components/shared/LadeSpinner'
@@ -18,6 +19,26 @@ export default function AdminPage() {
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [pendingCerts, setPendingCerts] = useState<CertPending[]>([])
+  const [certBusy, setCertBusy] = useState<string | null>(null)
+
+  const loadCerts = async () => {
+    try {
+      const data = await listPendingCerts()
+      setPendingCerts(data || [])
+    } catch {
+      /* silent */
+    }
+  }
+
+  const handleApprove = async (id: string) => {
+    setCertBusy(id)
+    try { await approveCert(id); await loadCerts() } finally { setCertBusy(null) }
+  }
+  const handleReject = async (id: string) => {
+    setCertBusy(id)
+    try { await rejectCert(id); await loadCerts() } finally { setCertBusy(null) }
+  }
 
   useEffect(() => {
     // Guard: nur Admin
@@ -42,6 +63,7 @@ export default function AdminPage() {
     }
 
     fetchDashboard()
+    loadCerts()
   }, [token, istAdmin, router])
 
   if (isLoading) {
@@ -129,6 +151,35 @@ export default function AdminPage() {
             </Card>
           )
         })}
+      </div>
+
+      {/* Pending BAFA-Zertifizierungen */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Offene BAFA-Zertifizierungen ({pendingCerts.length})
+        </h2>
+        {pendingCerts.length === 0 ? (
+          <Card className="p-6 text-sm text-gray-500">Keine offenen Anträge.</Card>
+        ) : (
+          <div className="space-y-3">
+            {pendingCerts.map((c) => (
+              <Card key={c.user_id} className="p-4 flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-semibold text-gray-900 dark:text-white">{c.email}</p>
+                  <p className="text-xs text-gray-500">User-ID: {c.user_id}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => handleApprove(c.user_id)} disabled={certBusy === c.user_id}>
+                    Freigeben
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleReject(c.user_id)} disabled={certBusy === c.user_id}>
+                    Ablehnen
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Quick Links */}

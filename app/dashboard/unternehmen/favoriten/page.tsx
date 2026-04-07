@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/store/authStore';
 import { useVerifiedGuard } from '@/lib/hooks/useVerifiedGuard';
 import { useMount } from '@/lib/hooks/useMount';
-import { getFavoriten, removeFavorit } from '@/lib/api/check';
+import { listFavoriten, removeFavorit, type Favorit } from '@/lib/api/fund24';
 import { LadeSpinner } from '@/components/shared/LadeSpinner';
 import { FehlerBox } from '@/components/shared/FehlerBox';
 import { LeererZustand } from '@/components/shared/LeererZustand';
@@ -14,18 +14,11 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Star, Trash2 } from 'lucide-react';
 
-interface FavoritItem {
-  id: string;
-  programm_name?: string;
-  beschreibung?: string;
-  kategorien?: string[];
-}
-
 export default function FavoritenPage() {
   const { token, istUnternehmen } = useAuth();
   const { loading: guardLoading } = useVerifiedGuard();
   const isMounted = useMount();
-  const [favoriten, setFavoriten] = useState<FavoritItem[]>([]);
+  const [favoriten, setFavoriten] = useState<Favorit[]>([]);
   const [fehler, setFehler] = useState('');
   const [ladet, setLadet] = useState(true);
   const [loescht, setLoescht] = useState<string | null>(null);
@@ -36,12 +29,8 @@ export default function FavoritenPage() {
     const loadData = async () => {
       try {
         setFehler('');
-        const { favoritenIds } = await getFavoriten(token);
-        // Map IDs to favorit items
-        setFavoriten((favoritenIds || []).map((id: number | string) => ({
-          id: String(id),
-          programm_name: 'Förderprogramm',
-        })));
+        const data = await listFavoriten();
+        setFavoriten(data || []);
       } catch (error) {
         setFehler(error instanceof Error ? error.message : 'Fehler beim Laden der Favoriten');
       } finally {
@@ -56,8 +45,8 @@ export default function FavoritenPage() {
     if (!token) return;
     try {
       setLoescht(id);
-      await removeFavorit(parseInt(id, 10), token);
-      setFavoriten(favoriten.filter((f: FavoritItem) => f.id !== id));
+      await removeFavorit(id);
+      setFavoriten(favoriten.filter((f) => f.programm_id !== id));
     } catch (error) {
       setFehler(error instanceof Error ? error.message : 'Fehler beim Löschen');
     } finally {
@@ -105,39 +94,28 @@ export default function FavoritenPage() {
           />
         ) : (
           <div className="grid gap-4">
-            {favoriten.map((favorit: FavoritItem) => (
-              <Card key={favorit.id} className="p-6 border-slate-200 hover:border-slate-300 transition">
+            {favoriten.map((favorit) => (
+              <Card key={favorit.programm_id} className="p-6 border-slate-200 hover:border-slate-300 transition">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                       <h3 className="text-lg font-semibold text-slate-900">
-                        {favorit.programm_name || 'Förderprogramm'}
+                        Programm {favorit.programm_id}
                       </h3>
                     </div>
                     <p className="text-sm text-slate-600 mb-3">
-                      {favorit.beschreibung || 'Keine Beschreibung'}
+                      Gespeichert am {new Date(favorit.created_at).toLocaleDateString('de-DE')}
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      {favorit.kategorien && favorit.kategorien.length > 0 && (
-                        <>
-                          {favorit.kategorien.map((kat: string) => (
-                            <Badge key={kat} variant="secondary">
-                              {kat}
-                            </Badge>
-                          ))}
-                        </>
-                      )}
-                    </div>
                   </div>
                   <Button
-                    onClick={() => handleRemove(favorit.id)}
-                    disabled={loescht === favorit.id}
+                    onClick={() => handleRemove(favorit.programm_id)}
+                    disabled={loescht === favorit.programm_id}
                     variant="ghost"
                     size="sm"
                     className="text-red-600 hover:text-red-700 hover:bg-red-50 shrink-0"
                   >
-                    {loescht === favorit.id ? (
+                    {loescht === favorit.programm_id ? (
                       <LadeSpinner />
                     ) : (
                       <Trash2 className="w-4 h-4" />
