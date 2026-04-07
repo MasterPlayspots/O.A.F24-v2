@@ -28,8 +28,8 @@ export default function SupportPage() {
             <p className="text-gray-600 mb-4">
               Fragen zu Antragsverfahren, Dokumentation und Förderrichtlinien
             </p>
-            <a href="mailto:abwicklung@fund24.de" className="text-blue-600 hover:text-blue-700 font-semibold">
-              abwicklung@fund24.de
+            <a href="mailto:info@fund24.io" className="text-blue-600 hover:text-blue-700 font-semibold">
+              info@fund24.io
             </a>
             <p className="text-sm text-gray-500 mt-3">Durchschnittliche Antwortzeit: 4 Stunden</p>
           </div>
@@ -45,8 +45,8 @@ export default function SupportPage() {
             <p className="text-gray-600 mb-4">
               Probleme mit der Plattform, Bugs und technische Fragen
             </p>
-            <a href="mailto:support@fund24.de" className="text-blue-600 hover:text-blue-700 font-semibold">
-              support@fund24.de
+            <a href="mailto:info@fund24.io" className="text-blue-600 hover:text-blue-700 font-semibold">
+              info@fund24.io
             </a>
             <p className="text-sm text-gray-500 mt-3">Durchschnittliche Antwortzeit: 2 Stunden</p>
           </div>
@@ -62,8 +62,8 @@ export default function SupportPage() {
             <p className="text-gray-600 mb-4">
               Direkter Kontakt für dringende Anliegen
             </p>
-            <a href="tel:+49301234567" className="text-blue-600 hover:text-blue-700 font-semibold">
-              +49 (0) 30 1234567
+            <a href="tel:+4915129617192" className="text-blue-600 hover:text-blue-700 font-semibold">
+              +49 151 29617192
             </a>
             <p className="text-sm text-gray-500 mt-3">Mo-Fr 9:00-17:00 Uhr</p>
           </div>
@@ -95,8 +95,8 @@ export default function SupportPage() {
               <p className="text-gray-700 text-sm mb-3">
                 Für kritische Systemausfälle außerhalb unserer Servicezeiten:
               </p>
-              <a href="mailto:notfall@fund24.de" className="text-blue-600 hover:text-blue-700 font-semibold">
-                notfall@fund24.de
+              <a href="mailto:info@fund24.io" className="text-blue-600 hover:text-blue-700 font-semibold">
+                info@fund24.io
               </a>
               <p className="text-xs text-gray-600 mt-2">
                 Bitte nutzen Sie diesen Kanal nur für kritische Störungen.
@@ -126,7 +126,7 @@ export default function SupportPage() {
                 2. Kann ich fund24 auch per Telefon erreichen?
               </h3>
               <p className="text-gray-700">
-                Ja, wir bieten Telefon-Support unter +49 (0) 30 1234567 montags bis freitags von 09:00 bis 17:00 Uhr an. Für eine schnellere Bearbeitung komplexer Anliegen empfehlen wir, eine E-Mail zu schreiben und die gewünschte Rückrufzeit anzugeben.
+                Ja, wir bieten Telefon-Support unter +49 151 29617192 montags bis freitags von 09:00 bis 17:00 Uhr an. Für eine schnellere Bearbeitung komplexer Anliegen empfehlen wir, eine E-Mail zu schreiben und die gewünschte Rückrufzeit anzugeben.
               </p>
             </div>
 
@@ -136,17 +136,17 @@ export default function SupportPage() {
                 3. Meine Website oder App funktioniert nicht. Wer ist der richtige Kontakt?
               </h3>
               <p className="text-gray-700">
-                Für alle technischen Probleme wenden Sie sich bitte an unser Technical Support Team unter support@fund24.de. Bitte beschreiben Sie das Problem so detailliert wie möglich und geben Sie Screenshots oder Fehlermeldungen an, damit wir schneller helfen können.
+                Für alle technischen Probleme wenden Sie sich bitte an unser Technical Support Team unter info@fund24.io. Bitte beschreiben Sie das Problem so detailliert wie möglich und geben Sie Screenshots oder Fehlermeldungen an, damit wir schneller helfen können.
               </p>
             </div>
 
             {/* FAQ 4 */}
             <div className="border-b border-gray-200 pb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                4. Was ist der Unterschied zwischen abwicklung@fund24.de und support@fund24.de?
+                4. Was ist der Unterschied zwischen info@fund24.io und info@fund24.io?
               </h3>
               <p className="text-gray-700">
-                <strong>abwicklung@fund24.de</strong> ist zuständig für Fragen zu Förderantrag-Verfahren, Dokumentation und Richtlinien. <strong>support@fund24.de</strong> ist unser Technical Support für Plattform-Probleme, Bugs und technische Fragen.
+                <strong>info@fund24.io</strong> ist zuständig für Fragen zu Förderantrag-Verfahren, Dokumentation und Richtlinien. <strong>info@fund24.io</strong> ist unser Technical Support für Plattform-Probleme, Bugs und technische Fragen.
               </p>
             </div>
 
@@ -168,7 +168,7 @@ export default function SupportPage() {
           <p className="text-blue-100 mb-6">
             Kontaktieren Sie uns direkt – unser Team freut sich auf Ihre Nachricht!
           </p>
-          <a href="mailto:support@fund24.de" className="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+          <a href="mailto:info@fund24.io" className="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
             E-Mail schreiben
           </a>
         </div>
