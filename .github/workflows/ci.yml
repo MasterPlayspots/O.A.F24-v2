@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Lint · Typecheck · Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        env:
+          # Dummy-Werte, damit der Build (der requireEnv server-seitig wirft) durchläuft.
+          # Echte Werte werden nur in Vercel verwendet.
+          NEXT_PUBLIC_CHECK_API_URL: https://example.workers.dev
+          NEXT_PUBLIC_FUND24_API_URL: https://example.workers.dev
+          NEXT_PUBLIC_SEMANTIC_API_URL: https://example.workers.dev
+          NEXT_PUBLIC_ZFBF_API_URL: https://example.workers.dev
+          JWT_SECRET: ci-dummy-secret-not-used-in-production
+        run: npm run build

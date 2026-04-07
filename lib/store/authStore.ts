@@ -6,9 +6,14 @@ import type { Nutzer } from '../types'
 
 interface AuthState {
   nutzer: Nutzer | null
+  /**
+   * Bearer-Token für die Cloudflare Worker. Wird im Memory gehalten,
+   * NICHT mehr im persistenten Storage (XSS-Schutz). Das echte
+   * Session-Cookie ist HttpOnly via /api/session.
+   */
   token: string | null
-  login: (token: string, nutzer: Nutzer) => void
-  logout: () => void
+  login: (token: string, nutzer: Nutzer) => Promise<void>
+  logout: () => Promise<void>
   istEingeloggt: () => boolean
   istUnternehmen: () => boolean
   istBerater: () => boolean
@@ -21,20 +26,31 @@ export const useAuth = create<AuthState>()(
       nutzer: null,
       token: null,
 
-      login: (token, nutzer) => {
+      login: async (token, nutzer) => {
         set({ token, nutzer })
-        // Signal-Cookie für Next.js Middleware (kein sensitiver Inhalt):
-        if (typeof document !== 'undefined') {
-          document.cookie = 'fund24-auth=1; path=/; max-age=86400; SameSite=Lax'
+        // Token an Server-Route geben → setzt HttpOnly-Cookie fund24-token,
+        // das die Middleware verifiziert.
+        try {
+          await fetch('/api/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token }),
+          })
+        } catch (err) {
+          console.error('[fund24] /api/session POST failed', err)
         }
       },
 
-      logout: () => {
-        set({ token: null, nutzer: null })
-        // Signal-Cookie löschen:
-        if (typeof document !== 'undefined') {
-          document.cookie = 'fund24-auth=; path=/; max-age=0; SameSite=Lax'
+      logout: async () => {
+        // Erst Server informieren, dann lokalen State leeren — falls
+        // der Request fehlschlägt, bleibt der User eingeloggt und
+        // kann es erneut versuchen.
+        try {
+          await fetch('/api/session', { method: 'DELETE' })
+        } catch (err) {
+          console.error('[fund24] /api/session DELETE failed', err)
         }
+        set({ token: null, nutzer: null })
       },
 
       istEingeloggt: () => get().nutzer !== null,
@@ -44,7 +60,11 @@ export const useAuth = create<AuthState>()(
     }),
     {
       name: 'fund24-auth',
-      partialize: (state) => ({ nutzer: state.nutzer, token: state.token }),
+      // Nur den Nutzer im localStorage halten, NICHT das Token mehr.
+      // Das Token wird bei Reload aus dem HttpOnly-Cookie nicht
+      // direkt lesbar sein — API-Calls müssen über den Server-Proxy
+      // laufen ODER das Token wird beim ersten Request neu geholt.
+      partialize: (state) => ({ nutzer: state.nutzer }),
     }
   )
 )

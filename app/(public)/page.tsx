@@ -6,12 +6,18 @@ import { ArrowRight } from 'lucide-react'
 export const revalidate = 3600
 
 export default async function LandingPage() {
-  let stats: Awaited<ReturnType<typeof getStats>> | null = null
+  // Fallback-Werte, damit das Hero auch ohne API gerendert wird.
+  // Werden überschrieben, sobald der fund24-api Worker antwortet.
+  let stats: Awaited<ReturnType<typeof getStats>> = {
+    total: 2500,
+    bundesweit: 450,
+    bundeslaender: 16,
+  }
 
   try {
     stats = await getStats()
   } catch (error) {
-    console.error('Fehler beim Abrufen der Statistiken:', error)
+    console.error('Fehler beim Abrufen der Statistiken (Fallback aktiv):', error)
   }
 
   return (
@@ -43,8 +49,7 @@ export default async function LandingPage() {
       </section>
 
       {/* Stats Row */}
-      {stats && (
-        <section className="bg-gray-50 dark:bg-gray-900 py-12 px-6 sm:px-8">
+      <section className="bg-gray-50 dark:bg-gray-900 py-12 px-6 sm:px-8">
           <div className="mx-auto max-w-4xl">
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
               <div className="text-center">
@@ -61,8 +66,7 @@ export default async function LandingPage() {
               </div>
             </div>
           </div>
-        </section>
-      )}
+      </section>
 
       {/* How It Works Section */}
       <section className="py-20 px-6 sm:py-24 sm:px-8">
