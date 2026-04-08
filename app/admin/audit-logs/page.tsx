@@ -81,52 +81,55 @@ export default function AuditLogsPage() {
   const handleFilter = () => load(true)
 
   return (
+    <div className="min-h-screen bg-architect-surface font-body text-white">
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Audit-Logs</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+        <h1 className="font-display text-3xl font-bold text-white">Audit-Logs</h1>
+        <p className="text-sm text-white/60 mt-1">
           Vollständiges Event-Protokoll. Nur für Administratoren.
         </p>
       </div>
 
       {/* Filter-Bar */}
-      <Card className="p-5 mb-6 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md">
+      <Card className="p-5 mb-6 bg-architect-surface/60 border-0 text-white backdrop-blur-md">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wide">
+            <label className="block text-xs font-semibold text-white/60 mb-1.5 uppercase tracking-wide">
               User ID
             </label>
             <Input
               value={filter.user_id}
               onChange={(e) => setFilter((f) => ({ ...f, user_id: e.target.value }))}
               placeholder="u_…"
+              className="bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wide">
+            <label className="block text-xs font-semibold text-white/60 mb-1.5 uppercase tracking-wide">
               Event Type
             </label>
             <Input
               value={filter.action}
               onChange={(e) => setFilter((f) => ({ ...f, action: e.target.value }))}
               placeholder="login, antrag.create, …"
+              className="bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wide">
+            <label className="block text-xs font-semibold text-white/60 mb-1.5 uppercase tracking-wide">
               Limit
             </label>
             <select
               value={filter.limit}
               onChange={(e) => setFilter((f) => ({ ...f, limit: Number(e.target.value) }))}
-              className="w-full h-9 px-3 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white"
+              className="w-full h-9 px-3 rounded-md bg-architect-surface-low/40 text-sm text-white"
             >
               {LIMITS.map((n) => (
                 <option key={n} value={n}>{n}</option>
               ))}
             </select>
           </div>
-          <Button onClick={handleFilter} disabled={loading}>
+          <Button onClick={handleFilter} disabled={loading} className="bg-architect-primary hover:bg-architect-primary-container text-white">
             {loading ? <LadeSpinner /> : 'Filtern'}
           </Button>
         </div>
@@ -135,17 +138,17 @@ export default function AuditLogsPage() {
       {fehler && <div className="mb-6"><FehlerBox fehler={fehler} /></div>}
 
       {/* Tabelle */}
-      <Card className="overflow-hidden bg-white dark:bg-slate-900">
+      <Card className="overflow-hidden bg-architect-surface/60 border-0 text-white">
         {loading ? (
           <div className="p-12 flex justify-center"><LadeSpinner /></div>
         ) : logs.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 dark:text-slate-400">
+          <div className="p-12 text-center text-white/50">
             Keine Logs gefunden.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300">
+              <thead className="bg-architect-surface-low/30 text-white/70">
                 <tr className="text-left">
                   <th className="px-5 py-3 font-semibold">Zeitstempel</th>
                   <th className="px-5 py-3 font-semibold">User ID</th>
@@ -160,23 +163,23 @@ export default function AuditLogsPage() {
                   return (
                     <tr
                       key={l.id}
-                      className={i % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/60 dark:bg-slate-800/30'}
+                      className={i % 2 === 0 ? '' : 'bg-architect-surface-low/30'}
                     >
-                      <td className="px-5 py-3 text-slate-700 dark:text-slate-200 whitespace-nowrap">
+                      <td className="px-5 py-3 text-white/80 whitespace-nowrap">
                         {new Date(l.created_at).toLocaleString('de-DE')}
                       </td>
-                      <td className="px-5 py-3 font-mono text-xs text-slate-600 dark:text-slate-300 truncate max-w-[140px]">
+                      <td className="px-5 py-3 font-mono text-xs text-white/60 truncate max-w-[140px]">
                         {l.user_id}
                       </td>
-                      <td className="px-5 py-3 text-slate-800 dark:text-white">
-                        <span className="inline-block px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium">
+                      <td className="px-5 py-3 text-white">
+                        <span className="inline-block px-2 py-0.5 rounded bg-architect-primary/20 text-architect-primary-light text-xs font-medium">
                           {pickEventType(l)}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-slate-600 dark:text-slate-300" title={detail}>
+                      <td className="px-5 py-3 text-white/70" title={detail}>
                         {truncate(detail, 60)}
                       </td>
-                      <td className="px-5 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">
+                      <td className="px-5 py-3 font-mono text-xs text-white/50">
                         {l.ip ?? '—'}
                       </td>
                     </tr>
@@ -190,11 +193,12 @@ export default function AuditLogsPage() {
 
       {hasMore && !loading && (
         <div className="mt-6 flex justify-center">
-          <Button variant="outline" onClick={() => load(false)} disabled={loadingMore}>
+          <Button variant="outline" onClick={() => load(false)} disabled={loadingMore} className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
             {loadingMore ? <LadeSpinner /> : 'Mehr laden'}
           </Button>
         </div>
       )}
+    </div>
     </div>
   )
 }

@@ -16,10 +16,10 @@ import { RefreshCw } from 'lucide-react'
 const LIMIT = 50
 
 const STATUS_STYLE: Record<EmailOutboxStatus, string> = {
-  queued:  'bg-slate-100 dark:bg-slate-700/40 text-slate-700 dark:text-slate-300',
-  sending: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-  sent:    'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
-  failed:  'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
+  queued:  'bg-architect-surface-low/40 text-white/80',
+  sending: 'bg-architect-primary/20 text-architect-primary-light',
+  sent:    'bg-architect-tertiary/25 text-architect-tertiary-light',
+  failed:  'bg-architect-error/20 text-architect-error-container',
 }
 
 const STATUS_LABEL: Record<EmailOutboxStatus, string> = {
@@ -97,25 +97,26 @@ export default function EmailOutboxPage() {
   }
 
   return (
+    <div className="min-h-screen bg-architect-surface font-body text-white">
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Email Outbox</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+        <h1 className="font-display text-3xl font-bold text-white">Email Outbox</h1>
+        <p className="text-sm text-white/60 mt-1">
           Versand-Queue für transaktionale E-Mails. Nur für Administratoren.
         </p>
       </div>
 
       {/* Filter-Bar */}
-      <Card className="p-5 mb-6 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md">
+      <Card className="p-5 mb-6 bg-architect-surface/60 border-0 text-white backdrop-blur-md">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wide">
+            <label className="block text-xs font-semibold text-white/60 mb-1.5 uppercase tracking-wide">
               Status
             </label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-              className="w-full h-9 px-3 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white"
+              className="w-full h-9 px-3 rounded-md bg-architect-surface-low/40 text-sm text-white"
             >
               <option value="">Alle</option>
               <option value="queued">In Queue</option>
@@ -124,7 +125,7 @@ export default function EmailOutboxPage() {
               <option value="failed">Fehlgeschlagen</option>
             </select>
           </div>
-          <Button onClick={() => load(true)} disabled={loading}>
+          <Button onClick={() => load(true)} disabled={loading} className="bg-architect-primary hover:bg-architect-primary-container text-white">
             {loading ? <LadeSpinner /> : 'Filtern'}
           </Button>
         </div>
@@ -133,17 +134,17 @@ export default function EmailOutboxPage() {
       {fehler && <div className="mb-6"><FehlerBox fehler={fehler} /></div>}
 
       {/* Tabelle */}
-      <Card className="overflow-hidden bg-white dark:bg-slate-900">
+      <Card className="overflow-hidden bg-architect-surface/60 border-0 text-white">
         {loading ? (
           <div className="p-12 flex justify-center"><LadeSpinner /></div>
         ) : mails.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 dark:text-slate-400">
+          <div className="p-12 text-center text-white/50">
             Keine E-Mails in der Queue.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300">
+              <thead className="bg-architect-surface-low/30 text-white/70">
                 <tr className="text-left">
                   <th className="px-5 py-3 font-semibold">Zeitstempel</th>
                   <th className="px-5 py-3 font-semibold">Empfänger</th>
@@ -159,15 +160,15 @@ export default function EmailOutboxPage() {
                   return (
                     <tr
                       key={m.id}
-                      className={i % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50/60 dark:bg-slate-800/30'}
+                      className={i % 2 === 0 ? '' : 'bg-architect-surface-low/30'}
                     >
-                      <td className="px-5 py-3 text-slate-700 dark:text-slate-200 whitespace-nowrap">
+                      <td className="px-5 py-3 text-white/80 whitespace-nowrap">
                         {new Date(m.created_at).toLocaleString('de-DE')}
                       </td>
-                      <td className="px-5 py-3 text-slate-700 dark:text-slate-200 truncate max-w-[200px]" title={empf}>
+                      <td className="px-5 py-3 text-white/80 truncate max-w-[200px]" title={empf}>
                         {empf}
                       </td>
-                      <td className="px-5 py-3 text-slate-800 dark:text-white truncate max-w-[260px]" title={m.subject}>
+                      <td className="px-5 py-3 text-white truncate max-w-[260px]" title={m.subject}>
                         {m.subject || '—'}
                       </td>
                       <td className="px-5 py-3">
@@ -175,7 +176,7 @@ export default function EmailOutboxPage() {
                           {STATUS_LABEL[m.status]}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-slate-600 dark:text-slate-300" title={m.error ?? ''}>
+                      <td className="px-5 py-3 text-white/70" title={m.error ?? ''}>
                         <span className="font-mono text-xs">{truncate(m.error, 60)}</span>
                       </td>
                       <td className="px-5 py-3 text-right">
@@ -185,6 +186,7 @@ export default function EmailOutboxPage() {
                             variant="outline"
                             onClick={() => handleRetry(m.id)}
                             disabled={retrying === m.id}
+                            className="bg-architect-surface-low/40 border-0 text-white hover:bg-architect-surface-low/60 hover:text-white"
                           >
                             {retrying === m.id ? (
                               <LadeSpinner />
@@ -205,11 +207,12 @@ export default function EmailOutboxPage() {
 
       {hasMore && !loading && (
         <div className="mt-6 flex justify-center">
-          <Button variant="outline" onClick={() => load(false)} disabled={loadingMore}>
+          <Button variant="outline" onClick={() => load(false)} disabled={loadingMore} className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
             {loadingMore ? <LadeSpinner /> : 'Mehr laden'}
           </Button>
         </div>
       )}
+    </div>
     </div>
   )
 }

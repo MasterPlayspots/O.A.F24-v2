@@ -106,18 +106,19 @@ export default function AdminUsersPage() {
   }
 
   return (
+    <div className="min-h-screen bg-architect-surface font-body text-white">
     <div className="mx-auto max-w-7xl px-6 py-12 sm:px-8 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <Link href="/admin" className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4">
+          <Link href="/admin" className="inline-flex items-center text-sm text-white/60 hover:text-white mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Zurück
           </Link>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+          <h1 className="font-display text-4xl font-bold text-white">
             Nutzer verwalten
           </h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-white/60">
             {users.length} Nutzer insgesamt
           </p>
         </div>
@@ -128,35 +129,35 @@ export default function AdminUsersPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+        <Search className="absolute left-3 top-3 h-5 w-5 text-white/40" />
         <Input
           placeholder="Nach E-Mail, Name oder Unternehmen suchen..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-10 bg-architect-surface/60 border-0 text-white placeholder:text-white/40"
         />
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border bg-white dark:bg-gray-800 overflow-x-auto">
+      <div className="rounded-lg bg-architect-surface/60 overflow-x-auto">
         <Table>
-          <TableHeader className="bg-gray-50 dark:bg-gray-700/50">
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>E-Mail</TableHead>
-              <TableHead>Unternehmen</TableHead>
-              <TableHead>Rolle</TableHead>
-              <TableHead className="text-right">Aktionen</TableHead>
+          <TableHeader className="bg-architect-surface-low/30">
+            <TableRow className="border-0 hover:bg-architect-surface-low/30">
+              <TableHead className="text-white/70">Name</TableHead>
+              <TableHead className="text-white/70">E-Mail</TableHead>
+              <TableHead className="text-white/70">Unternehmen</TableHead>
+              <TableHead className="text-white/70">Rolle</TableHead>
+              <TableHead className="text-white/70 text-right">Aktionen</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user) => (
-                <TableRow key={user.id}>
+                <TableRow key={user.id} className="border-0 hover:bg-architect-surface/40">
                   <TableCell className="font-medium">
                     {user.firstName} {user.lastName}
                   </TableCell>
-                  <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                  <TableCell className="text-sm text-white/60">
                     {user.email}
                   </TableCell>
                   <TableCell className="text-sm">
@@ -168,7 +169,7 @@ export default function AdminUsersPage() {
                       onValueChange={(val: string | null) => val && handleRoleChange(user.id, val)}
                       disabled={updatingId === user.id}
                     >
-                      <SelectTrigger className="w-[120px]">
+                      <SelectTrigger className="w-[120px] bg-architect-surface-low/40 border-0 text-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -192,8 +193,8 @@ export default function AdminUsersPage() {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+              <TableRow className="border-0 hover:bg-transparent">
+                <TableCell colSpan={5} className="text-center py-8 text-white/50">
                   Keine Nutzer gefunden
                 </TableCell>
               </TableRow>
@@ -201,6 +202,7 @@ export default function AdminUsersPage() {
           </TableBody>
         </Table>
       </div>
+    </div>
     </div>
   )
 }

@@ -201,22 +201,23 @@ export default function AdminAktuellesPage() {
   }
 
   return (
+    <div className="min-h-screen bg-architect-surface font-body text-white">
     <div className="mx-auto max-w-7xl px-6 py-12 sm:px-8 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <Link href="/admin" className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4">
+          <Link href="/admin" className="inline-flex items-center text-sm text-white/60 hover:text-white mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Zurück
           </Link>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+          <h1 className="font-display text-4xl font-bold text-white">
             News & Aktuelles
           </h1>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger>
-            <Button onClick={() => handleOpenDialog()}>
+            <Button onClick={() => handleOpenDialog()} className="bg-architect-primary hover:bg-architect-primary-container text-white">
               <Plus className="h-4 w-4 mr-2" />
               Neuer Artikel
             </Button>
@@ -307,7 +308,7 @@ export default function AdminAktuellesPage() {
 
                 <div>
                   <Label>Vorschau</Label>
-                  <div className="mt-1 h-80 bg-gray-50 dark:bg-gray-900 rounded-lg p-4 overflow-auto border">
+                  <div className="mt-1 h-80 bg-architect-surface-low/30 rounded-lg p-4 overflow-auto">
                     <div
                       className="prose dark:prose-invert max-w-none text-sm"
                       dangerouslySetInnerHTML={{ __html: preview }}
@@ -319,7 +320,7 @@ export default function AdminAktuellesPage() {
               {/* Save Button */}
               <Button
                 onClick={handleSave}
-                className="w-full"
+                className="w-full bg-architect-primary hover:bg-architect-primary-container text-white"
                 disabled={!formData.titel || !formData.kategorie || !formData.inhaltMd}
               >
                 {editingId ? 'Speichern' : 'Erstellen'}
@@ -338,25 +339,25 @@ export default function AdminAktuellesPage() {
           artikel.map((item) => (
             <Card
               key={item.id}
-              className="hover:shadow-lg transition-shadow"
+              className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/70 transition"
             >
               <div className="p-6 space-y-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h3 className="font-display text-lg font-semibold text-white">
                       {item.titel}
                     </h3>
                     {item.untertitel && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-sm text-white/60 mt-1">
                         {item.untertitel}
                       </p>
                     )}
                     <div className="flex items-center gap-3 mt-3 flex-wrap">
-                      <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                      <span className="text-xs bg-architect-surface-low/40 text-white/80 px-2 py-1 rounded">
                         {item.kategorie}
                       </span>
                       {item.tags.map((tag) => (
-                        <span key={tag} className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded">
+                        <span key={tag} className="text-xs bg-architect-primary/20 text-architect-primary-light px-2 py-1 rounded">
                           {tag}
                         </span>
                       ))}
@@ -368,6 +369,7 @@ export default function AdminAktuellesPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleOpenDialog(item)}
+                      className="bg-architect-surface-low/40 border-0 text-white hover:bg-architect-surface-low/60 hover:text-white"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -377,11 +379,12 @@ export default function AdminAktuellesPage() {
             </Card>
           ))
         ) : (
-          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-12 text-white/50">
             Keine Artikel vorhanden. Erstellen Sie einen neuen!
           </div>
         )}
       </div>
+    </div>
     </div>
   )
 }

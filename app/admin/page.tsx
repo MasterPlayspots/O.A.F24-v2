@@ -91,25 +91,25 @@ export default function AdminPage() {
       label: 'Aktive Nutzer',
       value: dashboard.userAnzahl,
       icon: Users,
-      color: 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+      color: 'bg-architect-primary/20 text-architect-primary-light',
     },
     {
       label: 'Checks heute',
       value: dashboard.checksHeute,
       icon: TrendingUp,
-      color: 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400',
+      color: 'bg-architect-tertiary/25 text-architect-tertiary-light',
     },
     {
       label: 'Offene Anfragen',
       value: dashboard.offeneAnfragen,
       icon: Clock,
-      color: 'bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
+      color: 'bg-architect-primary/20 text-architect-primary-light',
     },
     {
       label: 'Pending Provisionen',
       value: dashboard.pendingProvisionen,
       icon: DollarSign,
-      color: 'bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
+      color: 'bg-architect-primary/30 text-white',
     },
   ]
 
@@ -120,13 +120,14 @@ export default function AdminPage() {
   ]
 
   return (
+    <div className="min-h-screen bg-architect-surface font-body text-white">
     <div className="mx-auto max-w-7xl px-6 py-12 sm:px-8 space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+        <h1 className="font-display text-4xl font-bold tracking-tight text-white">
           Admin Dashboard
         </h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-white/60">
           Übersicht und Verwaltung der fund24-Plattform
         </p>
       </div>
@@ -136,15 +137,15 @@ export default function AdminPage() {
         {kpis.map((kpi) => {
           const Icon = kpi.icon
           return (
-            <Card key={kpi.label} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <Card key={kpi.label} className="overflow-hidden bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/70 transition">
               <div className="p-6 space-y-2">
                 <div className={`inline-flex rounded-lg p-2 ${kpi.color} w-fit`}>
                   <Icon className="h-6 w-6" />
                 </div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-white/60">
                   {kpi.label}
                 </p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                <p className="font-display text-3xl font-bold text-white">
                   {kpi.value.toLocaleString('de-DE')}
                 </p>
               </div>
@@ -155,24 +156,24 @@ export default function AdminPage() {
 
       {/* Pending BAFA-Zertifizierungen */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h2 className="font-display text-2xl font-bold text-white">
           Offene BAFA-Zertifizierungen ({pendingCerts.length})
         </h2>
         {pendingCerts.length === 0 ? (
-          <Card className="p-6 text-sm text-gray-500">Keine offenen Anträge.</Card>
+          <Card className="p-6 text-sm bg-architect-surface/60 border-0 text-white/60">Keine offenen Anträge.</Card>
         ) : (
           <div className="space-y-3">
             {pendingCerts.map((c) => (
-              <Card key={c.id} className="p-4 flex items-center justify-between gap-4">
+              <Card key={c.id} className="p-4 bg-architect-surface/60 border-0 text-white flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-semibold text-gray-900 dark:text-white">{c.email}</p>
-                  <p className="text-xs text-gray-500">User-ID: {c.id}</p>
+                  <p className="font-semibold text-white">{c.email}</p>
+                  <p className="text-xs text-white/50">User-ID: {c.id}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={() => handleApprove(c.id)} disabled={certBusy === c.id}>
+                  <Button size="sm" onClick={() => handleApprove(c.id)} disabled={certBusy === c.id} className="bg-architect-primary hover:bg-architect-primary-container text-white">
                     Freigeben
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleReject(c.id)} disabled={certBusy === c.id}>
+                  <Button size="sm" variant="outline" onClick={() => handleReject(c.id)} disabled={certBusy === c.id} className="bg-architect-surface-low/40 border-0 text-white hover:bg-architect-surface-low/60 hover:text-white">
                     Ablehnen
                   </Button>
                 </div>
@@ -184,25 +185,25 @@ export default function AdminPage() {
 
       {/* Quick Links */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h2 className="font-display text-2xl font-bold text-white">
           Schnellzugriff
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {quickLinks.map((link) => (
             <Link key={link.href} href={link.href}>
-              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+              <Card className="h-full bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/70 transition cursor-pointer">
                 <div className="p-6 space-y-3">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                  <h3 className="font-display font-semibold text-white">
                     {link.label}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-white/60">
                     {link.description}
                   </p>
                   <Button
                     variant="ghost"
                     size="sm"
                     asChild
-                    className="mt-2 w-full justify-start"
+                    className="mt-2 w-full justify-start text-architect-primary-light hover:text-white hover:bg-architect-surface/40"
                   >
                     <span>
                       Öffnen
@@ -215,6 +216,7 @@ export default function AdminPage() {
           ))}
         </div>
       </div>
+    </div>
     </div>
   )
 }

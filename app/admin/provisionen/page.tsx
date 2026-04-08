@@ -29,11 +29,11 @@ import Link from 'next/link'
 import type { Provision, ProvisionStatus } from '@/lib/types'
 
 const STATUS_COLORS: Record<ProvisionStatus, string> = {
-  ausstehend: 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400',
-  dokumente_eingereicht: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400',
-  geprueft: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400',
-  abgerechnet: 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400',
-  storniert: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400',
+  ausstehend: 'bg-architect-primary/20 text-architect-primary-light',
+  dokumente_eingereicht: 'bg-architect-primary/25 text-architect-primary-light',
+  geprueft: 'bg-architect-primary/30 text-white',
+  abgerechnet: 'bg-architect-tertiary/25 text-architect-tertiary-light',
+  storniert: 'bg-architect-error/20 text-architect-error-container',
 }
 
 export default function AdminProvisionenPage() {
@@ -148,18 +148,19 @@ export default function AdminProvisionenPage() {
   }
 
   return (
+    <div className="min-h-screen bg-architect-surface font-body text-white">
     <div className="mx-auto max-w-7xl px-6 py-12 sm:px-8 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <Link href="/admin" className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4">
+          <Link href="/admin" className="inline-flex items-center text-sm text-white/60 hover:text-white mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Zurück
           </Link>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+          <h1 className="font-display text-4xl font-bold text-white">
             Provisionen verwalten
           </h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-white/60">
             {provisionen.length} Provisionen insgesamt
           </p>
         </div>
@@ -170,11 +171,11 @@ export default function AdminProvisionenPage() {
 
       {/* Status Filter */}
       <div className="max-w-xs">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="text-sm font-medium text-white/70">
           Nach Status filtern
         </label>
         <Select value={statusFilter} onValueChange={(val: string | null) => setStatusFilter((val ?? '') as ProvisionStatus | '')}>
-          <SelectTrigger className="mt-1">
+          <SelectTrigger className="mt-1 bg-architect-surface/60 border-0 text-white">
             <SelectValue placeholder="Alle Status" />
           </SelectTrigger>
           <SelectContent>
@@ -189,27 +190,27 @@ export default function AdminProvisionenPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border bg-white dark:bg-gray-800 overflow-x-auto">
+      <div className="rounded-lg bg-architect-surface/60 overflow-x-auto">
         <Table>
-          <TableHeader className="bg-gray-50 dark:bg-gray-700/50">
-            <TableRow>
-              <TableHead>Berater</TableHead>
-              <TableHead>Unternehmen</TableHead>
-              <TableHead>Programm</TableHead>
-              <TableHead>Betrag</TableHead>
-              <TableHead>Provision (9,99%)</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Aktionen</TableHead>
+          <TableHeader className="bg-architect-surface-low/30">
+            <TableRow className="border-0 hover:bg-architect-surface-low/30">
+              <TableHead className="text-white/70">Berater</TableHead>
+              <TableHead className="text-white/70">Unternehmen</TableHead>
+              <TableHead className="text-white/70">Programm</TableHead>
+              <TableHead className="text-white/70">Betrag</TableHead>
+              <TableHead className="text-white/70">Provision (9,99%)</TableHead>
+              <TableHead className="text-white/70">Status</TableHead>
+              <TableHead className="text-white/70 text-right">Aktionen</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredProvisionen.length > 0 ? (
               filteredProvisionen.map((prov) => (
-                <TableRow key={prov.id}>
+                <TableRow key={prov.id} className="border-0 hover:bg-architect-surface/40">
                   <TableCell className="font-medium text-sm">
                     {prov.beraterId.substring(0, 8)}...
                   </TableCell>
-                  <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                  <TableCell className="text-sm text-white/60">
                     {prov.unternehmenId.substring(0, 8)}...
                   </TableCell>
                   <TableCell className="text-sm">
@@ -222,7 +223,7 @@ export default function AdminProvisionenPage() {
                         value={editBetrag}
                         onChange={(e) => setEditBetrag(e.target.value)}
                         placeholder="Betrag"
-                        className="w-24 h-8"
+                        className="w-24 h-8 bg-architect-surface-low/40 border-0 text-white"
                       />
                     ) : (
                       <span
@@ -247,7 +248,7 @@ export default function AdminProvisionenPage() {
                       }
                       disabled={updatingId === prov.id}
                     >
-                      <SelectTrigger className="w-[140px]">
+                      <SelectTrigger className="w-[140px] bg-architect-surface-low/40 border-0 text-white">
                         <Badge className={STATUS_COLORS[prov.status]}>
                           {prov.status}
                         </Badge>
@@ -269,6 +270,7 @@ export default function AdminProvisionenPage() {
                         size="sm"
                         onClick={() => handleBetragChange(prov.id)}
                         disabled={updatingId === prov.id}
+                        className="bg-architect-primary hover:bg-architect-primary-container text-white"
                       >
                         Speichern
                       </Button>
@@ -277,8 +279,8 @@ export default function AdminProvisionenPage() {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+              <TableRow className="border-0 hover:bg-transparent">
+                <TableCell colSpan={7} className="text-center py-8 text-white/50">
                   Keine Provisionen gefunden
                 </TableCell>
               </TableRow>
@@ -286,6 +288,7 @@ export default function AdminProvisionenPage() {
           </TableBody>
         </Table>
       </div>
+    </div>
     </div>
   )
 }
