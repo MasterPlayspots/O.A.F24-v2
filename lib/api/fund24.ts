@@ -94,6 +94,26 @@ export async function getDashboard(): Promise<DashboardSummary> {
 }
 
 // ---------- Berichte (γ-Hybrid) ----------
+export interface Bericht {
+  id: string
+  status: 'draft' | 'preview' | 'paid' | 'downloaded'
+  content: unknown
+  quality_score: number | null
+  finalized_by_berater_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+// TODO: GET /api/berichte/:id muss noch im Worker ergänzt werden
+export async function getBericht(id: string): Promise<Bericht> {
+  return apiCall<Bericht>(API.FUND24, `/api/berichte/${id}`, undefined, token())
+}
+
+// TODO: GET /api/berichte muss noch im Worker ergänzt werden
+export async function listBerichte(): Promise<Bericht[]> {
+  return apiCall<Bericht[]>(API.FUND24, '/api/berichte', undefined, token())
+}
+
 export async function createBericht(body: { unternehmen_id?: string; bafa_beratung_id?: string; branche?: string; content?: unknown }) {
   return apiCall<{ id: string; status: string }>(
     API.FUND24, '/api/berichte',

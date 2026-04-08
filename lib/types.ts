@@ -10,6 +10,7 @@ export interface Nutzer {
   role: 'unternehmen' | 'berater' | 'admin'
   emailVerified: boolean
   kontingentTotal?: number
+  bafa_certified?: number
 }
 
 export interface AuthResponse {
