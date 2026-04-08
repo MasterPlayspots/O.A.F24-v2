@@ -6,7 +6,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuth } from '@/lib/store/authStore'
-import { getBeraterProfil, updateBeraterProfil } from '@/lib/api/check'
+import { getBeraterProfil as getBeraterProfilLegacy } from '@/lib/api/check'
+import { updateBeraterProfil } from '@/lib/api/berater'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -57,7 +58,7 @@ export default function BeraterProfilPage() {
     const fetchProfil = async () => {
       try {
         if (!token || !nutzer?.id) throw new Error('Authentifizierung erforderlich')
-        const data = await getBeraterProfil(nutzer.id)
+        const data = await getBeraterProfilLegacy(nutzer.id)
         setProfil(data)
         reset({
           displayName: data.displayName,
@@ -85,23 +86,16 @@ export default function BeraterProfilPage() {
 
       if (!token) throw new Error('Token erforderlich')
 
-      await updateBeraterProfil(
-        {
-          displayName: data.displayName,
-          bio: data.bio || undefined,
-          region: data.region,
-          branchen: data.branchen
-            .split(',')
-            .map((b) => b.trim())
-            .filter((b) => b.length > 0),
-          spezialisierungen: data.spezialisierungen
-            .split(',')
-            .map((s) => s.trim())
-            .filter((s) => s.length > 0),
-          websiteUrl: data.websiteUrl || undefined,
-        },
-        token
-      )
+      await updateBeraterProfil({
+        displayName: data.displayName,
+        bio: data.bio || undefined,
+        region: data.region,
+        branchen: data.branchen
+          .split(',')
+          .map((b) => b.trim())
+          .filter((b) => b.length > 0),
+        verfuegbar: true,
+      })
 
       setSuccessMessage('Profil erfolgreich aktualisiert!')
       setTimeout(() => setSuccessMessage(null), 3000)

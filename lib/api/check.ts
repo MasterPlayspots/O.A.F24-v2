@@ -164,34 +164,9 @@ export async function getBeraterProfil(
   return apiCall(API.CHECK, `/api/netzwerk/berater/${id}`)
 }
 
-// ── BERATER PROFIL (AUTH) ────────────────────────────────────
-
-export async function updateBeraterProfil(
-  daten: Partial<BeraterProfil>, token: string
-): Promise<{ ok: boolean }> {
-  return apiCall(API.CHECK, '/api/berater/profil', {
-    method: 'PUT',
-    body: JSON.stringify(daten),
-  }, token)
-}
-
-export async function addExpertise(
-  daten: Omit<BeraterExpertise, 'id'>, token: string
-): Promise<{ id: string }> {
-  return apiCall(API.CHECK, '/api/berater/expertise', {
-    method: 'POST',
-    body: JSON.stringify(daten),
-  }, token)
-}
-
-export async function addDienstleistung(
-  daten: Omit<Dienstleistung, 'id'>, token: string
-): Promise<{ id: string }> {
-  return apiCall(API.CHECK, '/api/berater/dienstleistungen', {
-    method: 'POST',
-    body: JSON.stringify(daten),
-  }, token)
-}
+// ── BERATER PROFIL/EXPERTISE/DIENSTLEISTUNGEN ────────────────
+// Moved to lib/api/berater.ts (Sprint 11) — wired against bafa-creator-ai-worker
+// /api/berater/* on API.FUND24, replacing the legacy API.CHECK calls.
 
 // ── BERATER ABWICKLUNG ───────────────────────────────────────
 

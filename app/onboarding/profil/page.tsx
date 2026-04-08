@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/lib/store/authStore';
-import { updateBeraterProfil } from '@/lib/api/check';
+import { updateBeraterProfil } from '@/lib/api/berater';
 import { SchrittAnzeige } from '@/components/shared/SchrittAnzeige';
 import { LadeSpinner } from '@/components/shared/LadeSpinner';
 import { FehlerBox } from '@/components/shared/FehlerBox';
@@ -66,9 +66,15 @@ type FormData = z.infer<typeof schema>;
 
 export default function ProfilPage() {
   const router = useRouter();
-  const { token } = useAuth();
+  const { token, nutzer, istBerater } = useAuth();
   const [fehler, setFehler] = useState('');
   const [ladet, setLadet] = useState(false);
+
+  // Role guard — only berater
+  useEffect(() => {
+    if (!token) { router.replace('/login'); return; }
+    if (nutzer && !istBerater()) { router.replace('/dashboard/unternehmen'); }
+  }, [token, nutzer, istBerater, router]);
 
   const {
     register,
@@ -99,7 +105,7 @@ export default function ProfilPage() {
     try {
       setFehler('');
       setLadet(true);
-      await updateBeraterProfil(data, token);
+      await updateBeraterProfil(data);
       router.push('/onboarding/expertise');
     } catch (error) {
       setFehler(error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten');
@@ -109,13 +115,13 @@ export default function ProfilPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-architect-surface font-body text-white p-6">
       <div className="max-w-2xl mx-auto">
         <SchrittAnzeige schritte={['Profil', 'Expertise', 'Dienstleistungen']} aktuell={0} />
 
-        <div className="mt-8 bg-white rounded-lg shadow-sm p-8 border border-slate-200">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Profil erstellen</h1>
-          <p className="text-slate-600 mb-8">
+        <div className="mt-8 bg-architect-surface/60 rounded-lg p-8">
+          <h1 className="font-display text-3xl font-bold text-white mb-2">Profil erstellen</h1>
+          <p className="text-white/60 mb-8">
             Richten Sie Ihr Berater-Profil ein und geben Sie uns einen Überblick über Ihre Kompetenzen.
           </p>
 
@@ -123,22 +129,22 @@ export default function ProfilPage() {
 
           <form onSubmit={handleSubmit((data: FormData) => onSubmit(data))} className="space-y-8">
             <div>
-              <Label htmlFor="displayName" className="text-base font-semibold">
+              <Label htmlFor="displayName" className="text-base font-semibold text-white">
                 Anzeigename
               </Label>
               <Input
                 id="displayName"
                 {...register('displayName')}
                 placeholder="z.B. Dr. Max Müller"
-                className="mt-2"
+                className="mt-2 bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40"
               />
               {errors.displayName && (
-                <p className="text-red-600 text-sm mt-1">{errors.displayName.message}</p>
+                <p className="text-architect-error-container text-sm mt-1">{errors.displayName.message}</p>
               )}
             </div>
 
             <div>
-              <Label htmlFor="region" className="text-base font-semibold">
+              <Label htmlFor="region" className="text-base font-semibold text-white">
                 Region / Bundesland
               </Label>
               <Controller
@@ -146,7 +152,7 @@ export default function ProfilPage() {
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value || ''} onValueChange={(value: string | null) => value && field.onChange(value)}>
-                    <SelectTrigger className="mt-2">
+                    <SelectTrigger className="mt-2 bg-architect-surface-low/40 border-0 text-white">
                       <SelectValue placeholder="Wählen Sie Ihr Bundesland" />
                     </SelectTrigger>
                     <SelectContent>
@@ -160,12 +166,12 @@ export default function ProfilPage() {
                 )}
               />
               {errors.region && (
-                <p className="text-red-600 text-sm mt-1">{errors.region.message}</p>
+                <p className="text-architect-error-container text-sm mt-1">{errors.region.message}</p>
               )}
             </div>
 
             <div>
-              <Label className="text-base font-semibold block mb-3">Branchen</Label>
+              <Label className="text-base font-semibold text-white block mb-3">Branchen</Label>
               <div className="grid grid-cols-2 gap-4">
                 {branchenOptionen.map((branche: string) => (
                   <div key={branche} className="flex items-center">
@@ -174,38 +180,38 @@ export default function ProfilPage() {
                       id={branche}
                       value={branche}
                       {...register('branchen')}
-                      className="w-4 h-4 rounded border-slate-300"
+                      className="w-4 h-4 rounded"
                     />
-                    <label htmlFor={branche} className="ml-2 text-sm cursor-pointer">
+                    <label htmlFor={branche} className="ml-2 text-sm cursor-pointer text-white/80">
                       {branche}
                     </label>
                   </div>
                 ))}
               </div>
               {errors.branchen && (
-                <p className="text-red-600 text-sm mt-2">{errors.branchen.message}</p>
+                <p className="text-architect-error-container text-sm mt-2">{errors.branchen.message}</p>
               )}
             </div>
 
             <div>
-              <Label htmlFor="bio" className="text-base font-semibold">
+              <Label htmlFor="bio" className="text-base font-semibold text-white">
                 Über Sie (optional)
               </Label>
               <Textarea
                 id="bio"
                 {...register('bio')}
                 placeholder="Erzählen Sie etwas über Ihre Erfahrung und Spezialisierung..."
-                className="mt-2 resize-none"
+                className="mt-2 resize-none bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40"
                 rows={4}
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-white/50 mt-1">
                 {bioCount} / 500 Zeichen
               </p>
-              {errors.bio && <p className="text-red-600 text-sm mt-1">{errors.bio.message}</p>}
+              {errors.bio && <p className="text-architect-error-container text-sm mt-1">{errors.bio.message}</p>}
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
-              <Label htmlFor="verfuegbar" className="font-semibold cursor-pointer">
+            <div className="flex items-center justify-between p-4 bg-architect-surface-low/40 rounded-lg">
+              <Label htmlFor="verfuegbar" className="font-semibold cursor-pointer text-white">
                 Ich bin verfügbar für neue Projekte
               </Label>
               <Controller
@@ -217,14 +223,19 @@ export default function ProfilPage() {
                     type="checkbox"
                     checked={field.value}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300"
+                    className="w-4 h-4 rounded"
                   />
                 )}
               />
             </div>
 
             <div className="flex gap-4 pt-6">
-              <Button type="submit" disabled={ladet} size="lg" className="flex-1">
+              <Button
+                type="submit"
+                disabled={ladet}
+                size="lg"
+                className="flex-1 bg-architect-primary hover:bg-architect-primary-container text-white"
+              >
                 {ladet ? <LadeSpinner /> : 'Weiter zur Expertise'}
               </Button>
             </div>

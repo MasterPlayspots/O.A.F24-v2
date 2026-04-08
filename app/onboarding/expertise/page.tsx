@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/lib/store/authStore';
-import { addExpertise } from '@/lib/api/check';
+import { addExpertise } from '@/lib/api/berater';
 import { SchrittAnzeige } from '@/components/shared/SchrittAnzeige';
 import { LadeSpinner } from '@/components/shared/LadeSpinner';
 import { FehlerBox } from '@/components/shared/FehlerBox';
@@ -50,9 +50,14 @@ type FormData = z.infer<typeof schema>;
 
 export default function ExpertisePage() {
   const router = useRouter();
-  const { token } = useAuth();
+  const { token, nutzer, istBerater } = useAuth();
   const [fehler, setFehler] = useState('');
   const [ladet, setLadet] = useState(false);
+
+  useEffect(() => {
+    if (!token) { router.replace('/login'); return; }
+    if (nutzer && !istBerater()) { router.replace('/dashboard/unternehmen'); }
+  }, [token, nutzer, istBerater, router]);
 
   const {
     register,
@@ -83,7 +88,7 @@ export default function ExpertisePage() {
       setFehler('');
       setLadet(true);
       for (const entry of data.entries) {
-        await addExpertise(entry, token!);
+        await addExpertise(entry);
       }
       router.push('/onboarding/dienstleistungen');
     } catch (error) {
@@ -94,13 +99,13 @@ export default function ExpertisePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-architect-surface font-body text-white p-6">
       <div className="max-w-4xl mx-auto">
         <SchrittAnzeige schritte={['Profil', 'Expertise', 'Dienstleistungen']} aktuell={1} />
 
-        <div className="mt-8 bg-white rounded-lg shadow-sm p-8 border border-slate-200">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Expertise hinzufügen</h1>
-          <p className="text-slate-600 mb-8">
+        <div className="mt-8 bg-architect-surface/60 rounded-lg p-8">
+          <h1 className="font-display text-3xl font-bold text-white mb-2">Expertise hinzufügen</h1>
+          <p className="text-white/60 mb-8">
             Geben Sie an, in welchen Förderbereichen Sie spezialisiert sind und wie viele erfolgreiche Anträge Sie bereits bearbeitet haben.
           </p>
 
@@ -108,16 +113,16 @@ export default function ExpertisePage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {fields.map((field, index) => (
-              <Card key={field.id} className="p-6 border-slate-200">
+              <Card key={field.id} className="p-6 bg-architect-surface-low/40 border-0 text-white">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-semibold text-slate-900">Expertise #{index + 1}</h3>
+                  <h3 className="font-display text-lg font-semibold text-white">Expertise #{index + 1}</h3>
                   {fields.length > 1 && (
                     <Button
                       type="button"
                       onClick={() => remove(index)}
                       variant="ghost"
                       size="sm"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-architect-error-container hover:text-white hover:bg-architect-error/20"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -134,7 +139,7 @@ export default function ExpertisePage() {
                       control={control}
                       render={({ field }) => (
                         <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger className="mt-2">
+                          <SelectTrigger className="mt-2 bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40">
                             <SelectValue placeholder="Wählen Sie einen Förderbereich" />
                           </SelectTrigger>
                           <SelectContent>
@@ -148,7 +153,7 @@ export default function ExpertisePage() {
                       )}
                     />
                     {errors.entries?.[index]?.foerderbereich && (
-                      <p className="text-red-600 text-sm mt-1">
+                      <p className="text-architect-error-container text-sm mt-1">
                         {errors.entries[index]?.foerderbereich?.message}
                       </p>
                     )}
@@ -190,11 +195,11 @@ export default function ExpertisePage() {
                       {...register(`entries.${index}.erfolgreicheAntraege`, {
                         valueAsNumber: true,
                       })}
-                      className="mt-2"
+                      className="mt-2 bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40"
                       placeholder="0"
                     />
                     {errors.entries?.[index]?.erfolgreicheAntraege && (
-                      <p className="text-red-600 text-sm mt-1">
+                      <p className="text-architect-error-container text-sm mt-1">
                         {errors.entries[index]?.erfolgreicheAntraege?.message}
                       </p>
                     )}
@@ -211,11 +216,11 @@ export default function ExpertisePage() {
                       {...register(`entries.${index}.gesamtvolumenEur`, {
                         valueAsNumber: true,
                       })}
-                      className="mt-2"
+                      className="mt-2 bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40"
                       placeholder="0"
                     />
                     {errors.entries?.[index]?.gesamtvolumenEur && (
-                      <p className="text-red-600 text-sm mt-1">
+                      <p className="text-architect-error-container text-sm mt-1">
                         {errors.entries[index]?.gesamtvolumenEur?.message}
                       </p>
                     )}
@@ -225,7 +230,7 @@ export default function ExpertisePage() {
             ))}
 
             {errors.entries && (
-              <p className="text-red-600 text-sm">{errors.entries.message}</p>
+              <p className="text-architect-error-container text-sm">{errors.entries.message}</p>
             )}
 
             <Button
@@ -245,7 +250,7 @@ export default function ExpertisePage() {
             </Button>
 
             <div className="flex gap-4 pt-6">
-              <Button type="submit" disabled={ladet} size="lg" className="flex-1">
+              <Button type="submit" disabled={ladet} size="lg" className="flex-1 bg-architect-primary hover:bg-architect-primary-container text-white">
                 {ladet ? <LadeSpinner /> : 'Weiter zu Dienstleistungen'}
               </Button>
             </div>
