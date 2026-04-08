@@ -22,6 +22,8 @@ import { nachrichten } from "./routes/nachrichten";
 import { netzwerk } from "./routes/netzwerk";
 import { check } from "./routes/check";
 import { beratungen } from "./routes/beratungen";
+import { vorlagen } from "./routes/vorlagen";
+import { me } from "./routes/me";
 import { performBackup, cleanupOldBackups } from "./services/backup";
 import { cleanupAuditLogs } from "./services/audit";
 import { cleanupExpiredData } from "./services/retention";
@@ -99,6 +101,8 @@ app.route("/api/nachrichten", nachrichten);
 app.route("/api/netzwerk", netzwerk);
 app.route("/api/check", check);
 app.route("/api/beratungen", beratungen);
+app.route("/api/vorlagen", vorlagen);
+app.route("/api/me", me);
 
 // ============================================
 // 404 Handler
