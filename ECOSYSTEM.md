@@ -27,10 +27,21 @@ Dieses Dokument beschreibt das komplette fund24-Ökosystem von der untersten Clo
 
 → Für fund24 Production zählt **nur `bafa-creator-ai-worker`**. Alle neuen Pfade liegen darin.
 
+**Routing (Zone fund24.io = `809ef77b10e4c17bf959cfe7aadf9e28`):**
+
+| Pattern | Worker |
+|---|---|
+| `api.fund24.io/api/*` | `bafa-creator-ai-worker` (Route-ID `9f85bd2b6fa64d69b08254278c03566b`, gesetzt 2026-04-08) |
+| `api.fund24.io/semantic/*` | `fund24-semantic-search` (legacy) |
+| `api.fund24.io/check/*` | `foerdermittel-check-api` (legacy) |
+
+Es gibt **keinen** Catch-all `api.fund24.io/*`. Alles außerhalb der drei Patterns gibt Cloudflare 1002 zurück.
+
 ### A.3 D1-Datenbanken (10 total, 3 fund24-relevant)
 
 | DB | UUID | Größe | Zweck |
 |---|---|---|---|
+| **`zfbf-db`** (DB) | 9a41ed93-e2a4-440d-8ef1-a3e63cb0c6e3 | neu | Ownership-Layer für reports, kontingent, gdpr, audit (re-created 2026-04-08, alte UUID war stale) |
 | **`bafa_antraege`** (BAFA_DB) | 8582e9dd-8063-4dbd-b079-f38b2bb3918f | 1.35 MB | **Haupt-Userdata: users, unternehmen, antraege_v2, reports, bafa_beratungen, …** |
 | **`foerderprogramme`** (FOERDER_DB) | b95adb7b-ed86-441b-841e-4cd3a9a15135 | 79.2 MB | 3884 Förderprogramme (Bund/Land/EU) + Quellen |
 | **`bafa_learnings`** (BAFA_CONTENT) | 7f5947f7-42af-455e-81ad-0c57be23b940 | 224 KB | KI-Lernzyklen, Prompts, Wording-Regeln |
