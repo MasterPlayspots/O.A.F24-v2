@@ -21,6 +21,7 @@ import { forum } from "./routes/forum";
 import { nachrichten } from "./routes/nachrichten";
 import { netzwerk } from "./routes/netzwerk";
 import { check } from "./routes/check";
+import { beratungen } from "./routes/beratungen";
 import { performBackup, cleanupOldBackups } from "./services/backup";
 import { cleanupAuditLogs } from "./services/audit";
 import { cleanupExpiredData } from "./services/retention";
@@ -84,6 +85,7 @@ app.route("/api/auth/webauthn", webauthn);
 app.route("/api/auth/magic-link", magicLink);
 app.route("/api/reports", reports);
 app.route("/api/bafa", reports); // Legacy alias for /api/reports
+app.route("/api/berichte", reports); // v2 frontend alias for /api/reports
 app.route("/api/branchen", branchen);
 app.route("/api/promo", promo);
 app.route("/api/orders", orders);
@@ -96,6 +98,7 @@ app.route("/api/forum", forum);
 app.route("/api/nachrichten", nachrichten);
 app.route("/api/netzwerk", netzwerk);
 app.route("/api/check", check);
+app.route("/api/beratungen", beratungen);
 
 // ============================================
 // 404 Handler

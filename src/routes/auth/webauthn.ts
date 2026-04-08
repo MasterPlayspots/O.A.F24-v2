@@ -188,8 +188,8 @@ webauthn.post("/register-verify", async (c) => {
       isNewUser = true;
       const userId = crypto.randomUUID();
       await c.env.DB.prepare(
-        `INSERT INTO users (id, email, password_hash, salt, hash_version, first_name, last_name, role, email_verified, onboarding_completed, created_at, updated_at)
-         VALUES (?, ?, '', '', 0, '', '', ?, 1, 0, datetime('now'), datetime('now'))`
+        `INSERT INTO users (id, email, password_hash, salt, hash_version, first_name, last_name, role, email_verified, onboarding_completed, privacy_accepted_at, created_at, updated_at)
+         VALUES (?, ?, '', '', 0, '', '', ?, 1, 0, datetime('now'), datetime('now'), datetime('now'))`
       )
         .bind(userId, email, userRole)
         .run();

@@ -58,6 +58,17 @@ export type Variables = {
   jwtPayload: JwtPayload;
 };
 
+export interface PasskeyCredential {
+  id: string;
+  user_id: string;
+  credential_id: string;
+  public_key: string;
+  counter: number;
+  device_type: string | null;
+  transports: string | null;
+  created_at: string;
+}
+
 // ============================================
 // Database Row Types
 // ============================================

@@ -116,6 +116,10 @@ payments.post("/stripe/webhook", async (c) => {
       await OrderRepo.updatePaymentStatus(db, s.id, "completed");
       await ReportRepo.unlockReport(db, reportId, s.id);
       await ReportRepo.updateAntragStatus(bafaDb, reportId, "bezahlt", { bezahlt: true });
+      await db
+        .prepare("UPDATE users SET kontingent_total = kontingent_total + 1 WHERE id = ?")
+        .bind(userId)
+        .run();
       await createDownloadToken(bafaDb, reportId);
       await writeAuditLog(db, {
         userId,
@@ -204,6 +208,10 @@ payments.post("/paypal/capture-order", requireAuth, async (c) => {
         await OrderRepo.updatePaymentStatusById(db, pay.id, "completed");
         await ReportRepo.unlockReport(db, pay.report_id, orderId);
         await ReportRepo.updateAntragStatus(bafaDb, pay.report_id, "bezahlt", { bezahlt: true });
+        await db
+          .prepare("UPDATE users SET kontingent_total = kontingent_total + 1 WHERE id = ?")
+          .bind(user.id)
+          .run();
         const { token: dlToken, validUntil } = await createDownloadToken(bafaDb, pay.report_id);
         await writeAuditLog(db, {
           userId: user.id,

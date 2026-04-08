@@ -443,4 +443,20 @@ reports.post("/:id/finalize", requireAuth, async (c) => {
   return c.json({ success: true });
 });
 
+// PATCH /:id/finalize — alias for v2 frontend (same logic as POST /:id/finalize)
+reports.patch("/:id/finalize", requireAuth, async (c) => {
+  const user = c.get("user");
+  const db = c.env.DB;
+  const bafaDb = c.env.BAFA_DB;
+
+  const reserved = await UserRepo.reserveKontingent(db, user.id);
+  if (!reserved) return kontingentError(c);
+
+  const antragId = c.req.param("id");
+  await ReportRepo.finalizeReport(db, antragId, user.id);
+  await ReportRepo.updateAntragStatus(bafaDb, antragId, "pending");
+
+  return c.json({ success: true });
+});
+
 export { reports };
