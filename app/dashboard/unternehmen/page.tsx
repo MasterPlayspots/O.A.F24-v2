@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/store/authStore';
 import { useVerifiedGuard } from '@/lib/hooks/useVerifiedGuard';
 import { useMount } from '@/lib/hooks/useMount';
 import { getDashboard } from '@/lib/api/check';
+import { getDashboard as getFund24Dashboard, type DashboardSummary } from '@/lib/api/fund24';
 import { DashboardUnternehmen, CheckSession } from '@/lib/types';
 import { FehlerBox } from '@/components/shared/FehlerBox';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ export default function UnternehmenDashboardPage() {
   const { loading: guardLoading } = useVerifiedGuard();
   const isMounted = useMount();
   const [data, setData] = useState<DashboardUnternehmen | null>(null);
+  const [fund24, setFund24] = useState<DashboardSummary | null>(null);
   const [fehler, setFehler] = useState('');
   const [ladet, setLadet] = useState(true);
 
@@ -38,6 +40,10 @@ export default function UnternehmenDashboardPage() {
         setFehler('');
         const result = await getDashboard('unternehmen', token);
         setData(result as DashboardUnternehmen);
+        try {
+          const f24 = await getFund24Dashboard();
+          setFund24(f24);
+        } catch { /* fund24 panel optional */ }
       } catch (error) {
         setFehler(error instanceof Error ? error.message : 'Fehler beim Laden der Daten');
       } finally {
@@ -140,6 +146,26 @@ export default function UnternehmenDashboardPage() {
             </div>
           </Card>
         </div>
+
+        {fund24 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <Card className="p-6 border-slate-200">
+              <p className="text-sm text-slate-600 font-medium">BAFA-Anträge</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{fund24.antraege.n}</p>
+              <p className="text-xs text-slate-500 mt-1">
+                {fund24.antraege.entwurf || 0} Entwurf · {fund24.antraege.eingereicht || 0} eingereicht · {fund24.antraege.bewilligt || 0} bewilligt
+              </p>
+            </Card>
+            <Card className="p-6 border-slate-200">
+              <p className="text-sm text-slate-600 font-medium">BAFA-Berichte</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{fund24.reports.n}</p>
+            </Card>
+            <Card className="p-6 border-slate-200">
+              <p className="text-sm text-slate-600 font-medium">Dokumente</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{fund24.dokumente.n}</p>
+            </Card>
+          </div>
+        )}
 
         <Card className="border-slate-200">
           <div className="p-6 border-b border-slate-200">

@@ -163,16 +163,16 @@ export default function AdminPage() {
         ) : (
           <div className="space-y-3">
             {pendingCerts.map((c) => (
-              <Card key={c.user_id} className="p-4 flex items-center justify-between gap-4">
+              <Card key={c.id} className="p-4 flex items-center justify-between gap-4">
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">{c.email}</p>
-                  <p className="text-xs text-gray-500">User-ID: {c.user_id}</p>
+                  <p className="text-xs text-gray-500">User-ID: {c.id}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={() => handleApprove(c.user_id)} disabled={certBusy === c.user_id}>
+                  <Button size="sm" onClick={() => handleApprove(c.id)} disabled={certBusy === c.id}>
                     Freigeben
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleReject(c.user_id)} disabled={certBusy === c.user_id}>
+                  <Button size="sm" variant="outline" onClick={() => handleReject(c.id)} disabled={certBusy === c.id}>
                     Ablehnen
                   </Button>
                 </div>

@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/store/authStore';
 import { useVerifiedGuard } from '@/lib/hooks/useVerifiedGuard';
 import { useMount } from '@/lib/hooks/useMount';
 import { getDashboard, updateAnfrage } from '@/lib/api/check';
+import { listBeraterKunden, type BeraterKunde } from '@/lib/api/fund24';
 import { DashboardBerater, Anfrage, TrackerVorgang } from '@/lib/types';
 import { LadeSpinner } from '@/components/shared/LadeSpinner';
 import { FehlerBox } from '@/components/shared/FehlerBox';
@@ -31,6 +32,7 @@ export default function BeraterDashboardPage() {
   const { loading: guardLoading } = useVerifiedGuard();
   const isMounted = useMount();
   const [data, setData] = useState<DashboardBerater | null>(null);
+  const [kunden, setKunden] = useState<BeraterKunde[]>([]);
   const [fehler, setFehler] = useState('');
   const [ladet, setLadet] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
@@ -43,6 +45,10 @@ export default function BeraterDashboardPage() {
         setFehler('');
         const result = await getDashboard('berater', token);
         setData(result as DashboardBerater);
+        try {
+          const k = await listBeraterKunden();
+          setKunden(k || []);
+        } catch { /* optional */ }
       } catch (error) {
         setFehler(error instanceof Error ? error.message : 'Fehler beim Laden der Daten');
       } finally {
@@ -128,6 +134,28 @@ export default function BeraterDashboardPage() {
           <h1 className="text-4xl font-bold text-slate-900 mb-2">Berater Dashboard</h1>
           <p className="text-slate-600">Übersicht Ihrer Anfragen und Projekte</p>
         </div>
+
+        {kunden.length > 0 && (
+          <Card className="border-slate-200 mb-8">
+            <div className="p-6 border-b border-slate-200">
+              <h2 className="text-xl font-bold text-slate-900">Meine Kunden ({kunden.length})</h2>
+            </div>
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {kunden.map((k) => (
+                <div key={k.unternehmen_id} className="border border-slate-200 rounded-lg p-4">
+                  <p className="font-semibold text-slate-900">{k.firmenname || 'Unbenannt'}</p>
+                  {k.branche && <p className="text-xs text-slate-500">{k.branche}</p>}
+                  <p className="text-sm text-slate-600 mt-2">{k.antraege_count} Antrag/Anträge</p>
+                  {k.letzte_aktivitaet && (
+                    <p className="text-xs text-slate-400 mt-1">
+                      Zuletzt: {new Date(k.letzte_aktivitaet).toLocaleDateString('de-DE')}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card className="p-6 border-slate-200">
