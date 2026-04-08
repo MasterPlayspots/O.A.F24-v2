@@ -1,16 +1,25 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { verifyEmail, resendVerification } from '@/lib/api/auth'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { verifyCode, resendVerification } from '@/lib/api/auth'
 import { useAuth } from '@/lib/store/authStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-export default function VerifizierenPage() {
+function VerifyForm() {
   const router = useRouter()
-  const { nutzer, token, login } = useAuth()
+  const searchParams = useSearchParams()
+  const { nutzer, login } = useAuth()
+
+  // Email primarily from URL (post-register flow). Fallback to store
+  // (legacy flow where register issued a token immediately).
+  const emailFromQuery = searchParams.get('email')
+  const roleFromQuery = searchParams.get('role')
+  const nextParam = searchParams.get('next')
+  const email = emailFromQuery ?? nutzer?.email ?? ''
+
   const [code, setCode] = useState('')
   const [fehler, setFehler] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -18,10 +27,10 @@ export default function VerifizierenPage() {
   const [resendMsg, setResendMsg] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!nutzer || !token) {
+    if (!email) {
       router.push('/login')
     }
-  }, [nutzer, token, router])
+  }, [email, router])
 
   useEffect(() => {
     if (cooldown <= 0) return
@@ -31,14 +40,21 @@ export default function VerifizierenPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!token || !nutzer) return
+    if (!email) return
     setIsSubmitting(true)
     setFehler(null)
     try {
-      await verifyEmail(code, token)
-      login(token, { ...nutzer, emailVerified: true })
-      if (nutzer.role === 'berater') {
+      const res = await verifyCode(email, code)
+      await login(res.token, res.user)
+      if (nextParam) {
+        router.push(nextParam)
+        return
+      }
+      const role = res.user.role || roleFromQuery
+      if (role === 'berater') {
         router.push('/onboarding/profil')
+      } else if (role === 'admin') {
+        router.push('/admin')
       } else {
         router.push('/dashboard/unternehmen')
       }
@@ -50,9 +66,10 @@ export default function VerifizierenPage() {
   }
 
   const handleResend = async () => {
-    if (!token || cooldown > 0) return
+    if (!email || cooldown > 0) return
+    setResendMsg(null)
     try {
-      await resendVerification(token)
+      await resendVerification(email)
       setCooldown(60)
       setResendMsg('Code wurde erneut gesendet.')
     } catch {
@@ -60,14 +77,14 @@ export default function VerifizierenPage() {
     }
   }
 
-  if (!nutzer) return null
+  if (!email) return null
 
   return (
     <div className="space-y-6">
       <div className="text-center">
         <h1 className="font-display text-2xl font-bold text-white">E-Mail verifizieren</h1>
         <p className="mt-2 text-sm text-white/60">
-          Code wurde an <strong>{nutzer.email}</strong> gesendet
+          Code wurde an <strong>{email}</strong> gesendet
         </p>
       </div>
 
@@ -95,7 +112,11 @@ export default function VerifizierenPage() {
           />
         </div>
 
-        <Button type="submit" className="w-full bg-architect-primary hover:bg-architect-primary-container text-white" disabled={code.length !== 6 || isSubmitting}>
+        <Button
+          type="submit"
+          className="w-full bg-architect-primary hover:bg-architect-primary-container text-white"
+          disabled={code.length !== 6 || isSubmitting}
+        >
           {isSubmitting ? 'Wird überprüft...' : 'Verifizieren'}
         </Button>
       </form>
@@ -113,5 +134,13 @@ export default function VerifizierenPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function VerifizierenPage() {
+  return (
+    <Suspense>
+      <VerifyForm />
+    </Suspense>
   )
 }

@@ -30,6 +30,20 @@ interface WorkerAuthResponse {
   user: WorkerUser
 }
 
+interface WorkerRegisterResponse {
+  success: boolean
+  userId?: string
+  requiresVerification?: boolean
+  message?: string
+  // Legacy: in case the worker ever returns full auth payload from /register
+  token?: string
+  user?: WorkerUser
+}
+
+export type RegisterResult =
+  | AuthResponse
+  | { requiresVerification: true; email: string; userId?: string }
+
 function mapNutzer(u: WorkerUser): Nutzer {
   return {
     id: u.id,
@@ -46,8 +60,8 @@ function mapAuth(r: WorkerAuthResponse): AuthResponse {
   return { token: r.token, user: mapNutzer(r.user) }
 }
 
-export async function register(daten: RegisterData): Promise<AuthResponse> {
-  const r = await apiCall<WorkerAuthResponse>(API.FUND24, '/api/auth/register', {
+export async function register(daten: RegisterData): Promise<RegisterResult> {
+  const r = await apiCall<WorkerRegisterResponse>(API.FUND24, '/api/auth/register', {
     method: 'POST',
     body: JSON.stringify({
       email: daten.email,
@@ -58,6 +72,17 @@ export async function register(daten: RegisterData): Promise<AuthResponse> {
       company: daten.company,
       privacyAccepted: daten.privacyAccepted,
     }),
+  })
+  if (r.token && r.user) {
+    return mapAuth(r as WorkerAuthResponse)
+  }
+  return { requiresVerification: true, email: daten.email, userId: r.userId }
+}
+
+export async function verifyCode(email: string, code: string): Promise<AuthResponse> {
+  const r = await apiCall<WorkerAuthResponse>(API.FUND24, '/api/auth/verify-code', {
+    method: 'POST',
+    body: JSON.stringify({ email, code }),
   })
   return mapAuth(r)
 }
@@ -80,8 +105,11 @@ export async function verifyEmail(code: string, token: string) {
     method: 'POST', body: JSON.stringify({ code }),
   }, token)
 }
-export async function resendVerification(token: string) {
-  return apiCall<{ ok: boolean }>(API.FUND24, '/api/auth/resend-code', { method: 'POST' }, token)
+export async function resendVerification(email: string) {
+  return apiCall<{ success: boolean; message?: string }>(API.FUND24, '/api/auth/resend-code', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  })
 }
 export async function forgotPassword(email: string) {
   return apiCall<{ ok: boolean }>(API.FUND24, '/api/auth/forgot-password', {

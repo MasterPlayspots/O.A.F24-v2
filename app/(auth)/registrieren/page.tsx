@@ -105,11 +105,16 @@ function RegisterForm() {
         role: rolle,
         privacyAccepted: data.datenschutz,
       })
-      login(res.token, res.user)
-      if (beraterParam) {
-        router.push(`/berater/${beraterParam}`)
+      if ('requiresVerification' in res) {
+        const next = beraterParam ? `&next=/berater/${beraterParam}` : ''
+        router.push(`/verifizieren?email=${encodeURIComponent(data.email)}&role=${rolle}${next}`)
       } else {
-        router.push('/verifizieren')
+        login(res.token, res.user)
+        if (beraterParam) {
+          router.push(`/berater/${beraterParam}`)
+        } else {
+          router.push('/verifizieren')
+        }
       }
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
