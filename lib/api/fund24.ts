@@ -192,6 +192,19 @@ export async function getAntrag(id: string): Promise<Antrag> {
   return apiCall<Antrag>(API.FUND24, `/api/antraege/${id}`, undefined, token())
 }
 
+export async function listMeineAntraege(): Promise<Antrag[]> {
+  return apiCall<Antrag[]>(API.FUND24, '/api/me/antraege', undefined, token())
+}
+
+export async function createAntrag(body: { programm_id: string; beschreibung?: string }): Promise<{ id: string }> {
+  return apiCall<{ id: string }>(
+    API.FUND24,
+    '/api/me/antraege',
+    { method: 'POST', body: JSON.stringify(body) },
+    token()
+  )
+}
+
 // TODO: GET /api/antraege/:id/dokumente muss noch im Worker ergänzt werden
 export async function listAntragDokumente(antragId: string): Promise<AntragDokumentDTO[]> {
   return apiCall<AntragDokumentDTO[]>(API.FUND24, `/api/antraege/${antragId}/dokumente`, undefined, token())
