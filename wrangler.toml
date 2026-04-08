@@ -19,7 +19,7 @@ FRONTEND_URL = "https://zfbf.info"
 [[d1_databases]]
 binding = "DB"
 database_name = "zfbf-db"
-database_id = "6b06bad2-a074-4280-ae26-14d2057893e6"
+database_id = "9a41ed93-e2a4-440d-8ef1-a3e63cb0c6e3"
 
 [[d1_databases]]
 binding = "BAFA_DB"
@@ -70,6 +70,13 @@ enabled = true
 # Daily backup at 02:00 UTC + Weekly learning cycle Monday 03:00 UTC
 [triggers]
 crons = ["0 2 * * *", "0 3 * * 1"]
+
+# Worker Routes (Zone fund24.io = 809ef77b10e4c17bf959cfe7aadf9e28)
+# Mirrors the route created via Cloudflare API on 2026-04-08 so the
+# repo stays the source of truth and future deploys don't drift.
+[[routes]]
+pattern = "api.fund24.io/api/*"
+zone_id = "809ef77b10e4c17bf959cfe7aadf9e28"
 
 # Secrets (set via: wrangler secret put <NAME>)
 # JWT_SECRET
