@@ -132,6 +132,38 @@ export async function updateBeratung(id: string, body: { status?: string; protok
   return apiCall(API.FUND24, `/api/beratungen/${id}`, { method: 'PATCH', body: JSON.stringify(body) }, token())
 }
 
+// ---------- Antrag (Detail + Dokumente) ----------
+export interface Antrag {
+  id: string
+  user_id: string
+  programm_id: string | null
+  programm_name?: string | null
+  status: 'entwurf' | 'eingereicht' | 'bewilligt' | 'abgelehnt'
+  foerdersumme_beantragt: number | null
+  foerdersumme_bewilligt: number | null
+  vollstaendigkeit: number | null
+  created_at: string
+  updated_at: string
+}
+
+export interface AntragDokumentDTO {
+  id: string
+  filename: string
+  size_bytes: number | null
+  mime_type: string | null
+  uploaded_at: string | null
+}
+
+// GET /api/antraege/:id existiert laut ECOSYSTEM TEIL C.3 im Worker.
+export async function getAntrag(id: string): Promise<Antrag> {
+  return apiCall<Antrag>(API.FUND24, `/api/antraege/${id}`, undefined, token())
+}
+
+// TODO: GET /api/antraege/:id/dokumente muss noch im Worker ergänzt werden
+export async function listAntragDokumente(antragId: string): Promise<AntragDokumentDTO[]> {
+  return apiCall<AntragDokumentDTO[]>(API.FUND24, `/api/antraege/${antragId}/dokumente`, undefined, token())
+}
+
 // ---------- Antrag-Zugriff (Berater einladen / entziehen) ----------
 export interface AntragZugriff {
   id: string
