@@ -57,7 +57,7 @@ export default function UnternehmenAnfragenPage() {
 
   if (!isMounted || guardLoading || ladet) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-architect-surface font-body text-white p-6">
         <div className="max-w-4xl mx-auto">
           <Skeleton className="h-12 w-48 mb-8" />
           <Skeleton className="h-96" />
@@ -68,7 +68,7 @@ export default function UnternehmenAnfragenPage() {
 
   if (fehler) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-architect-surface font-body text-white p-6">
         <div className="max-w-4xl mx-auto">
           <FehlerBox fehler={fehler} />
         </div>
@@ -103,11 +103,11 @@ export default function UnternehmenAnfragenPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-architect-surface font-body text-white p-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Anfragen</h1>
-          <p className="text-slate-600">Übersicht aller Ihre Anfragen an Berater</p>
+          <h1 className="font-display text-4xl font-bold text-white mb-2">Anfragen</h1>
+          <p className="text-white/60">Übersicht aller Ihre Anfragen an Berater</p>
         </div>
 
         {anfragen.length === 0 ? (
@@ -116,21 +116,21 @@ export default function UnternehmenAnfragenPage() {
             beschreibung="Sie haben noch keine Anfragen an Berater gesendet"
           />
         ) : (
-          <Card className="border-slate-200 overflow-hidden">
+          <Card className="bg-architect-surface/60 border-0 text-white overflow-hidden">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-slate-200 bg-slate-50">
-                    <TableHead>Berater</TableHead>
-                    <TableHead>Dienstleistung</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Datum</TableHead>
+                  <TableRow className="border-0 bg-architect-surface-low/30 hover:bg-architect-surface-low/30">
+                    <TableHead className="text-white/70">Berater</TableHead>
+                    <TableHead className="text-white/70">Dienstleistung</TableHead>
+                    <TableHead className="text-white/70">Status</TableHead>
+                    <TableHead className="text-white/70">Datum</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {anfragen.map((anfrage: AnfrageWithDetails) => (
-                    <TableRow key={anfrage.id} className="border-slate-200 hover:bg-slate-50">
+                    <TableRow key={anfrage.id} className="border-0 hover:bg-architect-surface/40">
                       <TableCell className="font-medium">
                         {anfrage.anUserName || 'Unbekannt'}
                       </TableCell>
@@ -140,12 +140,12 @@ export default function UnternehmenAnfragenPage() {
                           {getStatusLabel(anfrage.status)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-slate-600">
+                      <TableCell className="text-sm text-white/60">
                         {new Date(anfrage.createdAt).toLocaleDateString('de-DE')}
                       </TableCell>
                       <TableCell>
                         {anfrage.status === 'angenommen' && (
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
                             Nachricht
                           </Button>
                         )}

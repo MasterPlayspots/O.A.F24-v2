@@ -56,7 +56,7 @@ export default function FavoritenPage() {
 
   if (!isMounted || guardLoading || ladet) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-architect-surface font-body text-white p-6">
         <div className="max-w-4xl mx-auto">
           <Skeleton className="h-12 w-48 mb-8" />
           <div className="grid gap-4">
@@ -71,7 +71,7 @@ export default function FavoritenPage() {
 
   if (fehler) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-architect-surface font-body text-white p-6">
         <div className="max-w-4xl mx-auto">
           <FehlerBox fehler={fehler} />
         </div>
@@ -80,11 +80,11 @@ export default function FavoritenPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-architect-surface font-body text-white p-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Favoriten</h1>
-          <p className="text-slate-600">Ihre gespeicherten Förderprogramme</p>
+          <h1 className="font-display text-4xl font-bold text-white mb-2">Favoriten</h1>
+          <p className="text-white/60">Ihre gespeicherten Förderprogramme</p>
         </div>
 
         {favoriten.length === 0 ? (
@@ -95,16 +95,16 @@ export default function FavoritenPage() {
         ) : (
           <div className="grid gap-4">
             {favoriten.map((favorit) => (
-              <Card key={favorit.programm_id} className="p-6 border-slate-200 hover:border-slate-300 transition">
+              <Card key={favorit.programm_id} className="p-6 bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/50 transition">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                      <h3 className="text-lg font-semibold text-slate-900">
+                      <Star className="w-5 h-5 fill-architect-primary-light text-architect-primary-light" />
+                      <h3 className="font-display text-lg font-semibold text-white">
                         Programm {favorit.programm_id}
                       </h3>
                     </div>
-                    <p className="text-sm text-slate-600 mb-3">
+                    <p className="text-sm text-white/60 mb-3">
                       Gespeichert am {new Date(favorit.created_at).toLocaleDateString('de-DE')}
                     </p>
                   </div>
@@ -113,7 +113,7 @@ export default function FavoritenPage() {
                     disabled={loescht === favorit.programm_id}
                     variant="ghost"
                     size="sm"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50 shrink-0"
+                    className="text-architect-error-container hover:text-white hover:bg-architect-error/20 shrink-0"
                   >
                     {loescht === favorit.programm_id ? (
                       <LadeSpinner />

@@ -61,14 +61,14 @@ export default function MeineAntraegePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-architect-surface font-body text-white p-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">Meine Anträge</h1>
-            <p className="text-slate-600">Übersicht deiner Förder-Anträge</p>
+            <h1 className="font-display text-4xl font-bold text-white mb-2">Meine Anträge</h1>
+            <p className="text-white/60">Übersicht deiner Förder-Anträge</p>
           </div>
-          <Button onClick={() => setModalOpen(true)} className="shrink-0">
+          <Button onClick={() => setModalOpen(true)} className="shrink-0 bg-architect-primary hover:bg-architect-primary-container text-white">
             <Plus className="w-4 h-4 mr-2" /> Neuen Antrag stellen
           </Button>
         </div>
@@ -82,11 +82,11 @@ export default function MeineAntraegePage() {
             ))}
           </div>
         ) : antraege.length === 0 ? (
-          <Card className="p-12 text-center border-slate-200">
-            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-slate-900 mb-2">Noch keine Anträge</h2>
-            <p className="text-sm text-slate-600 mb-6">Stelle deinen ersten Förder-Antrag.</p>
-            <Button onClick={() => setModalOpen(true)}>
+          <Card className="p-12 text-center bg-architect-surface/60 border-0 text-white">
+            <FileText className="w-12 h-12 text-white/40 mx-auto mb-4" />
+            <h2 className="font-display text-xl font-semibold text-white mb-2">Noch keine Anträge</h2>
+            <p className="text-sm text-white/60 mb-6">Stelle deinen ersten Förder-Antrag.</p>
+            <Button onClick={() => setModalOpen(true)} className="bg-architect-primary hover:bg-architect-primary-container text-white">
               <Plus className="w-4 h-4 mr-2" /> Antrag erstellen
             </Button>
           </Card>
@@ -94,30 +94,30 @@ export default function MeineAntraegePage() {
           <div className="space-y-3">
             {antraege.map((a) => (
               <Link key={a.id} href={`/antraege/${a.id}`}>
-                <Card className="p-6 border-slate-200 hover:border-slate-300 hover:shadow-sm transition cursor-pointer">
+                <Card className="p-6 bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/50 transition cursor-pointer">
                   <div className="flex items-center justify-between gap-6">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <AntragStatusBadge status={a.status} />
                         {a.vollstaendigkeit != null && (
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-white/50">
                             {a.vollstaendigkeit}% vollständig
                           </span>
                         )}
                       </div>
-                      <h3 className="text-lg font-semibold text-slate-900 truncate">
+                      <h3 className="font-display text-lg font-semibold text-white truncate">
                         {a.programm_name ?? a.programm_id ?? 'Unbenannter Antrag'}
                       </h3>
-                      <p className="text-xs text-slate-400 mt-1 font-mono truncate">{a.id}</p>
+                      <p className="text-xs text-white/40 mt-1 font-mono truncate">{a.id}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-xs text-slate-500 uppercase tracking-wide">Beantragt</p>
-                      <p className="text-lg font-bold text-slate-900">{fmtEUR(a.foerdersumme_beantragt)}</p>
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs text-white/50 uppercase tracking-wide">Beantragt</p>
+                      <p className="font-display text-lg font-bold text-white">{fmtEUR(a.foerdersumme_beantragt)}</p>
+                      <p className="text-xs text-white/40 mt-1">
                         {new Date(a.created_at).toLocaleDateString('de-DE')}
                       </p>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-slate-400 shrink-0" />
+                    <ArrowRight className="w-5 h-5 text-white/40 shrink-0" />
                   </div>
                 </Card>
               </Link>
