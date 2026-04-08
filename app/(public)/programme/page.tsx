@@ -18,17 +18,19 @@ export default async function ProgrammePage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12 sm:py-16 sm:px-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
-          Förderprogramme durchsuchen
-        </h1>
-        <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-          Finden Sie die passenden Förderprogramme für Ihr Unternehmen. Nutzen Sie die Filter zur gezielten Suche.
-        </p>
-      </div>
+    <div className="min-h-screen bg-architect-surface font-body text-white">
+      <div className="mx-auto max-w-7xl px-6 py-12 sm:py-16 sm:px-8">
+        <div className="mb-8">
+          <h1 className="font-display text-4xl font-bold tracking-tight text-white">
+            Förderprogramme durchsuchen
+          </h1>
+          <p className="mt-4 text-lg text-white/70">
+            Finden Sie die passenden Förderprogramme für Ihr Unternehmen. Nutzen Sie die Filter zur gezielten Suche.
+          </p>
+        </div>
 
-      <ProgrammListe filterOptions={filterOptions} />
+        <ProgrammListe filterOptions={filterOptions} />
+      </div>
     </div>
   )
 }

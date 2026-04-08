@@ -143,14 +143,14 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
 
             return (
               <div key={i} className="relative h-5 w-5">
-                <Star className="h-5 w-5 text-gray-300" fill="currentColor" />
+                <Star className="h-5 w-5 text-white/30" fill="currentColor" />
                 {(isFull || isHalf) && (
                   <div
                     className="absolute top-0 left-0 overflow-hidden"
                     style={{ width: isFull ? '100%' : '50%' }}
                   >
                     <Star
-                      className="h-5 w-5 text-yellow-400"
+                      className="h-5 w-5 text-architect-primary-light"
                       fill="currentColor"
                     />
                   </div>
@@ -159,7 +159,7 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
             );
           })}
         </div>
-        <span className="text-sm font-medium text-gray-700">
+        <span className="text-sm font-medium text-white/80">
           {roundedRating.toFixed(1)}
         </span>
       </div>
@@ -168,11 +168,11 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <div className="min-h-screen bg-architect-surface font-body text-white">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="space-y-4">
-            <div className="h-10 w-32 animate-pulse rounded bg-gray-200" />
-            <div className="h-64 w-full animate-pulse rounded bg-gray-200" />
+            <div className="h-10 w-32 animate-pulse rounded bg-architect-surface/40" />
+            <div className="h-64 w-full animate-pulse rounded bg-architect-surface/40" />
           </div>
         </div>
       </div>
@@ -181,11 +181,11 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
 
   if (error || !berater) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <div className="min-h-screen bg-architect-surface font-body text-white">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           <Link
             href="/berater"
-            className="mb-6 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700"
+            className="mb-6 inline-flex items-center text-sm font-medium text-architect-primary-light hover:text-white"
           >
             <svg
               className="mr-2 h-4 w-4"
@@ -203,11 +203,11 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
             Zurück zur Beraterliste
           </Link>
 
-          <div className="rounded-lg bg-red-50 p-8 text-center ring-1 ring-red-200">
-            <h1 className="text-lg font-semibold text-red-900">
+          <div className="rounded-lg bg-architect-error/20 p-8 text-center">
+            <h1 className="font-display text-lg font-semibold text-architect-error-container">
               Berater nicht gefunden
             </h1>
-            <p className="mt-2 text-sm text-red-700">
+            <p className="mt-2 text-sm text-architect-error-container/80">
               {error || 'Entschuldigung, dieser Berater existiert nicht.'}
             </p>
           </div>
@@ -217,12 +217,12 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-architect-surface font-body text-white">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Back link */}
         <Link
           href="/berater"
-          className="mb-6 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700"
+          className="mb-6 inline-flex items-center text-sm font-medium text-architect-primary-light hover:text-white"
         >
           <svg
             className="mr-2 h-4 w-4"
@@ -244,20 +244,20 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
           {/* Main content */}
           <div className="lg:col-span-2">
             {/* Header */}
-            <div className="mb-8 rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
+            <div className="mb-8 rounded-lg bg-architect-surface/60 p-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
+                  <h1 className="font-display text-3xl font-bold text-white">
                     {berater.displayName}
                   </h1>
                   {berater.region && (
-                    <p className="mt-2 text-lg text-gray-600">
+                    <p className="mt-2 text-lg text-white/70">
                       {berater.region}
                     </p>
                   )}
                 </div>
                 {berater.verfuegbar && (
-                  <Badge className="bg-green-100 text-green-800 border-green-200">
+                  <Badge className="bg-architect-tertiary/25 text-architect-tertiary-light border-0">
                     Verfügbar
                   </Badge>
                 )}
@@ -273,11 +273,11 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
 
             {/* Bio */}
             {berater.bio && (
-              <div className="mb-8 rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
-                <h2 className="mb-4 text-xl font-semibold text-gray-900">
+              <div className="mb-8 rounded-lg bg-architect-surface/60 p-6">
+                <h2 className="font-display mb-4 text-xl font-semibold text-white">
                   Über mich
                 </h2>
-                <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                <p className="whitespace-pre-wrap text-white/80 leading-relaxed">
                   {berater.bio}
                 </p>
               </div>
@@ -285,15 +285,15 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
 
             {/* Expertise */}
             {berater.expertise && berater.expertise.length > 0 && (
-              <div className="mb-8 rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
-                <h2 className="mb-4 text-xl font-semibold text-gray-900">
+              <div className="mb-8 rounded-lg bg-architect-surface/60 p-6">
+                <h2 className="font-display mb-4 text-xl font-semibold text-white">
                   Fachkompetenz
                 </h2>
                 <ul className="space-y-2">
                   {berater.expertise.map((item: BeraterExpertise, i: number) => (
                     <li key={i} className="flex items-start gap-3">
                       <svg
-                        className="mt-1 h-5 w-5 flex-shrink-0 text-green-600"
+                        className="mt-1 h-5 w-5 flex-shrink-0 text-architect-tertiary-light"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -303,7 +303,7 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
                           clipRule="evenodd"
                         />
                       </svg>
-                      <span className="text-gray-700">{item.foerderbereich}</span>
+                      <span className="text-white/80">{item.foerderbereich}</span>
                     </li>
                   ))}
                 </ul>
@@ -312,28 +312,28 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
 
             {/* Dienstleistungen */}
             {berater.dienstleistungen && berater.dienstleistungen.length > 0 && (
-              <div className="mb-8 rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
-                <h2 className="mb-4 text-xl font-semibold text-gray-900">
+              <div className="mb-8 rounded-lg bg-architect-surface/60 p-6">
+                <h2 className="font-display mb-4 text-xl font-semibold text-white">
                   Dienstleistungen
                 </h2>
                 <div className="space-y-3">
                   {berater.dienstleistungen.map((service: Dienstleistung, i: number) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between rounded-lg bg-slate-50 p-4"
+                      className="flex items-center justify-between rounded-lg bg-architect-surface-low/40 p-4"
                     >
                       <div>
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-white">
                           {service.name}
                         </p>
                         {service.kategorie && (
-                          <p className="mt-1 text-sm text-gray-600">
+                          <p className="mt-1 text-sm text-white/60">
                             {service.kategorie}
                           </p>
                         )}
                       </div>
                       {service.preisVon !== undefined && (
-                        <p className="ml-4 flex-shrink-0 text-lg font-semibold text-gray-900">
+                        <p className="ml-4 flex-shrink-0 text-lg font-semibold text-white">
                           {new Intl.NumberFormat('de-DE', {
                             style: 'currency',
                             currency: 'EUR',
@@ -348,8 +348,8 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
 
             {/* Branchen */}
             {berater.branchen && berater.branchen.length > 0 && (
-              <div className="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
-                <h2 className="mb-4 text-xl font-semibold text-gray-900">
+              <div className="rounded-lg bg-architect-surface/60 p-6">
+                <h2 className="font-display mb-4 text-xl font-semibold text-white">
                   Spezialisierungen
                 </h2>
                 <div className="flex flex-wrap gap-2">
@@ -365,19 +365,19 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
 
           {/* Right sidebar - CTA */}
           <div>
-            <div className="sticky top-8 rounded-lg bg-blue-50 p-6 ring-1 ring-blue-200">
-              <h3 className="mb-4 text-lg font-semibold text-gray-900">
+            <div className="sticky top-8 rounded-lg bg-architect-primary/20 p-6">
+              <h3 className="font-display mb-4 text-lg font-semibold text-white">
                 Interesse?
               </h3>
-              <p className="mb-6 text-sm text-gray-600">
+              <p className="mb-6 text-sm text-white/70">
                 Nehmen Sie Kontakt auf und senden Sie eine Anfrage.
               </p>
 
               {mounted && (
                 <>
                   {nutzer?.role === 'berater' ? (
-                    <div className="rounded-lg bg-yellow-50 p-3 ring-1 ring-yellow-200">
-                      <p className="text-xs text-yellow-800">
+                    <div className="rounded-lg bg-architect-primary/20 p-3">
+                      <p className="text-xs text-architect-primary-light">
                         Sie sind als Berater angemeldet. Sie können keine
                         Anfragen stellen.
                       </p>
@@ -386,7 +386,7 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
                     <Button
                       onClick={handleAnfrageClick}
                       size="lg"
-                      className="w-full"
+                      className="w-full bg-architect-primary hover:bg-architect-primary-container text-white"
                     >
                       Anfrage senden
                     </Button>
@@ -410,8 +410,8 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
 
           <div className="space-y-4">
             {anfrageError && (
-              <div className="rounded-lg bg-red-50 p-3 ring-1 ring-red-200">
-                <p className="text-sm text-red-800">{anfrageError}</p>
+              <div className="rounded-lg bg-architect-error/20 p-3">
+                <p className="text-sm text-architect-error-container">{anfrageError}</p>
               </div>
             )}
 

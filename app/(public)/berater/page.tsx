@@ -99,24 +99,24 @@ export default function BeraterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-architect-surface font-body text-white">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="mb-2 text-4xl font-bold text-gray-900">
+          <h1 className="font-display mb-2 text-4xl font-bold text-white">
             Fachberatungen
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-white/70">
             Finden Sie die richtige Beratung für Ihr Unternehmen
           </p>
         </div>
 
         {/* Filters */}
-        <div className="mb-8 rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
-          <h2 className="mb-4 text-sm font-semibold text-gray-900">Filter</h2>
+        <div className="mb-8 rounded-lg bg-architect-surface/60 p-6">
+          <h2 className="font-display mb-4 text-sm font-semibold text-white">Filter</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="mb-2 block text-sm font-medium text-white/80">
                 Bundesland
               </label>
               <Select value={selectedBundesland} onValueChange={handleBundeslandChange}>
@@ -134,7 +134,7 @@ export default function BeraterPage() {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="mb-2 block text-sm font-medium text-white/80">
                 Spezialisierung
               </label>
               <Select value={selectedSpezialisierung} onValueChange={handleSpezialisierungChange}>
@@ -155,8 +155,8 @@ export default function BeraterPage() {
 
         {/* Error state */}
         {error && (
-          <div className="mb-8 rounded-lg bg-red-50 p-4 ring-1 ring-red-200">
-            <p className="text-sm text-red-800">{error}</p>
+          <div className="mb-8 rounded-lg bg-architect-error/20 p-4">
+            <p className="text-sm text-architect-error-container">{error}</p>
           </div>
         )}
 
@@ -168,9 +168,9 @@ export default function BeraterPage() {
             ))}
           </div>
         ) : filteredBerater.length === 0 ? (
-          <div className="rounded-lg bg-white p-12 text-center ring-1 ring-gray-200">
+          <div className="rounded-lg bg-architect-surface/60 p-12 text-center">
             <svg
-              className="mx-auto h-12 w-12 text-gray-400"
+              className="mx-auto h-12 w-12 text-white/40"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -182,16 +182,16 @@ export default function BeraterPage() {
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">
+            <h3 className="font-display mt-4 text-lg font-medium text-white">
               Keine Beratungen gefunden
             </h3>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-white/60">
               Versuchen Sie, die Filter anzupassen und erneut zu suchen.
             </p>
           </div>
         ) : (
           <div>
-            <p className="mb-6 text-sm font-medium text-gray-600">
+            <p className="mb-6 text-sm font-medium text-white/60">
               {filteredBerater.length}{' '}
               {filteredBerater.length === 1 ? 'Beratung' : 'Beratungen'} gefunden
             </p>
