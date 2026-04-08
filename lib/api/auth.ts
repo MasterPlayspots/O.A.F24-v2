@@ -1,4 +1,4 @@
-// lib/api/auth.ts — Auth endpoints on foerdermittel-check-api
+// lib/api/auth.ts — Auth endpoints on bafa-creator-ai-worker (api.fund24.io/api/*)
 import { apiCall } from './client'
 import { API } from './config'
 import type { AuthResponse, Nutzer } from '../types'
@@ -10,6 +10,7 @@ interface RegisterData {
   lastName: string
   company?: string
   role: Nutzer['role']
+  privacyAccepted: boolean
 }
 
 // Worker liefert snake_case — wir mappen auf camelCase Nutzer
@@ -46,22 +47,23 @@ function mapAuth(r: WorkerAuthResponse): AuthResponse {
 }
 
 export async function register(daten: RegisterData): Promise<AuthResponse> {
-  const r = await apiCall<WorkerAuthResponse>(API.CHECK, '/api/auth/register', {
+  const r = await apiCall<WorkerAuthResponse>(API.FUND24, '/api/auth/register', {
     method: 'POST',
     body: JSON.stringify({
       email: daten.email,
       password: daten.password,
-      first_name: daten.firstName,
-      last_name: daten.lastName,
-      rolle: daten.role,
+      firstName: daten.firstName,
+      lastName: daten.lastName,
+      role: daten.role,
       company: daten.company,
+      privacyAccepted: daten.privacyAccepted,
     }),
   })
   return mapAuth(r)
 }
 
 export async function login(email: string, password: string): Promise<AuthResponse> {
-  const r = await apiCall<WorkerAuthResponse>(API.CHECK, '/api/auth/login', {
+  const r = await apiCall<WorkerAuthResponse>(API.FUND24, '/api/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   })
@@ -69,25 +71,25 @@ export async function login(email: string, password: string): Promise<AuthRespon
 }
 
 export async function getMe(token: string): Promise<Nutzer> {
-  const u = await apiCall<WorkerUser>(API.CHECK, '/api/auth/me', undefined, token)
+  const u = await apiCall<WorkerUser>(API.FUND24, '/api/auth/me', undefined, token)
   return mapNutzer(u)
 }
 
 export async function verifyEmail(code: string, token: string) {
-  return apiCall<{ ok: boolean }>(API.CHECK, '/api/auth/verify-email', {
+  return apiCall<{ ok: boolean }>(API.FUND24, '/api/auth/verify-email', {
     method: 'POST', body: JSON.stringify({ code }),
   }, token)
 }
 export async function resendVerification(token: string) {
-  return apiCall<{ ok: boolean }>(API.CHECK, '/api/auth/resend-verification', { method: 'POST' }, token)
+  return apiCall<{ ok: boolean }>(API.FUND24, '/api/auth/resend-code', { method: 'POST' }, token)
 }
 export async function forgotPassword(email: string) {
-  return apiCall<{ ok: boolean }>(API.CHECK, '/api/auth/forgot-password', {
+  return apiCall<{ ok: boolean }>(API.FUND24, '/api/auth/forgot-password', {
     method: 'POST', body: JSON.stringify({ email }),
   })
 }
 export async function resetPassword(token: string, password: string) {
-  return apiCall<{ ok: boolean }>(API.CHECK, '/api/auth/reset-password', {
+  return apiCall<{ ok: boolean }>(API.FUND24, '/api/auth/reset-password', {
     method: 'POST', body: JSON.stringify({ token, password }),
   })
 }
@@ -95,5 +97,5 @@ export async function logout(token: string) {
   if (typeof document !== 'undefined') {
     document.cookie = 'fund24-auth=; path=/; max-age=0'
   }
-  return apiCall<{ ok: boolean }>(API.CHECK, '/api/auth/logout', { method: 'POST' }, token)
+  return apiCall<{ ok: boolean }>(API.FUND24, '/api/auth/logout', { method: 'POST' }, token)
 }

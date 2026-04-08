@@ -103,6 +103,7 @@ function RegisterForm() {
         lastName: data.lastName,
         company: data.company,
         role: rolle,
+        privacyAccepted: data.datenschutz,
       })
       login(res.token, res.user)
       if (beraterParam) {
