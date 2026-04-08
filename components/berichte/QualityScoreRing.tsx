@@ -28,8 +28,8 @@ export function QualityScoreRing({ score, size = 120 }: { score: number; size?: 
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-[family-name:var(--font-manrope)] text-3xl font-bold text-white tracking-tight">{clamped}</span>
-        <span className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-widest text-white/60">Quality</span>
+        <span className="font-display text-3xl font-bold text-white tracking-tight">{clamped}</span>
+        <span className="font-body text-[10px] uppercase tracking-widest text-white/60">Quality</span>
       </div>
     </div>
   );

@@ -50,6 +50,8 @@
   --color-architect-error-container: #ffdad6;
   --color-architect-on-primary: #ffffff;
   --color-architect-on-tertiary: #000000;
+  --color-architect-primary-light: #c9d1ff;
+  --color-architect-tertiary-light: #7fe8c8;
   --font-display: var(--font-manrope);
   --font-body: var(--font-inter);
 

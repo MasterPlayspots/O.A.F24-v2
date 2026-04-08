@@ -21,10 +21,10 @@ import { ACLList } from '@/components/antraege/ACLList';
 import { InviteBeraterModal } from '@/components/antraege/InviteBeraterModal';
 
 const STATUS_STYLE: Record<Antrag['status'], { bg: string; fg: string; label: string }> = {
-  entwurf:     { bg: 'bg-[#737688]/40', fg: 'text-white',         label: 'Entwurf' },
-  eingereicht: { bg: 'bg-[#6575ad]/30', fg: 'text-[#c9d1ff]',     label: 'Eingereicht' },
-  bewilligt:   { bg: 'bg-[#069e7c]/35', fg: 'text-[#7fe8c8]',     label: 'Bewilligt' },
-  abgelehnt:   { bg: 'bg-[#ba1a1a]/25', fg: 'text-[#ffdad6]',     label: 'Abgelehnt' },
+  entwurf:     { bg: 'bg-architect-surface/40', fg: 'text-white',         label: 'Entwurf' },
+  eingereicht: { bg: 'bg-architect-primary/30', fg: 'text-architect-primary-light',     label: 'Eingereicht' },
+  bewilligt:   { bg: 'bg-architect-tertiary/35', fg: 'text-architect-tertiary-light',     label: 'Bewilligt' },
+  abgelehnt:   { bg: 'bg-architect-error/25', fg: 'text-architect-error-container',     label: 'Abgelehnt' },
 };
 
 function fmtEUR(n: number | null) {
@@ -104,13 +104,13 @@ export default function AntragDetailPage() {
   const completeness = antrag?.vollstaendigkeit ?? 0;
 
   return (
-    <div className="min-h-screen bg-[#737688] font-[family-name:var(--font-inter)] text-white">
+    <div className="min-h-screen bg-architect-surface font-body text-white">
       <div className="max-w-5xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="flex items-start justify-between gap-8 mb-12">
           <div className="min-w-0">
             <p className="text-xs uppercase tracking-[0.2em] text-white/50 mb-3">Antrag</p>
-            <h1 className="font-[family-name:var(--font-manrope)] font-bold text-5xl tracking-[-0.02em] leading-none truncate">
+            <h1 className="font-display font-bold text-5xl tracking-[-0.02em] leading-none truncate">
               {antrag?.programm_name ?? 'Antrag-Detail'}
             </h1>
             <div className="mt-5 flex items-center gap-4">
@@ -124,27 +124,27 @@ export default function AntragDetailPage() {
         </div>
 
         {fehler && (
-          <div className="mb-8 px-5 py-4 rounded-md bg-[#ba1a1a]/15 text-[#ffdad6] text-sm">{fehler}</div>
+          <div className="mb-8 px-5 py-4 rounded-md bg-architect-error/15 text-architect-error-container text-sm">{fehler}</div>
         )}
 
         {loading ? (
           <div className="space-y-4">
-            <div className="bg-[#637c74]/40 rounded-lg h-32 animate-pulse" />
-            <div className="bg-[#637c74]/40 rounded-lg h-48 animate-pulse" />
+            <div className="bg-architect-surface-low/40 rounded-lg h-32 animate-pulse" />
+            <div className="bg-architect-surface-low/40 rounded-lg h-48 animate-pulse" />
           </div>
         ) : antrag ? (
           <div className="space-y-10">
             {/* Fördersummen */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-[#737688]/60 rounded-lg p-6 shadow-[0_10px_40px_rgba(101,117,173,0.06)]">
+              <div className="bg-architect-surface/60 rounded-lg p-6 shadow-[0_10px_40px_rgba(101,117,173,0.06)]">
                 <p className="text-xs uppercase tracking-widest text-white/50 mb-2">Beantragt</p>
-                <p className="font-[family-name:var(--font-manrope)] text-3xl font-bold text-white tracking-tight">
+                <p className="font-display text-3xl font-bold text-white tracking-tight">
                   {fmtEUR(antrag.foerdersumme_beantragt)}
                 </p>
               </div>
-              <div className="bg-[#737688]/60 rounded-lg p-6 shadow-[0_10px_40px_rgba(101,117,173,0.06)]">
+              <div className="bg-architect-surface/60 rounded-lg p-6 shadow-[0_10px_40px_rgba(101,117,173,0.06)]">
                 <p className="text-xs uppercase tracking-widest text-white/50 mb-2">Bewilligt</p>
-                <p className="font-[family-name:var(--font-manrope)] text-3xl font-bold text-[#7fe8c8] tracking-tight">
+                <p className="font-display text-3xl font-bold text-architect-tertiary-light tracking-tight">
                   {fmtEUR(antrag.foerdersumme_bewilligt)}
                 </p>
               </div>
@@ -152,7 +152,7 @@ export default function AntragDetailPage() {
 
             {/* Dokumente */}
             <section>
-              <h2 className="font-[family-name:var(--font-manrope)] text-2xl font-bold text-white mb-4 tracking-tight">
+              <h2 className="font-display text-2xl font-bold text-white mb-4 tracking-tight">
                 Dokumente
               </h2>
               <DokumenteListe dokumente={dokumente} />
@@ -161,14 +161,14 @@ export default function AntragDetailPage() {
             {/* ACL */}
             <section>
               <div className="flex items-end justify-between mb-4">
-                <h2 className="font-[family-name:var(--font-manrope)] text-2xl font-bold text-white tracking-tight">
+                <h2 className="font-display text-2xl font-bold text-white tracking-tight">
                   Zugriff
                 </h2>
                 <button
                   type="button"
                   onClick={() => setModalOpen(true)}
-                  className="px-5 py-2.5 rounded-md font-[family-name:var(--font-manrope)] font-semibold text-sm text-white tracking-wide
-                             bg-gradient-to-br from-[#6575ad] to-[#4a5a8f] hover:brightness-110
+                  className="px-5 py-2.5 rounded-md font-display font-semibold text-sm text-white tracking-wide
+                             bg-gradient-to-br from-architect-primary to-architect-primary-container hover:brightness-110
                              shadow-[0_10px_40px_rgba(101,117,173,0.25)] transition"
                 >
                   Berater einladen

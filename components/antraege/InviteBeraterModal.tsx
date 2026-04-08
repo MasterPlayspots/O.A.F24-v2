@@ -47,19 +47,19 @@ export function InviteBeraterModal({ open, onClose, onSubmit }: Props) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-xl p-8 bg-[#737688]/80 backdrop-blur-[20px]
+        className="w-full max-w-md rounded-xl p-8 bg-architect-surface/80 backdrop-blur-[20px]
                    shadow-[0_10px_60px_rgba(101,117,173,0.25)]"
       >
-        <h2 className="font-[family-name:var(--font-manrope)] font-bold text-2xl text-white tracking-tight mb-2">
+        <h2 className="font-display font-bold text-2xl text-white tracking-tight mb-2">
           Berater einladen
         </h2>
-        <p className="font-[family-name:var(--font-inter)] text-sm text-white/60 mb-6">
+        <p className="font-body text-sm text-white/60 mb-6">
           Erteile einem Berater Zugriff auf diesen Antrag.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block font-[family-name:var(--font-manrope)] text-xs font-semibold tracking-wide text-white/80 mb-2 uppercase">
+            <label className="block font-display text-xs font-semibold tracking-wide text-white/80 mb-2 uppercase">
               Berater-ID
             </label>
             <input
@@ -67,23 +67,23 @@ export function InviteBeraterModal({ open, onClose, onSubmit }: Props) {
               value={beraterId}
               onChange={(e) => setBeraterId(e.target.value)}
               placeholder="z. B. b_a1b2c3…"
-              className="w-full bg-[#637c74]/60 focus:bg-[#737688]/80 rounded-md px-4 py-3
-                         font-[family-name:var(--font-inter)] text-sm text-white placeholder-white/30
-                         outline-none transition-colors focus:ring-1 focus:ring-[#6575ad]/40"
+              className="w-full bg-architect-surface-low/60 focus:bg-architect-surface/80 rounded-md px-4 py-3
+                         font-body text-sm text-white placeholder-white/30
+                         outline-none transition-colors focus:ring-1 focus:ring-architect-primary/40"
               autoFocus
             />
           </div>
 
           <div>
-            <label className="block font-[family-name:var(--font-manrope)] text-xs font-semibold tracking-wide text-white/80 mb-2 uppercase">
+            <label className="block font-display text-xs font-semibold tracking-wide text-white/80 mb-2 uppercase">
               Rolle
             </label>
             <select
               value={rolle}
               onChange={(e) => setRolle(e.target.value as Rolle)}
-              className="w-full bg-[#637c74]/60 focus:bg-[#737688]/80 rounded-md px-4 py-3
-                         font-[family-name:var(--font-inter)] text-sm text-white
-                         outline-none transition-colors focus:ring-1 focus:ring-[#6575ad]/40"
+              className="w-full bg-architect-surface-low/60 focus:bg-architect-surface/80 rounded-md px-4 py-3
+                         font-body text-sm text-white
+                         outline-none transition-colors focus:ring-1 focus:ring-architect-primary/40"
             >
               <option value="editor">Editor — kann bearbeiten</option>
               <option value="viewer">Viewer — nur lesen</option>
@@ -92,7 +92,7 @@ export function InviteBeraterModal({ open, onClose, onSubmit }: Props) {
           </div>
 
           {fehler && (
-            <div className="px-4 py-3 rounded-md bg-[#ba1a1a]/15 text-[#ffdad6] font-[family-name:var(--font-inter)] text-xs">
+            <div className="px-4 py-3 rounded-md bg-architect-error/15 text-architect-error-container font-body text-xs">
               {fehler}
             </div>
           )}
@@ -102,15 +102,15 @@ export function InviteBeraterModal({ open, onClose, onSubmit }: Props) {
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-5 py-2.5 rounded-md font-[family-name:var(--font-inter)] text-sm text-white/70 hover:text-white transition"
+              className="px-5 py-2.5 rounded-md font-body text-sm text-white/70 hover:text-white transition"
             >
               Abbrechen
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-2.5 rounded-md font-[family-name:var(--font-manrope)] font-semibold text-sm text-white tracking-wide
-                         bg-gradient-to-br from-[#6575ad] to-[#4a5a8f] hover:brightness-110
+              className="px-6 py-2.5 rounded-md font-display font-semibold text-sm text-white tracking-wide
+                         bg-gradient-to-br from-architect-primary to-architect-primary-container hover:brightness-110
                          shadow-[0_10px_40px_rgba(101,117,173,0.25)] transition disabled:opacity-50"
             >
               {submitting ? 'Lädt…' : 'Einladen'}

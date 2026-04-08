@@ -29,10 +29,10 @@ export function CompletenessRing({ percent, size = 120 }: { percent: number; siz
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-[family-name:var(--font-manrope)] text-3xl font-bold text-white tracking-tight">
+        <span className="font-display text-3xl font-bold text-white tracking-tight">
           {clamped}%
         </span>
-        <span className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-widest text-white/60">
+        <span className="font-body text-[10px] uppercase tracking-widest text-white/60">
           Vollständig
         </span>
       </div>

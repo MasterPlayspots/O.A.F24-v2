@@ -117,15 +117,15 @@ export default function BerichtEditorPage() {
   const score = bericht?.quality_score ?? 0;
 
   return (
-    <div className="min-h-screen bg-[#737688] font-[family-name:var(--font-inter)] text-white">
+    <div className="min-h-screen bg-architect-surface font-body text-white">
       <div className="max-w-5xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="flex items-start justify-between gap-8 mb-12">
           <div>
-            <p className="font-[family-name:var(--font-inter)] text-xs uppercase tracking-[0.2em] text-white/50 mb-3">
+            <p className="font-body text-xs uppercase tracking-[0.2em] text-white/50 mb-3">
               γ-Hybrid · Berater-Bericht
             </p>
-            <h1 className="font-[family-name:var(--font-manrope)] font-bold text-white text-5xl tracking-[-0.02em] leading-none">
+            <h1 className="font-display font-bold text-white text-5xl tracking-[-0.02em] leading-none">
               {isNew ? 'Neuer Bericht' : 'Bericht bearbeiten'}
             </h1>
             <div className="mt-5 flex items-center gap-4">
@@ -140,19 +140,19 @@ export default function BerichtEditorPage() {
 
         {/* Fehler */}
         {fehler && (
-          <div className="mb-8 px-5 py-4 rounded-md bg-[#ba1a1a]/15 text-[#ffdad6] font-[family-name:var(--font-inter)] text-sm">
+          <div className="mb-8 px-5 py-4 rounded-md bg-architect-error/15 text-architect-error-container font-body text-sm">
             {fehler}
           </div>
         )}
 
         {/* Editor-Card (surface_container_lowest auf surface) */}
         {loading ? (
-          <div className="bg-[#637c74]/40 rounded-lg h-96 animate-pulse" />
+          <div className="bg-architect-surface-low/40 rounded-lg h-96 animate-pulse" />
         ) : (
-          <div className="bg-[#737688]/60 rounded-lg p-10 space-y-10 shadow-[0_10px_40px_rgba(101,117,173,0.06)]">
+          <div className="bg-architect-surface/60 rounded-lg p-10 space-y-10 shadow-[0_10px_40px_rgba(101,117,173,0.06)]">
             {FELDER.map((feld) => (
               <div key={feld.key}>
-                <label className="block font-[family-name:var(--font-manrope)] text-sm font-semibold tracking-wide text-white mb-3">
+                <label className="block font-display text-sm font-semibold tracking-wide text-white mb-3">
                   {feld.label}
                 </label>
                 <textarea
@@ -160,10 +160,10 @@ export default function BerichtEditorPage() {
                   value={content[feld.key] ?? ''}
                   onChange={(e) => setContent((c) => ({ ...c, [feld.key]: e.target.value }))}
                   onBlur={handleBlur}
-                  className="w-full bg-[#637c74]/60 focus:bg-[#737688]/80 rounded-md px-4 py-3
-                             font-[family-name:var(--font-inter)] text-[15px] text-white placeholder-white/30
+                  className="w-full bg-architect-surface-low/60 focus:bg-architect-surface/80 rounded-md px-4 py-3
+                             font-body text-[15px] text-white placeholder-white/30
                              outline-none transition-colors resize-y
-                             focus:ring-1 focus:ring-[#6575ad]/30"
+                             focus:ring-1 focus:ring-architect-primary/30"
                   placeholder={`${feld.label} beschreiben…`}
                 />
               </div>
@@ -174,12 +174,12 @@ export default function BerichtEditorPage() {
         {/* Footer */}
         {bericht && (
           <div className="mt-10 flex items-end justify-between gap-6">
-            <div className="font-[family-name:var(--font-inter)] text-xs text-white/50 space-y-1">
+            <div className="font-body text-xs text-white/50 space-y-1">
               <div>ID: <span className="text-white/70 font-mono">{bericht.id}</span></div>
               {bericht.finalized_by_berater_id && (
                 <div>
                   Finalisiert von:{' '}
-                  <span className="text-[#7fe8c8] font-mono">{bericht.finalized_by_berater_id}</span>
+                  <span className="text-architect-tertiary-light font-mono">{bericht.finalized_by_berater_id}</span>
                 </div>
               )}
               <div>Status-Flow: draft → preview → paid → downloaded</div>

@@ -17,10 +17,10 @@ const PHASEN: { value: BeratungPhase; label: string }[] = [
 ];
 
 const PHASE_STYLE: Record<BeratungPhase, { bg: string; fg: string }> = {
-  anlauf:        { bg: 'bg-[#737688]/40', fg: 'text-white' },
-  beratung:      { bg: 'bg-[#6575ad]/30', fg: 'text-[#c9d1ff]' },
-  nachbereitung: { bg: 'bg-[#6575ad]/40', fg: 'text-[#c9d1ff]' },
-  abgeschlossen: { bg: 'bg-[#069e7c]/35', fg: 'text-[#7fe8c8]' },
+  anlauf:        { bg: 'bg-architect-surface/40', fg: 'text-white' },
+  beratung:      { bg: 'bg-architect-primary/30', fg: 'text-architect-primary-light' },
+  nachbereitung: { bg: 'bg-architect-primary/40', fg: 'text-architect-primary-light' },
+  abgeschlossen: { bg: 'bg-architect-tertiary/35', fg: 'text-architect-tertiary-light' },
 };
 
 function fmtEUR(n: number | null) {
@@ -130,13 +130,13 @@ export default function BeratungEditorPage() {
   const ps = PHASE_STYLE[phase];
 
   return (
-    <div className="min-h-screen bg-[#737688] font-[family-name:var(--font-inter)] text-white">
+    <div className="min-h-screen bg-architect-surface font-body text-white">
       <div className="max-w-5xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="flex items-start justify-between gap-8 mb-12">
           <div className="min-w-0">
             <p className="text-xs uppercase tracking-[0.2em] text-white/50 mb-3">BAFA-Beratung</p>
-            <h1 className="font-[family-name:var(--font-manrope)] font-bold text-5xl tracking-[-0.02em] leading-none truncate">
+            <h1 className="font-display font-bold text-5xl tracking-[-0.02em] leading-none truncate">
               {beratung?.unternehmen_name ?? 'Beratung'}
             </h1>
             <div className="mt-5 flex items-center gap-4 flex-wrap">
@@ -159,27 +159,27 @@ export default function BeratungEditorPage() {
         </div>
 
         {fehler && (
-          <div className="mb-8 px-5 py-4 rounded-md bg-[#ba1a1a]/15 text-[#ffdad6] text-sm">{fehler}</div>
+          <div className="mb-8 px-5 py-4 rounded-md bg-architect-error/15 text-architect-error-container text-sm">{fehler}</div>
         )}
 
         {loading ? (
           <div className="space-y-4">
-            <div className="bg-[#637c74]/40 rounded-lg h-32 animate-pulse" />
-            <div className="bg-[#637c74]/40 rounded-lg h-64 animate-pulse" />
+            <div className="bg-architect-surface-low/40 rounded-lg h-32 animate-pulse" />
+            <div className="bg-architect-surface-low/40 rounded-lg h-64 animate-pulse" />
           </div>
         ) : beratung ? (
-          <div className="bg-[#737688]/60 rounded-lg p-10 space-y-10 shadow-[0_10px_40px_rgba(101,117,173,0.06)]">
+          <div className="bg-architect-surface/60 rounded-lg p-10 space-y-10 shadow-[0_10px_40px_rgba(101,117,173,0.06)]">
             {/* Phase */}
             <div>
-              <label className="block font-[family-name:var(--font-manrope)] text-sm font-semibold tracking-wide text-white mb-3">
+              <label className="block font-display text-sm font-semibold tracking-wide text-white mb-3">
                 Phase
               </label>
               <select
                 value={phase}
                 onChange={(e) => handlePhaseChange(e.target.value as BeratungPhase)}
-                className="w-full md:w-80 bg-[#637c74]/60 focus:bg-[#737688]/80 rounded-md px-4 py-3
-                           font-[family-name:var(--font-inter)] text-sm text-white
-                           outline-none transition-colors focus:ring-1 focus:ring-[#6575ad]/40"
+                className="w-full md:w-80 bg-architect-surface-low/60 focus:bg-architect-surface/80 rounded-md px-4 py-3
+                           font-body text-sm text-white
+                           outline-none transition-colors focus:ring-1 focus:ring-architect-primary/40"
               >
                 {PHASEN.map((p) => (
                   <option key={p.value} value={p.value}>{p.label}</option>
@@ -190,7 +190,7 @@ export default function BeratungEditorPage() {
             {/* Förderhöhe + Eigenanteil */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block font-[family-name:var(--font-manrope)] text-sm font-semibold tracking-wide text-white mb-3">
+                <label className="block font-display text-sm font-semibold tracking-wide text-white mb-3">
                   Förderhöhe (€)
                 </label>
                 <input
@@ -201,16 +201,16 @@ export default function BeratungEditorPage() {
                   onChange={(e) => setFoerderhoehe(e.target.value)}
                   onBlur={handleFoerderBlur}
                   placeholder="0"
-                  className="w-full bg-[#637c74]/60 focus:bg-[#737688]/80 rounded-md px-4 py-3
-                             font-[family-name:var(--font-inter)] text-sm text-white placeholder-white/30
-                             outline-none transition-colors focus:ring-1 focus:ring-[#6575ad]/40"
+                  className="w-full bg-architect-surface-low/60 focus:bg-architect-surface/80 rounded-md px-4 py-3
+                             font-body text-sm text-white placeholder-white/30
+                             outline-none transition-colors focus:ring-1 focus:ring-architect-primary/40"
                 />
                 <p className="mt-2 text-xs text-white/40">
                   Aktuell: <span className="text-white/70">{fmtEUR(beratung.foerderhoehe)}</span>
                 </p>
               </div>
               <div>
-                <label className="block font-[family-name:var(--font-manrope)] text-sm font-semibold tracking-wide text-white mb-3">
+                <label className="block font-display text-sm font-semibold tracking-wide text-white mb-3">
                   Eigenanteil (€)
                 </label>
                 <input
@@ -221,9 +221,9 @@ export default function BeratungEditorPage() {
                   onChange={(e) => setEigenanteil(e.target.value)}
                   onBlur={handleEigenBlur}
                   placeholder="0"
-                  className="w-full bg-[#637c74]/60 focus:bg-[#737688]/80 rounded-md px-4 py-3
-                             font-[family-name:var(--font-inter)] text-sm text-white placeholder-white/30
-                             outline-none transition-colors focus:ring-1 focus:ring-[#6575ad]/40"
+                  className="w-full bg-architect-surface-low/60 focus:bg-architect-surface/80 rounded-md px-4 py-3
+                             font-body text-sm text-white placeholder-white/30
+                             outline-none transition-colors focus:ring-1 focus:ring-architect-primary/40"
                 />
                 <p className="mt-2 text-xs text-white/40">
                   Aktuell: <span className="text-white/70">{fmtEUR(beratung.eigenanteil)}</span>
@@ -233,7 +233,7 @@ export default function BeratungEditorPage() {
 
             {/* Protokoll */}
             <div>
-              <label className="block font-[family-name:var(--font-manrope)] text-sm font-semibold tracking-wide text-white mb-3">
+              <label className="block font-display text-sm font-semibold tracking-wide text-white mb-3">
                 Protokoll
               </label>
               <textarea
@@ -242,9 +242,9 @@ export default function BeratungEditorPage() {
                 onChange={(e) => setProtokoll(e.target.value)}
                 onBlur={handleProtokollBlur}
                 placeholder="Protokoll der Beratung…"
-                className="w-full bg-[#637c74]/60 focus:bg-[#737688]/80 rounded-md px-4 py-3
-                           font-[family-name:var(--font-inter)] text-[15px] text-white placeholder-white/30
-                           outline-none transition-colors resize-y focus:ring-1 focus:ring-[#6575ad]/30"
+                className="w-full bg-architect-surface-low/60 focus:bg-architect-surface/80 rounded-md px-4 py-3
+                           font-body text-[15px] text-white placeholder-white/30
+                           outline-none transition-colors resize-y focus:ring-1 focus:ring-architect-primary/30"
               />
             </div>
           </div>

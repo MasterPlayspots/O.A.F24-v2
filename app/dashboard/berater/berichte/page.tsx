@@ -39,21 +39,21 @@ export default function BerichteUebersichtPage() {
   }, [token]);
 
   return (
-    <div className="min-h-screen bg-[#737688] font-[family-name:var(--font-inter)] text-white">
+    <div className="min-h-screen bg-architect-surface font-body text-white">
       <div className="max-w-5xl mx-auto px-6 py-12">
         <div className="flex items-end justify-between gap-8 mb-12">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-white/50 mb-3">
               γ-Hybrid · Übersicht
             </p>
-            <h1 className="font-[family-name:var(--font-manrope)] font-bold text-5xl tracking-[-0.02em] leading-none">
+            <h1 className="font-display font-bold text-5xl tracking-[-0.02em] leading-none">
               Meine Berichte
             </h1>
           </div>
           <Link
             href="/dashboard/berater/berichte/new"
-            className="px-6 py-3 rounded-md font-[family-name:var(--font-manrope)] font-semibold text-white tracking-wide
-                       bg-gradient-to-br from-[#6575ad] to-[#4a5a8f] hover:brightness-110
+            className="px-6 py-3 rounded-md font-display font-semibold text-white tracking-wide
+                       bg-gradient-to-br from-architect-primary to-architect-primary-container hover:brightness-110
                        shadow-[0_10px_40px_rgba(101,117,173,0.25)] transition"
           >
             Neuer Bericht
@@ -61,7 +61,7 @@ export default function BerichteUebersichtPage() {
         </div>
 
         {fehler && (
-          <div className="mb-8 px-5 py-4 rounded-md bg-[#ba1a1a]/15 text-[#ffdad6] text-sm">
+          <div className="mb-8 px-5 py-4 rounded-md bg-architect-error/15 text-architect-error-container text-sm">
             {fehler}
           </div>
         )}
@@ -69,12 +69,12 @@ export default function BerichteUebersichtPage() {
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-[#637c74]/40 rounded-lg h-20 animate-pulse" />
+              <div key={i} className="bg-architect-surface-low/40 rounded-lg h-20 animate-pulse" />
             ))}
           </div>
         ) : berichte.length === 0 ? (
-          <div className="bg-[#737688]/60 rounded-lg p-12 text-center shadow-[0_10px_40px_rgba(101,117,173,0.06)]">
-            <p className="font-[family-name:var(--font-manrope)] text-2xl text-white/80 mb-3">
+          <div className="bg-architect-surface/60 rounded-lg p-12 text-center shadow-[0_10px_40px_rgba(101,117,173,0.06)]">
+            <p className="font-display text-2xl text-white/80 mb-3">
               Noch keine Berichte
             </p>
             <p className="text-sm text-white/50 mb-8">
@@ -82,8 +82,8 @@ export default function BerichteUebersichtPage() {
             </p>
             <Link
               href="/dashboard/berater/berichte/new"
-              className="inline-block px-6 py-3 rounded-md font-[family-name:var(--font-manrope)] font-semibold
-                         bg-gradient-to-br from-[#6575ad] to-[#4a5a8f] hover:brightness-110 transition"
+              className="inline-block px-6 py-3 rounded-md font-display font-semibold
+                         bg-gradient-to-br from-architect-primary to-architect-primary-container hover:brightness-110 transition"
             >
               Bericht erstellen
             </Link>
@@ -94,7 +94,7 @@ export default function BerichteUebersichtPage() {
               <Link
                 key={b.id}
                 href={`/dashboard/berater/berichte/${b.id}`}
-                className="block bg-[#737688]/60 hover:bg-[#737688]/80 rounded-lg p-6 transition
+                className="block bg-architect-surface/60 hover:bg-architect-surface/80 rounded-lg p-6 transition
                            shadow-[0_10px_40px_rgba(101,117,173,0.06)]"
               >
                 <div className="flex items-center justify-between gap-6">
@@ -103,7 +103,7 @@ export default function BerichteUebersichtPage() {
                       <StatusBadge status={b.status as BerichtStatus} />
                       {b.quality_score != null && (
                         <span className="text-xs text-white/60">
-                          Quality: <span className="text-[#7fe8c8] font-semibold">{b.quality_score}</span>
+                          Quality: <span className="text-architect-tertiary-light font-semibold">{b.quality_score}</span>
                         </span>
                       )}
                     </div>
