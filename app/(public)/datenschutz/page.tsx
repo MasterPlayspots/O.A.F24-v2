@@ -9,15 +9,15 @@ export default function DatenschutzPage() {
   // TODO: Rechtsanwalt prüfen lassen vor Go-Live
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 md:p-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Datenschutzerklärung</h1>
-        <p className="text-gray-600 mb-8">DSGVO-konforme Datenschutzerklärung für fund24</p>
+    <div className="min-h-screen bg-architect-surface font-body text-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto bg-architect-surface/60 rounded-lg p-8 md:p-12">
+        <h1 className="font-display text-4xl font-bold text-white mb-2">Datenschutzerklärung</h1>
+        <p className="text-white/60 mb-8">DSGVO-konforme Datenschutzerklärung für fund24</p>
 
         {/* Verantwortlicher */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Verantwortlicher für die Datenverarbeitung</h2>
-          <div className="bg-gray-50 rounded-lg p-6 text-gray-700 space-y-2">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">1. Verantwortlicher für die Datenverarbeitung</h2>
+          <div className="bg-architect-surface-low/40 rounded-lg p-6 text-white/80 space-y-2">
             <p>
               <strong>Fröba Sales Solutions UG (haftungsbeschränkt)</strong>
             </p>
@@ -35,11 +35,11 @@ export default function DatenschutzPage() {
 
         {/* Datenverarbeitung */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Datenverarbeitung und Ihre Rechte</h2>
+          <h2 className="font-display text-2xl font-bold text-white mb-4">2. Datenverarbeitung und Ihre Rechte</h2>
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Art der verarbeiteten Daten</h3>
-              <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <h3 className="font-display text-lg font-semibold text-white mb-2">Art der verarbeiteten Daten</h3>
+              <ul className="list-disc list-inside text-white/80 space-y-2">
                 <li>Kontaktinformationen (Name, E-Mail, Telefon, Adresse)</li>
                 <li>Registrierungs- und Nutzerdaten</li>
                 <li>Unternehmensinformationen (für Fördercheck)</li>
@@ -50,11 +50,11 @@ export default function DatenschutzPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Rechtsgrundlagen</h3>
-              <p className="text-gray-700 mb-2">
+              <h3 className="font-display text-lg font-semibold text-white mb-2">Rechtsgrundlagen</h3>
+              <p className="text-white/80 mb-2">
                 Die Verarbeitung Ihrer Daten erfolgt auf Grundlage von:
               </p>
-              <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <ul className="list-disc list-inside text-white/80 space-y-2">
                 <li>Ihrer Zustimmung gemäß Art. 6 Abs. 1 lit. a DSGVO</li>
                 <li>Erfüllung eines Vertrags gemäß Art. 6 Abs. 1 lit. b DSGVO</li>
                 <li>Erfüllung einer rechtlichen Verpflichtung gemäß Art. 6 Abs. 1 lit. c DSGVO</li>
@@ -66,11 +66,11 @@ export default function DatenschutzPage() {
 
         {/* Cookies */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Cookies und Tracking</h2>
+          <h2 className="font-display text-2xl font-bold text-white mb-4">3. Cookies und Tracking</h2>
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Authentifizierungs-Cookie</h3>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-gray-700">
+              <h3 className="font-display text-lg font-semibold text-white mb-2">Authentifizierungs-Cookie</h3>
+              <div className="bg-architect-primary/20 rounded-lg p-4 text-white/80">
                 <p className="mb-2">
                   <strong>Cookie-Name:</strong> fund24-auth
                 </p>
@@ -84,8 +84,8 @@ export default function DatenschutzPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Signal-Cookie</h3>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-gray-700">
+              <h3 className="font-display text-lg font-semibold text-white mb-2">Signal-Cookie</h3>
+              <div className="bg-architect-primary/20 rounded-lg p-4 text-white/80">
                 <p className="mb-2">
                   <strong>Cookie-Name:</strong> fund24-signal
                 </p>
@@ -99,8 +99,8 @@ export default function DatenschutzPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Weitere Tracking-Tools</h3>
-              <p className="text-gray-700">
+              <h3 className="font-display text-lg font-semibold text-white mb-2">Weitere Tracking-Tools</h3>
+              <p className="text-white/80">
                 Wir setzen Analytics-Tools ein, um die Nutzung unserer Website zu analysieren. Diese erfolgen auf Grundlage Ihrer Zustimmung. Sie können diese jederzeit in den Cookie-Einstellungen widerrufen.
               </p>
             </div>
@@ -109,8 +109,8 @@ export default function DatenschutzPage() {
 
         {/* Nutzerkonto */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Nutzerkonto und Registrierung</h2>
-          <div className="text-gray-700 space-y-3">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">4. Nutzerkonto und Registrierung</h2>
+          <div className="text-white/80 space-y-3">
             <p>
               Bei der Registrierung eines Nutzerkontos werden folgende Daten erfasst:
             </p>
@@ -129,8 +129,8 @@ export default function DatenschutzPage() {
 
         {/* Dokument-Upload */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Dokument-Upload und Speicherung</h2>
-          <div className="space-y-4 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">5. Dokument-Upload und Speicherung</h2>
+          <div className="space-y-4 text-white/80">
             <p>
               Bei der Nutzung unseres Fördercheck-Services können Sie Dokumente hochladen. Diese werden:
             </p>
@@ -148,8 +148,8 @@ export default function DatenschutzPage() {
 
         {/* Betroffenenrechte */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Ihre Rechte gemäß DSGVO</h2>
-          <div className="space-y-4 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">6. Ihre Rechte gemäß DSGVO</h2>
+          <div className="space-y-4 text-white/80">
             <p>Sie haben das Recht auf:</p>
             <ul className="list-disc list-inside space-y-2">
               <li><strong>Auskunft (Art. 15 DSGVO):</strong> Sie können jederzeit eine Auskunft über Ihre bei uns gespeicherten Daten anfordern.</li>
@@ -167,8 +167,8 @@ export default function DatenschutzPage() {
 
         {/* Beschwerde */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Recht auf Beschwerde</h2>
-          <div className="bg-gray-50 rounded-lg p-6 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">7. Recht auf Beschwerde</h2>
+          <div className="bg-architect-surface-low/40 rounded-lg p-6 text-white/80">
             <p className="mb-4">
               Sie haben das Recht, sich bei einer Datenschutzbehörde zu beschweren, wenn Sie der Ansicht sind, dass Ihre Rechte verletzt wurden.
             </p>
@@ -185,14 +185,14 @@ export default function DatenschutzPage() {
 
         {/* Hosting */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Hosting und externe Dienstleister</h2>
+          <h2 className="font-display text-2xl font-bold text-white mb-4">8. Hosting und externe Dienstleister</h2>
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Vercel (Frontend-Hosting)</h3>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-gray-700">
+              <h3 className="font-display text-lg font-semibold text-white mb-2">Vercel (Frontend-Hosting)</h3>
+              <div className="bg-architect-primary/20 rounded-lg p-4 text-white/80">
                 <p className="mb-2">
                   <strong>Anbieter:</strong> Vercel Inc.<br />
-                  <strong>Datenschutzerklärung:</strong> <a href="https://vercel.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">vercel.com/legal/privacy</a>
+                  <strong>Datenschutzerklärung:</strong> <a href="https://vercel.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="text-architect-primary-light hover:text-white underline">vercel.com/legal/privacy</a>
                 </p>
                 <p>
                   <strong>Standort:</strong> EU-Daten werden in der EU verarbeitet
@@ -201,11 +201,11 @@ export default function DatenschutzPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Cloudflare Workers (Serverless-Funktionen)</h3>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-gray-700">
+              <h3 className="font-display text-lg font-semibold text-white mb-2">Cloudflare Workers (Serverless-Funktionen)</h3>
+              <div className="bg-architect-primary/20 rounded-lg p-4 text-white/80">
                 <p className="mb-2">
                   <strong>Anbieter:</strong> Cloudflare Inc.<br />
-                  <strong>Datenschutzerklärung:</strong> <a href="https://www.cloudflare.com/de-de/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">cloudflare.com/de-de/privacypolicy</a>
+                  <strong>Datenschutzerklärung:</strong> <a href="https://www.cloudflare.com/de-de/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-architect-primary-light hover:text-white underline">cloudflare.com/de-de/privacypolicy</a>
                 </p>
                 <p>
                   <strong>Standort:</strong> Globales Edge-Network mit lokaler Datenverarbeitung
@@ -214,8 +214,8 @@ export default function DatenschutzPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Datenschutzabkommen</h3>
-              <p className="text-gray-700">
+              <h3 className="font-display text-lg font-semibold text-white mb-2">Datenschutzabkommen</h3>
+              <p className="text-white/80">
                 Alle externe Dienstleister wurden ausgewählt, um DSGVO-Konformität sicherzustellen. Wir haben mit diesen Dienstleistern Auftragsverarbeitungsverträge (AV-Verträge) geschlossen.
               </p>
             </div>
@@ -224,8 +224,8 @@ export default function DatenschutzPage() {
 
         {/* Speicherdauer */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Speicherdauer</h2>
-          <div className="space-y-4 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">9. Speicherdauer</h2>
+          <div className="space-y-4 text-white/80">
             <p>
               Ihre Daten werden nur so lange gespeichert, wie notwendig:
             </p>
@@ -243,8 +243,8 @@ export default function DatenschutzPage() {
 
         {/* Weitergabe an Dritte */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Weitergabe von Daten an Dritte</h2>
-          <div className="text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">10. Weitergabe von Daten an Dritte</h2>
+          <div className="text-white/80">
             <p className="mb-4">
               Wir geben Ihre Daten nicht an Dritte weiter, außer:
             </p>
@@ -262,8 +262,8 @@ export default function DatenschutzPage() {
 
         {/* Kontakt */}
         <section className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Fragen zum Datenschutz?</h2>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">11. Fragen zum Datenschutz?</h2>
+          <div className="bg-architect-primary/20 rounded-lg p-6 text-white/80">
             <p>
               <strong>Datenschutzbeauftragter:</strong><br />
               E-Mail: info@fund24.io<br />
@@ -276,11 +276,11 @@ export default function DatenschutzPage() {
         </section>
 
         {/* Letzte Aktualisierung */}
-        <div className="border-t border-gray-200 pt-8 text-sm text-gray-600">
+        <div className="pt-8 text-sm text-white/60">
           <p>
             <strong>Letzte Aktualisierung:</strong> {new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
-          <p className="mt-2 italic text-yellow-700 bg-yellow-50 p-3 rounded">
+          <p className="mt-2 italic text-architect-primary-light bg-architect-primary/20 p-3 rounded">
             Diese Datenschutzerklärung ist zu Demonstrationszwecken erstellt. Bitte lassen Sie sie von einem Rechtsanwalt prüfen, bevor Sie mit dem öffentlichen Betrieb starten.
           </p>
         </div>

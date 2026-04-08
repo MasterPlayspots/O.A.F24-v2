@@ -61,12 +61,12 @@ function LoginForm() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold">Anmelden</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Melden Sie sich in Ihrem fund24-Konto an</p>
+        <h1 className="font-display text-2xl font-bold text-white">Anmelden</h1>
+        <p className="mt-2 text-sm text-white/60">Melden Sie sich in Ihrem fund24-Konto an</p>
       </div>
 
       {fehler && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+        <div className="rounded-md bg-architect-error/20 p-3 text-sm text-architect-error-container">
           {fehler}
         </div>
       )}
@@ -74,29 +74,29 @@ function LoginForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="email">E-Mail</Label>
-          <Input id="email" type="email" {...register('email')} />
-          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+          <Input id="email" type="email" {...register('email')} className="bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40" />
+          {errors.email && <p className="text-xs text-architect-error-container">{errors.email.message}</p>}
         </div>
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Passwort</Label>
-            <Link href="/passwort-vergessen" className="text-xs text-primary hover:underline">
+            <Link href="/passwort-vergessen" className="text-xs text-architect-primary-light hover:text-white">
               Passwort vergessen?
             </Link>
           </div>
-          <Input id="password" type="password" {...register('password')} />
-          {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+          <Input id="password" type="password" {...register('password')} className="bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40" />
+          {errors.password && <p className="text-xs text-architect-error-container">{errors.password.message}</p>}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" className="w-full bg-architect-primary hover:bg-architect-primary-container text-white" disabled={isSubmitting}>
           {isSubmitting ? 'Wird angemeldet...' : 'Anmelden'}
         </Button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-sm text-white/60">
         Noch kein Konto?{' '}
-        <Link href="/registrieren" className="font-medium text-primary hover:underline">
+        <Link href="/registrieren" className="font-medium text-architect-primary-light hover:text-white">
           Registrieren
         </Link>
       </p>

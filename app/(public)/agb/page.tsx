@@ -9,15 +9,15 @@ export default function AGBPage() {
   // TODO: Rechtsanwalt erstellen lassen vor Go-Live
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 md:p-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Allgemeine Geschäftsbedingungen (AGB)</h1>
-        <p className="text-gray-600 mb-8">Bedingungen für die Nutzung der fund24 Plattform</p>
+    <div className="min-h-screen bg-architect-surface font-body text-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto bg-architect-surface/60 rounded-lg p-8 md:p-12">
+        <h1 className="font-display text-4xl font-bold text-white mb-2">Allgemeine Geschäftsbedingungen (AGB)</h1>
+        <p className="text-white/60 mb-8">Bedingungen für die Nutzung der fund24 Plattform</p>
 
         {/* Geltungsbereich */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Geltungsbereich und Vertragsgegenstand</h2>
-          <div className="space-y-4 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">1. Geltungsbereich und Vertragsgegenstand</h2>
+          <div className="space-y-4 text-white/80">
             <p>
               Diese AGB regeln das Verhältnis zwischen Fröba Sales Solutions UG (haftungsbeschränkt) (nachfolgend &bdquo;Dienstleister&ldquo; genannt) und den Nutzer der fund24-Plattform (nachfolgend &bdquo;Nutzer&ldquo; oder &bdquo;Kunde&ldquo; genannt).
             </p>
@@ -32,9 +32,9 @@ export default function AGBPage() {
 
         {/* Leistungsumfang */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Leistungsumfang</h2>
-          <div className="space-y-4 text-gray-700">
-            <h3 className="font-semibold text-gray-900">2.1 Verfügbare Services</h3>
+          <h2 className="font-display text-2xl font-bold text-white mb-4">2. Leistungsumfang</h2>
+          <div className="space-y-4 text-white/80">
+            <h3 className="font-display font-semibold text-white">2.1 Verfügbare Services</h3>
             <ul className="list-disc list-inside space-y-2">
               <li>Fördercheck und -verwaltung</li>
               <li>Dokumentenverwaltung und -speicherung</li>
@@ -43,12 +43,12 @@ export default function AGBPage() {
               <li>Technischer Support</li>
             </ul>
 
-            <h3 className="font-semibold text-gray-900 mt-4">2.2 Keine Rechtsberatung</h3>
+            <h3 className="font-display font-semibold text-white mt-4">2.2 Keine Rechtsberatung</h3>
             <p>
               Die fund24-Plattform bietet <strong>keine Rechtsberatung</strong>. Alle Informationen dienen zu Informationszwecken und ersetzen keine professionelle rechtliche oder steuerliche Beratung. Sie sind verantwortlich dafür, einen Rechtsanwalt oder Steuerberater zu konsultieren, falls erforderlich.
             </p>
 
-            <h3 className="font-semibold text-gray-900 mt-4">2.3 Verfügbarkeit</h3>
+            <h3 className="font-display font-semibold text-white mt-4">2.3 Verfügbarkeit</h3>
             <p>
               Wir streben eine Verfügbarkeit von 99% an, können aber keine Garantie übernehmen. Wir behhalten uns das Recht vor, die Plattform zu Wartungszwecken zu unterbrechen, sofern wir Sie angemessen benachrichtigen.
             </p>
@@ -57,8 +57,8 @@ export default function AGBPage() {
 
         {/* Registrierung und Konten */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Registrierung und Konteniverwaltung</h2>
-          <div className="space-y-4 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">3. Registrierung und Konteniverwaltung</h2>
+          <div className="space-y-4 text-white/80">
             <p>
               <strong>3.1 Registrierungsvoraussetzungen:</strong> Sie müssen mindestens 18 Jahre alt sein und über die gesetzliche Handlungsfähigkeit verfügen.
             </p>
@@ -76,10 +76,10 @@ export default function AGBPage() {
 
         {/* Gebühren und Preise */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Gebühren und Preise</h2>
-          <div className="space-y-4 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">4. Gebühren und Preise</h2>
+          <div className="space-y-4 text-white/80">
             <p>
-              <strong>4.1 Preismodelle:</strong> Die aktuellen Preise finden Sie auf unserer <a href="/preise" className="text-blue-600 hover:underline">Preisseite</a>. Preise und Leistungsumfang können mit angemessener Benachrichtigung geändert werden.
+              <strong>4.1 Preismodelle:</strong> Die aktuellen Preise finden Sie auf unserer <a href="/preise" className="text-architect-primary-light hover:text-white underline">Preisseite</a>. Preise und Leistungsumfang können mit angemessener Benachrichtigung geändert werden.
             </p>
             <p>
               <strong>4.2 Berater-Provision:</strong> Die Provision wird nur nach Erhalt eines positiven Bewilligungsbescheids fällig und ist schriftlich zu vereinbaren.
@@ -95,8 +95,8 @@ export default function AGBPage() {
 
         {/* Nutzungsrechte */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Nutzungsrechte und Eigentum</h2>
-          <div className="space-y-4 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">5. Nutzungsrechte und Eigentum</h2>
+          <div className="space-y-4 text-white/80">
             <p>
               <strong>5.1 Geistiges Eigentum:</strong> Alle Inhalte, Code und Design der fund24-Plattform sind Eigentum von fund24 und durch Urheberrecht geschützt.
             </p>
@@ -111,10 +111,10 @@ export default function AGBPage() {
 
         {/* Datenschutz und Sicherheit */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Datenschutz und Datensicherheit</h2>
-          <div className="space-y-4 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">6. Datenschutz und Datensicherheit</h2>
+          <div className="space-y-4 text-white/80">
             <p>
-              <strong>6.1 Datenschutzerklärung:</strong> Die Verarbeitung Ihrer Daten erfolgt gemäß unserer <a href="/datenschutz" className="text-blue-600 hover:underline">Datenschutzerklärung</a>.
+              <strong>6.1 Datenschutzerklärung:</strong> Die Verarbeitung Ihrer Daten erfolgt gemäß unserer <a href="/datenschutz" className="text-architect-primary-light hover:text-white underline">Datenschutzerklärung</a>.
             </p>
             <p>
               <strong>6.2 Sicherheitsmaßnahmen:</strong> Wir implementieren angemessene technische und organisatorische Sicherheitsmaßnahmen (Verschlüsselung, Firewall, etc.). Wir können jedoch keine absolute Sicherheit garantieren.
@@ -127,8 +127,8 @@ export default function AGBPage() {
 
         {/* Haftung */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Haftungsbeschränkung</h2>
-          <div className="space-y-4 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">7. Haftungsbeschränkung</h2>
+          <div className="space-y-4 text-white/80">
             <p>
               <strong>7.1 Disclaimer:</strong> Die Plattform wird auf &bdquo;as-is&ldquo; Basis bereitgestellt. Wir geben keine Garantie auf Richtigkeit, Vollständigkeit oder Aktualität der Informationen.
             </p>
@@ -146,8 +146,8 @@ export default function AGBPage() {
 
         {/* Nutzungsverletzungen */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Verbotene Handlungen</h2>
-          <div className="text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">8. Verbotene Handlungen</h2>
+          <div className="text-white/80">
             <p className="mb-4">Sie dürfen die Plattform nicht nutzen, um:</p>
             <ul className="list-disc list-inside space-y-2">
               <li>Illegale oder rechtswidrige Inhalte zu hochladen</li>
@@ -163,8 +163,8 @@ export default function AGBPage() {
 
         {/* Kündigungsrecht */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Kündigung und Beendigung</h2>
-          <div className="space-y-4 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">9. Kündigung und Beendigung</h2>
+          <div className="space-y-4 text-white/80">
             <p>
               <strong>9.1 Kündigungsfristen:</strong> Beide Parteien können die Vereinbarung mit 30 Tagen Kündigungsfrist zum Ende eines Kalendermonats kündigen.
             </p>
@@ -179,8 +179,8 @@ export default function AGBPage() {
 
         {/* Änderungen */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Änderungen der AGB</h2>
-          <div className="text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">10. Änderungen der AGB</h2>
+          <div className="text-white/80">
             <p>
               Wir behaften uns das Recht vor, diese AGB jederzeit mit 30 Tagen Vorlaufzeit zu ändern. Änderungen werden per E-Mail mitgeteilt. Durch Weitergenutzung der Plattform akzeptieren Sie die neuen Bedingungen.
             </p>
@@ -189,8 +189,8 @@ export default function AGBPage() {
 
         {/* Salvatorische Klausel */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Salvatorische Klausel</h2>
-          <div className="text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">11. Salvatorische Klausel</h2>
+          <div className="text-white/80">
             <p>
               Falls eine Bestimmung dieser AGB unwirksam ist, bleibt der Rest gültig. Die unwirksame Bestimmung wird durch eine wirksame Bestimmung ersetzt, die dem ursprünglichen Zweck am nächsten kommt.
             </p>
@@ -199,8 +199,8 @@ export default function AGBPage() {
 
         {/* Anwendbares Recht */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">12. Anwendbares Recht und Gerichtsstand</h2>
-          <div className="text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">12. Anwendbares Recht und Gerichtsstand</h2>
+          <div className="text-white/80">
             <p className="mb-4">
               <strong>Anwendbares Recht:</strong> Diese AGB unterliegen deutschem Recht, insbesondere dem BGB.
             </p>
@@ -212,8 +212,8 @@ export default function AGBPage() {
 
         {/* Kontakt */}
         <section className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">13. Kontakt und Fragen</h2>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-4">13. Kontakt und Fragen</h2>
+          <div className="bg-architect-primary/20 rounded-lg p-6 text-white/80">
             <p>
               <strong>Fröba Sales Solutions UG (haftungsbeschränkt)</strong><br />
               Johann-Nikolaus-Zitter Str. 31<br />
@@ -225,11 +225,11 @@ export default function AGBPage() {
         </section>
 
         {/* Letzte Aktualisierung */}
-        <div className="border-t border-gray-200 pt-8 text-sm text-gray-600">
+        <div className="pt-8 text-sm text-white/60">
           <p>
             <strong>Letzte Aktualisierung:</strong> {new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
-          <p className="mt-2 italic text-yellow-700 bg-yellow-50 p-3 rounded">
+          <p className="mt-2 italic text-architect-primary-light bg-architect-primary/20 p-3 rounded">
             Diese AGB sind zu Demonstrationszwecken erstellt. Bitte lassen Sie diese von einem Rechtsanwalt überarbeiten und anpassen, bevor Sie mit dem öffentlichen Betrieb starten.
           </p>
         </div>

@@ -65,18 +65,18 @@ export default function VerifizierenPage() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold">E-Mail verifizieren</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <h1 className="font-display text-2xl font-bold text-white">E-Mail verifizieren</h1>
+        <p className="mt-2 text-sm text-white/60">
           Code wurde an <strong>{nutzer.email}</strong> gesendet
         </p>
       </div>
 
       {fehler && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{fehler}</div>
+        <div className="rounded-md bg-architect-error/20 p-3 text-sm text-architect-error-container">{fehler}</div>
       )}
 
       {resendMsg && (
-        <div className="rounded-md bg-muted p-3 text-sm">{resendMsg}</div>
+        <div className="rounded-md bg-architect-surface-low/40 p-3 text-sm text-white/80">{resendMsg}</div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,12 +90,12 @@ export default function VerifizierenPage() {
             pattern="[0-9]*"
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-            className="text-center text-2xl tracking-[0.5em]"
+            className="text-center text-2xl tracking-[0.5em] bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40"
             placeholder="000000"
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={code.length !== 6 || isSubmitting}>
+        <Button type="submit" className="w-full bg-architect-primary hover:bg-architect-primary-container text-white" disabled={code.length !== 6 || isSubmitting}>
           {isSubmitting ? 'Wird überprüft...' : 'Verifizieren'}
         </Button>
       </form>
@@ -104,11 +104,11 @@ export default function VerifizierenPage() {
         <button
           onClick={handleResend}
           disabled={cooldown > 0}
-          className="text-sm text-primary hover:underline disabled:text-muted-foreground disabled:no-underline"
+          className="text-sm text-architect-primary-light hover:underline disabled:text-white/60 disabled:no-underline"
         >
           {cooldown > 0 ? `Code erneut senden (${cooldown}s)` : 'Code erneut senden'}
         </button>
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p className="mt-2 text-xs text-white/60">
           Bitte prüfen Sie auch Ihren Spam-Ordner.
         </p>
       </div>

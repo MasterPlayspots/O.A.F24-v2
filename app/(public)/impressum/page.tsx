@@ -9,19 +9,19 @@ export default function ImpressumPage() {
   // TODO: Alle Platzhalter vor Go-Live ersetzen
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8 md:p-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">Impressum</h1>
+    <div className="min-h-screen bg-architect-surface font-body text-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto bg-architect-surface/60 rounded-lg p-8 md:p-12">
+        <h1 className="font-display text-4xl font-bold text-white mb-8">Impressum</h1>
 
         {/* Angaben gemäß § 5 DDG */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Angaben gemäß § 5 Telemediengesetz (TMG)</h2>
+          <h2 className="font-display text-2xl font-bold text-white mb-6">Angaben gemäß § 5 Telemediengesetz (TMG)</h2>
 
           <div className="space-y-8">
             {/* Verantwortlicher */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Verantwortlicher im Sinne des TMG und MDStV</h3>
-              <div className="bg-gray-50 rounded-lg p-6 space-y-2 text-gray-700">
+              <h3 className="font-display text-lg font-semibold text-white mb-3">Verantwortlicher im Sinne des TMG und MDStV</h3>
+              <div className="bg-architect-surface-low/40 rounded-lg p-6 space-y-2 text-white/80">
                 <p>
                   <strong>Fröba Sales Solutions UG (haftungsbeschränkt)</strong>
                 </p>
@@ -40,8 +40,8 @@ export default function ImpressumPage() {
 
             {/* Kontaktdaten */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Kontaktdaten</h3>
-              <div className="bg-gray-50 rounded-lg p-6 space-y-2 text-gray-700">
+              <h3 className="font-display text-lg font-semibold text-white mb-3">Kontaktdaten</h3>
+              <div className="bg-architect-surface-low/40 rounded-lg p-6 space-y-2 text-white/80">
                 <p>
                   <strong>Telefon:</strong> +49 151 29617192
                 </p>
@@ -56,8 +56,8 @@ export default function ImpressumPage() {
 
             {/* Registereintrag */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Registereintrag</h3>
-              <div className="bg-gray-50 rounded-lg p-6 space-y-2 text-gray-700">
+              <h3 className="font-display text-lg font-semibold text-white mb-3">Registereintrag</h3>
+              <div className="bg-architect-surface-low/40 rounded-lg p-6 space-y-2 text-white/80">
                 <p>
                   <strong>Handelsregister:</strong> Amtsgericht Coburg<br />
                   <strong>Registernummer:</strong> HRB-Nr. wird nachgereicht<br />
@@ -68,8 +68,8 @@ export default function ImpressumPage() {
 
             {/* Umsatzsteuer */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Umsatzsteuer-Identifikationsnummer</h3>
-              <div className="bg-gray-50 rounded-lg p-6 space-y-2 text-gray-700">
+              <h3 className="font-display text-lg font-semibold text-white mb-3">Umsatzsteuer-Identifikationsnummer</h3>
+              <div className="bg-architect-surface-low/40 rounded-lg p-6 space-y-2 text-white/80">
                 <p>
                   <strong>USt-IdNr.:</strong> beantragt<br />
                   Gemäß § 27a Umsatzsteuergesetz (UStG)
@@ -79,8 +79,8 @@ export default function ImpressumPage() {
 
             {/* Berufsbezeichnung */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Berufsbezeichnung und zuständige Berufsaufsichtsbehörde</h3>
-              <div className="bg-gray-50 rounded-lg p-6 space-y-2 text-gray-700">
+              <h3 className="font-display text-lg font-semibold text-white mb-3">Berufsbezeichnung und zuständige Berufsaufsichtsbehörde</h3>
+              <div className="bg-architect-surface-low/40 rounded-lg p-6 space-y-2 text-white/80">
                 <p>
                   <strong>Berufsbezeichnung:</strong> Softwareentwicklung und Förderberatung
                 </p>
@@ -97,8 +97,8 @@ export default function ImpressumPage() {
 
         {/* Haftungsausschluss */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Haftungsausschluss</h2>
-          <div className="prose prose-neutral max-w-none text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-6">Haftungsausschluss</h2>
+          <div className="prose prose-invert max-w-none text-white/80">
             <h3 className="font-semibold">Haftung für Inhalte</h3>
             <p>
               Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
@@ -118,30 +118,30 @@ export default function ImpressumPage() {
 
         {/* Datenschutz */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Datenschutz</h2>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-6">Datenschutz</h2>
+          <div className="bg-architect-primary/20 rounded-lg p-6 text-white/80">
             <p className="mb-4">
               Die Nutzung unserer Website ist in der Regel ohne Angabe personenbezogener Daten möglich. Soweit auf unseren Seiten personenbezogene Daten (beispielsweise Name, Anschrift oder E-Mail-Adresse) erhoben werden, erfolgt dies soweit möglich auf freiwilliger Basis.
             </p>
             <p>
-              Weitere Informationen zum Datenschutz finden Sie in unserer <a href="/datenschutz" className="text-blue-600 hover:text-blue-700 underline">Datenschutzerklärung</a>.
+              Weitere Informationen zum Datenschutz finden Sie in unserer <a href="/datenschutz" className="text-architect-primary-light hover:text-white underline">Datenschutzerklärung</a>.
             </p>
           </div>
         </section>
 
         {/* Streitbeilegung */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Streitbeilegung</h2>
+          <h2 className="font-display text-2xl font-bold text-white mb-6">Streitbeilegung</h2>
           <div className="space-y-6">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Alternative Streitbeilegung gemäß Art. 14 Abs. 1 ODR-VO</h3>
-              <p className="text-gray-700">
+              <h3 className="font-display font-semibold text-white mb-2">Alternative Streitbeilegung gemäß Art. 14 Abs. 1 ODR-VO</h3>
+              <p className="text-white/80">
                 Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit, die unter folgender Adresse erreichbar ist: https://ec.europa.eu/consumers/odr
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Verbraucherstreitbeilegung / Universalschlichter</h3>
-              <p className="text-gray-700">
+              <h3 className="font-display font-semibold text-white mb-2">Verbraucherstreitbeilegung / Universalschlichter</h3>
+              <p className="text-white/80">
                 Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
               </p>
             </div>
@@ -150,8 +150,8 @@ export default function ImpressumPage() {
 
         {/* Haftungsbeschränkung */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Haftungsbeschränkung für Schäden</h2>
-          <div className="bg-gray-50 rounded-lg p-6 text-gray-700">
+          <h2 className="font-display text-2xl font-bold text-white mb-6">Haftungsbeschränkung für Schäden</h2>
+          <div className="bg-architect-surface-low/40 rounded-lg p-6 text-white/80">
             <p>
               Haftungsansprüche gegen fund24 wegen Schäden materieller oder ideeller Art, welche auf der Nutzung oder Nichtnutzung der dargebotenen Informationen bzw. durch die Nutzung fehlerhafter und unvollständiger Informationen verursacht wurden, sind grundsätzlich ausgeschlossen, sofern ein nachweislich grober Verschulden unsererseits nicht vorliegen. Alle Angebote sind freibleibend und unverbindlich. Wir behalten uns vor, Teile der Seiten oder das gesamte Angebot ohne gesonderte Ankündigung zu verändern, zu ergänzen, zu löschen oder die Veröffentlichung zeitweise oder endgültig einzustellen.
             </p>
@@ -159,7 +159,7 @@ export default function ImpressumPage() {
         </section>
 
         {/* Letzte Aktualisierung */}
-        <div className="border-t border-gray-200 pt-8 text-sm text-gray-600">
+        <div className="pt-8 text-sm text-white/60">
           <p>
             <strong>Letzte Aktualisierung:</strong> {new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>

@@ -63,28 +63,28 @@ function RegisterForm() {
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">Registrieren</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Wie möchten Sie fund24 nutzen?</p>
+          <h1 className="font-display text-2xl font-bold text-white">Registrieren</h1>
+          <p className="mt-2 text-sm text-white/60">Wie möchten Sie fund24 nutzen?</p>
         </div>
         <div className="space-y-3">
           <button
             onClick={() => setRolle('unternehmen')}
-            className="w-full rounded-lg border p-4 text-left hover:border-primary hover:bg-muted/50"
+            className="w-full rounded-lg bg-architect-surface-low/40 hover:bg-architect-surface/40 p-4 text-left"
           >
-            <p className="font-medium">Als Unternehmen</p>
-            <p className="mt-1 text-sm text-muted-foreground">Fördermittel finden und Berater beauftragen</p>
+            <p className="font-display font-medium text-white">Als Unternehmen</p>
+            <p className="mt-1 text-sm text-white/60">Fördermittel finden und Berater beauftragen</p>
           </button>
           <button
             onClick={() => setRolle('berater')}
-            className="w-full rounded-lg border p-4 text-left hover:border-primary hover:bg-muted/50"
+            className="w-full rounded-lg bg-architect-surface-low/40 hover:bg-architect-surface/40 p-4 text-left"
           >
-            <p className="font-medium">Als Berater</p>
-            <p className="mt-1 text-sm text-muted-foreground">Aufträge erhalten und Unternehmen beraten</p>
+            <p className="font-display font-medium text-white">Als Berater</p>
+            <p className="mt-1 text-sm text-white/60">Aufträge erhalten und Unternehmen beraten</p>
           </button>
         </div>
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-sm text-white/60">
           Bereits registriert?{' '}
-          <Link href="/login" className="font-medium text-primary hover:underline">
+          <Link href="/login" className="font-medium text-architect-primary-light hover:text-white">
             Einloggen
           </Link>
         </p>
@@ -124,19 +124,19 @@ function RegisterForm() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold">
+        <h1 className="font-display text-2xl font-bold text-white">
           Als {rolle === 'berater' ? 'Berater' : 'Unternehmen'} registrieren
         </h1>
         <button
           onClick={() => setRolle(null)}
-          className="mt-1 text-sm text-muted-foreground hover:text-primary"
+          className="mt-1 text-sm text-white/60 hover:text-architect-primary-light"
         >
           Rolle ändern
         </button>
       </div>
 
       {serverFehler && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+        <div className="rounded-md bg-architect-error/20 p-3 text-sm text-architect-error-container">
           {serverFehler}{' '}
           {serverFehler.includes('bereits registriert') && (
             <Link href="/login" className="font-medium underline">
@@ -150,40 +150,40 @@ function RegisterForm() {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="firstName">Vorname</Label>
-            <Input id="firstName" {...register('firstName')} />
+            <Input id="firstName" {...register('firstName')} className="bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40" />
             {errors.firstName && (
-              <p className="text-xs text-destructive">{errors.firstName.message}</p>
+              <p className="text-xs text-architect-error-container">{errors.firstName.message}</p>
             )}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="lastName">Nachname</Label>
-            <Input id="lastName" {...register('lastName')} />
+            <Input id="lastName" {...register('lastName')} className="bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40" />
             {errors.lastName && (
-              <p className="text-xs text-destructive">{errors.lastName.message}</p>
+              <p className="text-xs text-architect-error-container">{errors.lastName.message}</p>
             )}
           </div>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="email">E-Mail</Label>
-          <Input id="email" type="email" {...register('email')} />
+          <Input id="email" type="email" {...register('email')} className="bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40" />
           {errors.email && (
-            <p className="text-xs text-destructive">{errors.email.message}</p>
+            <p className="text-xs text-architect-error-container">{errors.email.message}</p>
           )}
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="password">Passwort</Label>
-          <Input id="password" type="password" {...register('password')} />
+          <Input id="password" type="password" {...register('password')} className="bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40" />
           {errors.password && (
-            <p className="text-xs text-destructive">{errors.password.message}</p>
+            <p className="text-xs text-architect-error-container">{errors.password.message}</p>
           )}
         </div>
 
         {rolle === 'unternehmen' && (
           <div className="space-y-1.5">
             <Label htmlFor="company">Firma (optional)</Label>
-            <Input id="company" {...register('company')} />
+            <Input id="company" {...register('company')} className="bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40" />
           </div>
         )}
 
@@ -195,29 +195,29 @@ function RegisterForm() {
               setValue('datenschutz', checked ? true : (false as unknown as true), { shouldValidate: true })
             }
           />
-          <Label htmlFor="datenschutz" className="text-sm leading-tight">
+          <Label htmlFor="datenschutz" className="text-sm leading-tight text-white/80">
             Ich akzeptiere die{' '}
-            <Link href="/datenschutz" className="text-primary hover:underline" target="_blank">
+            <Link href="/datenschutz" className="text-architect-primary-light hover:text-white" target="_blank">
               Datenschutzerklärung
             </Link>{' '}
             und{' '}
-            <Link href="/agb" className="text-primary hover:underline" target="_blank">
+            <Link href="/agb" className="text-architect-primary-light hover:text-white" target="_blank">
               AGB
             </Link>
           </Label>
         </div>
         {errors.datenschutz && (
-          <p className="text-xs text-destructive">{errors.datenschutz.message}</p>
+          <p className="text-xs text-architect-error-container">{errors.datenschutz.message}</p>
         )}
 
-        <Button type="submit" className="w-full" disabled={!isValid || isSubmitting}>
+        <Button type="submit" className="w-full bg-architect-primary hover:bg-architect-primary-container text-white" disabled={!isValid || isSubmitting}>
           {isSubmitting ? 'Wird registriert...' : 'Registrieren'}
         </Button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-sm text-white/60">
         Bereits registriert?{' '}
-        <Link href="/login" className="font-medium text-primary hover:underline">
+        <Link href="/login" className="font-medium text-architect-primary-light hover:text-white">
           Einloggen
         </Link>
       </p>

@@ -43,12 +43,12 @@ export default function PasswortVergessenPage() {
   if (gesendet) {
     return (
       <div className="space-y-6 text-center">
-        <h1 className="text-2xl font-bold">Link gesendet</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="font-display text-2xl font-bold text-white">Link gesendet</h1>
+        <p className="text-sm text-white/60">
           Falls eine E-Mail mit dieser Adresse existiert, haben wir einen Link zum
           Zurücksetzen gesendet. Bitte prüfen Sie auch Ihren Spam-Ordner.
         </p>
-        <Link href="/login" className="text-sm font-medium text-primary hover:underline">
+        <Link href="/login" className="text-sm font-medium text-architect-primary-light hover:text-white">
           Zurück zum Login
         </Link>
       </div>
@@ -58,8 +58,8 @@ export default function PasswortVergessenPage() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold">Passwort vergessen</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <h1 className="font-display text-2xl font-bold text-white">Passwort vergessen</h1>
+        <p className="mt-2 text-sm text-white/60">
           Geben Sie Ihre E-Mail ein und wir senden Ihnen einen Link zum Zurücksetzen.
         </p>
       </div>
@@ -67,17 +67,17 @@ export default function PasswortVergessenPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="email">E-Mail</Label>
-          <Input id="email" type="email" {...register('email')} />
-          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+          <Input id="email" type="email" {...register('email')} className="bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40" />
+          {errors.email && <p className="text-xs text-architect-error-container">{errors.email.message}</p>}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" className="w-full bg-architect-primary hover:bg-architect-primary-container text-white" disabled={isSubmitting}>
           {isSubmitting ? 'Wird gesendet...' : 'Link senden'}
         </Button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground">
-        <Link href="/login" className="font-medium text-primary hover:underline">
+      <p className="text-center text-sm text-white/60">
+        <Link href="/login" className="font-medium text-architect-primary-light hover:text-white">
           Zurück zum Login
         </Link>
       </p>
