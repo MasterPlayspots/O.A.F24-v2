@@ -45,7 +45,7 @@ export default async function LandingPage() {
             <Button
               asChild
               size="lg"
-              className="bg-architect-surface/60 hover:bg-architect-surface/40 text-white border-0"
+              className="bg-architect-surface hover:bg-architect-surface/40 text-white border-0"
             >
               <Link href="/registrieren">Registrieren</Link>
             </Button>
@@ -54,7 +54,7 @@ export default async function LandingPage() {
       </section>
 
       {/* Stats Row */}
-      <section className="bg-architect-surface-low/40 py-12 px-6 sm:px-8">
+      <section className="bg-architect-surface-low py-12 px-6 sm:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
             <div className="text-center">
@@ -101,7 +101,7 @@ export default async function LandingPage() {
       </section>
 
       {/* Berater CTA Section */}
-      <section className="bg-architect-surface-low/40 py-16 px-6 sm:py-20 sm:px-8">
+      <section className="bg-architect-surface-low py-16 px-6 sm:py-20 sm:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
             Sie sind Berater?

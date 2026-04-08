@@ -67,7 +67,7 @@ export function Navbar() {
     : []
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-architect-surface/95 backdrop-blur supports-[backdrop-filter]:bg-architect-surface/80 font-body">
+    <header className="sticky top-0 z-50 w-full bg-architect-surface backdrop-blur supports-[backdrop-filter]:bg-architect-surface/80 font-body">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="font-display text-xl font-bold tracking-tight text-white">
           fund24

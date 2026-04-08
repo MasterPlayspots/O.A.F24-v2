@@ -25,7 +25,7 @@ const LINKS = {
 
 export function Footer() {
   return (
-    <footer className="bg-architect-surface-low/40 font-body text-white">
+    <footer className="bg-architect-surface-low font-body text-white">
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {([
