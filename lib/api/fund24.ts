@@ -230,11 +230,14 @@ export async function rejectCert(userId: string) {
 export interface AuditLog {
   id: string
   user_id: string
-  action: string
-  resource: string | null
-  resource_id: string | null
+  // Worker-Variante "action" + "resource" / DB-Variante "event_type" + "detail" — beide optional.
+  action?: string | null
+  event_type?: string | null
+  resource?: string | null
+  resource_id?: string | null
+  detail?: string | null
   ip: string | null
-  user_agent: string | null
+  user_agent?: string | null
   created_at: string
 }
 export async function listAuditLogs(filter?: { user_id?: string; action?: string; limit?: number; offset?: number }) {
