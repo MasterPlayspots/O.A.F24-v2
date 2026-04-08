@@ -56,10 +56,10 @@ export default function FoerderSchnellcheckPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold text-white">
           Förder-Schnellcheck
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300">
+        <p className="text-lg text-white/70">
           Finden Sie passende Förderprogramme in weniger als 5 Minuten — kostenlos und unverbindlich.
         </p>
       </div>
@@ -77,9 +77,9 @@ export default function FoerderSchnellcheckPage() {
 
       {/* Form */}
       {!isLoading ? (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-architect-surface/60 rounded-lg p-6 sm:p-8">
           <div className="space-y-2">
-            <label htmlFor="url" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+            <label htmlFor="url" className="text-sm font-semibold text-white/80">
               Website Ihres Unternehmens
             </label>
             <Input
@@ -88,12 +88,12 @@ export default function FoerderSchnellcheckPage() {
               type="url"
               disabled={isLoading}
               {...register('url')}
-              className="h-12"
+              className="h-12 bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40"
             />
             {errors.url && (
-              <p className="text-sm text-destructive">{errors.url.message}</p>
+              <p className="text-sm text-architect-error-container">{errors.url.message}</p>
             )}
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-white/50">
               Wir nutzen Ihre Website, um Ihr Unternehmen zu analysieren. Alle Daten sind sicher.
             </p>
           </div>
@@ -102,7 +102,7 @@ export default function FoerderSchnellcheckPage() {
             type="submit"
             size="lg"
             disabled={isLoading}
-            className="w-full"
+            className="w-full bg-architect-primary hover:bg-architect-primary-container text-white"
           >
             Analyse starten
             <ArrowRight className="ml-2 h-4 w-4" />
@@ -113,9 +113,9 @@ export default function FoerderSchnellcheckPage() {
       )}
 
       {/* Info Box */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 space-y-3">
-        <h3 className="font-semibold text-gray-900 dark:text-white">Was passiert nächster?</h3>
-        <ol className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+      <div className="bg-architect-primary/20 rounded-lg p-6 space-y-3">
+        <h3 className="font-display font-semibold text-architect-primary-light">Was passiert nächster?</h3>
+        <ol className="space-y-2 text-sm text-white/80">
           <li>1. Wir analysieren Ihre Website und erstellen ein Profil</li>
           <li>2. Sie beantworten einige Fragen zu Ihrem Vorhaben</li>
           <li>3. KI matched Sie mit den passendsten Programmen</li>

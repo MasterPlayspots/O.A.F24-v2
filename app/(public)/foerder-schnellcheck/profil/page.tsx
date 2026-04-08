@@ -55,10 +55,10 @@ export default function ProfilPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="font-display text-3xl font-bold text-white">
           Ihr Unternehmensprofil
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-white/70">
           Das haben wir über Ihr Unternehmen gelernt
         </p>
       </div>
@@ -72,12 +72,12 @@ export default function ProfilPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="bg-white dark:bg-gray-800 shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-primary/10 to-blue-600/10 p-6 sm:p-8 border-b">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <Card className="bg-architect-surface/60 border-0 overflow-hidden">
+          <div className="bg-architect-primary/20 p-6 sm:p-8">
+            <h2 className="font-display text-2xl font-bold text-white">
               {store.profil.firmenname}
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm">
+            <p className="text-white/70 mt-1 text-sm">
               {store.profil.kurzprofil}
             </p>
           </div>
@@ -85,20 +85,20 @@ export default function ProfilPage() {
           <div className="p-6 sm:p-8 space-y-6">
             {/* Main Attributes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              <div className="bg-architect-surface-low/40 rounded-lg p-4">
+                <p className="text-xs font-semibold text-white/60 uppercase tracking-wide">
                   Branche
                 </p>
-                <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
+                <p className="font-display text-lg font-semibold text-white mt-1">
                   {store.profil.branche}
                 </p>
               </div>
 
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              <div className="bg-architect-surface-low/40 rounded-lg p-4">
+                <p className="text-xs font-semibold text-white/60 uppercase tracking-wide">
                   Bundesland
                 </p>
-                <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
+                <p className="font-display text-lg font-semibold text-white mt-1">
                   {store.profil.bundesland}
                 </p>
               </div>
@@ -106,9 +106,9 @@ export default function ProfilPage() {
 
             {/* Technology Indicator */}
             {store.profil.technologieindikator && (
-              <div className="flex items-center gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+              <div className="flex items-center gap-3 bg-architect-primary/20 rounded-lg p-4">
+                <Zap className="h-5 w-5 text-architect-primary-light flex-shrink-0" />
+                <span className="text-sm font-medium text-architect-primary-light">
                   Tech-innovativ erkannt
                 </span>
               </div>
@@ -116,17 +116,17 @@ export default function ProfilPage() {
 
             {/* Data Quality */}
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <p className="text-sm font-semibold text-white/80">
                 Datenqualität
               </p>
               <div className="flex items-center gap-3">
-                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                <div className="flex-1 bg-architect-surface-low/40 rounded-full h-2 overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-green-500 to-green-600 h-full transition-all"
+                    className="bg-architect-tertiary h-full transition-all"
                     style={{ width: `${store.profil.datenqualitaet * 10}%` }}
                   />
                 </div>
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 w-12">
+                <span className="text-sm font-semibold text-white/80 w-12">
                   {store.profil.datenqualitaet}/10
                 </span>
               </div>
@@ -146,7 +146,7 @@ export default function ProfilPage() {
             size="lg"
             onClick={handleWeiter}
             disabled={isLoading}
-            className="w-full"
+            className="w-full bg-architect-primary hover:bg-architect-primary-container text-white"
           >
             Umfrage starten
             <ArrowRight className="ml-2 h-4 w-4" />
@@ -157,7 +157,7 @@ export default function ProfilPage() {
       {isLoading && <LadeSpinner text="Fragen werden vorbereitet..." />}
 
       {/* Info */}
-      <div className="text-center text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2">
+      <div className="text-center text-xs text-white/60 flex items-center justify-center gap-2">
         <TrendingUp className="h-4 w-4" />
         <span>5-7 kurze Fragen • Ca. 3 Minuten</span>
       </div>

@@ -104,10 +104,10 @@ export default function ChatPage() {
       {/* Progress */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-semibold text-white/80">
             Frage {store.aktiveFrageIndex + 1} von {store.fragen.length}
           </span>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="text-sm text-white/50">
             {Math.round(progress)}%
           </span>
         </div>
@@ -123,15 +123,15 @@ export default function ChatPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8 space-y-6"
+        className="bg-architect-surface/60 rounded-lg p-6 sm:p-8 space-y-6"
       >
         {/* Question */}
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="font-display text-2xl font-bold text-white">
             {store.aktiveFrage.frage}
           </h2>
           {store.aktiveFrage.kontext && (
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
+            <p className="text-white/70 text-sm">
               {store.aktiveFrage.kontext}
             </p>
           )}
@@ -142,19 +142,17 @@ export default function ChatPage() {
           {store.aktiveFrage.antwortTyp === 'ja_nein' && (
             <div className="flex gap-3 sm:flex-row flex-col">
               <Button
-                variant={selectedAnswer === 'ja' ? 'default' : 'outline'}
                 size="lg"
                 onClick={() => setSelectedAnswer('ja')}
-                className="flex-1"
+                className={`flex-1 ${selectedAnswer === 'ja' ? 'bg-architect-primary hover:bg-architect-primary-container text-white' : 'bg-architect-surface-low/40 hover:bg-architect-surface/40 text-white'}`}
                 disabled={isSubmitting}
               >
                 Ja
               </Button>
               <Button
-                variant={selectedAnswer === 'nein' ? 'default' : 'outline'}
                 size="lg"
                 onClick={() => setSelectedAnswer('nein')}
-                className="flex-1"
+                className={`flex-1 ${selectedAnswer === 'nein' ? 'bg-architect-primary hover:bg-architect-primary-container text-white' : 'bg-architect-surface-low/40 hover:bg-architect-surface/40 text-white'}`}
                 disabled={isSubmitting}
               >
                 Nein
@@ -166,9 +164,9 @@ export default function ChatPage() {
             <RadioGroup value={selectedAnswer} onValueChange={setSelectedAnswer}>
               <div className="space-y-3">
                 {store.aktiveFrage.optionen?.map((option) => (
-                  <div key={option} className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
+                  <div key={option} className="flex items-center space-x-3 p-3 rounded-lg bg-architect-surface-low/40 hover:bg-architect-surface/40 cursor-pointer">
                     <RadioGroupItem value={option} id={option} />
-                    <Label htmlFor={option} className="cursor-pointer flex-1">
+                    <Label htmlFor={option} className="cursor-pointer flex-1 text-white">
                       {option}
                     </Label>
                   </div>
@@ -183,7 +181,7 @@ export default function ChatPage() {
               value={textAnswer}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              className="h-12"
+              className="h-12 bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40"
               onKeyDown={handleKeyDown}
             />
           )}
@@ -195,7 +193,7 @@ export default function ChatPage() {
               value={numberAnswer}
               onChange={handleNumberChange}
               disabled={isSubmitting}
-              className="h-12"
+              className="h-12 bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40"
               onKeyDown={handleKeyDown}
             />
           )}
@@ -206,7 +204,7 @@ export default function ChatPage() {
           onClick={handleSubmit}
           disabled={isSubmitting}
           size="lg"
-          className="w-full"
+          className="w-full bg-architect-primary hover:bg-architect-primary-container text-white"
         >
           {isSubmitting ? (
             <>

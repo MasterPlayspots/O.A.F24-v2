@@ -63,10 +63,10 @@ export default function AnalysePage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="font-display text-3xl font-bold text-white">
           Analysiere Ihr Unternehmen
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-white/70">
           Dies dauert etwa 30-60 Sekunden...
         </p>
       </div>
@@ -75,7 +75,7 @@ export default function AnalysePage() {
       {error && <FehlerBox fehler={error} />}
 
       {/* Progress Phases */}
-      <div className="space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+      <div className="space-y-4 bg-architect-surface/60 rounded-lg p-8">
         {PHASES.map((phase, index) => (
           <motion.div
             key={phase.value}
@@ -84,29 +84,29 @@ export default function AnalysePage() {
             transition={{ delay: index * 0.15 }}
             className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${
               index < currentPhaseIndex
-                ? 'bg-green-50 dark:bg-green-900/20'
+                ? 'bg-architect-tertiary/25'
                 : index === currentPhaseIndex
-                ? 'bg-blue-50 dark:bg-blue-900/20'
-                : 'bg-gray-50 dark:bg-gray-900/50'
+                ? 'bg-architect-primary/20'
+                : 'bg-architect-surface-low/40'
             }`}
           >
             <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm">
               {index < currentPhaseIndex ? (
-                <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <CheckCircle2 className="h-6 w-6 text-architect-tertiary-light" />
               ) : index === currentPhaseIndex ? (
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                  className="h-6 w-6 rounded-full border-2 border-blue-600 dark:border-blue-400 border-t-transparent"
+                  className="h-6 w-6 rounded-full border-2 border-architect-primary-light border-t-transparent"
                 />
               ) : (
-                <div className="h-6 w-6 rounded-full border-2 border-gray-300 dark:border-gray-600" />
+                <div className="h-6 w-6 rounded-full border-2 border-white/30" />
               )}
             </div>
             <span className={`font-medium ${
               index <= currentPhaseIndex
-                ? 'text-gray-900 dark:text-white'
-                : 'text-gray-500 dark:text-gray-400'
+                ? 'text-white'
+                : 'text-white/50'
             }`}>
               {phase.label}
             </span>
@@ -115,9 +115,9 @@ export default function AnalysePage() {
       </div>
 
       {/* Progress Bar */}
-      <div className="bg-gray-100 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+      <div className="bg-architect-surface-low/40 rounded-full h-2 overflow-hidden">
         <motion.div
-          className="h-full bg-gradient-to-r from-primary to-blue-600"
+          className="h-full bg-architect-primary"
           initial={{ width: '0%' }}
           animate={{ width: `${(currentPhaseIndex / PHASES.length) * 100}%` }}
           transition={{ duration: 0.3 }}
@@ -125,7 +125,7 @@ export default function AnalysePage() {
       </div>
 
       {/* Hint */}
-      <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-center text-sm text-white/60">
         Bitte schließen Sie diese Seite nicht. Ihre Sitzung wird automatisch fortgesetzt.
       </p>
     </div>

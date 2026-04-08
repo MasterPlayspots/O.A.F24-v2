@@ -83,19 +83,19 @@ export default function BerichtPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center space-y-4"
         >
-          <CheckCircle2 className="h-16 w-16 text-green-600 dark:text-green-400 mx-auto" />
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <CheckCircle2 className="h-16 w-16 text-architect-tertiary-light mx-auto" />
+          <h1 className="font-display text-3xl font-bold text-white">
             Erfolgreich angefordert!
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+          <p className="text-white/70 max-w-md mx-auto">
             Ihr detaillierter Fördermittel-Report wird in Kürze an Ihre E-Mail versendet.
           </p>
 
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-sm text-blue-900 dark:text-blue-100 mt-6">
+          <div className="bg-architect-primary/20 rounded-lg p-4 text-sm text-architect-primary-light mt-6">
             <p>Bitte überprüfen Sie Ihren Spam-Ordner, falls die E-Mail nicht ankommt.</p>
           </div>
 
-          <p className="text-xs text-gray-500 dark:text-gray-400 pt-4">
+          <p className="text-xs text-white/50 pt-4">
             Sie werden in Kürze zur Startseite weitergeleitet...
           </p>
         </motion.div>
@@ -107,10 +107,10 @@ export default function BerichtPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="font-display text-3xl font-bold text-white">
           Erhalten Sie Ihren detaillierten Report
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-white/70">
           Geben Sie Ihre E-Mail ein, um einen PDF-Report mit allen Details zu erhalten
         </p>
       </div>
@@ -120,11 +120,11 @@ export default function BerichtPage() {
 
       {/* Form Card */}
       {!isSubmitting ? (
-        <Card className="bg-white dark:bg-gray-800 shadow-lg">
+        <Card className="bg-architect-surface/60 border-0">
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 sm:p-8 space-y-6">
             {/* Email Input */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-semibold">
+              <Label htmlFor="email" className="text-sm font-semibold text-white/80">
                 E-Mail-Adresse
               </Label>
               <Input
@@ -132,10 +132,10 @@ export default function BerichtPage() {
                 type="email"
                 placeholder="ihre@email.de"
                 {...register('email')}
-                className="h-12"
+                className="h-12 bg-architect-surface-low/40 border-0 text-white placeholder:text-white/40"
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-architect-error-container">{errors.email.message}</p>
               )}
             </div>
 
@@ -147,17 +147,17 @@ export default function BerichtPage() {
                   {...register('dsgvo')}
                   className="mt-1"
                 />
-                <Label htmlFor="dsgvo" className="text-sm cursor-pointer leading-relaxed">
+                <Label htmlFor="dsgvo" className="text-sm cursor-pointer leading-relaxed text-white/80">
                   Ich akzeptiere die Datenschutzerklärung und möchte E-Mails von fund24 erhalten
                 </Label>
               </div>
               {errors.dsgvo && (
-                <p className="text-sm text-destructive">{errors.dsgvo.message}</p>
+                <p className="text-sm text-architect-error-container">{errors.dsgvo.message}</p>
               )}
             </div>
 
             {/* Legal Note */}
-            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 text-xs text-gray-600 dark:text-gray-400 space-y-2">
+            <div className="bg-architect-surface-low/40 rounded-lg p-4 text-xs text-white/60 space-y-2">
               <p>
                 Mit der Anmeldung erklären Sie sich mit unserer Datenschutzerklärung einverstanden. Wir verwenden Ihre Daten nur zur Zusendung des Reports und zum Versand von Newsletters.
               </p>
@@ -171,7 +171,7 @@ export default function BerichtPage() {
               type="submit"
               size="lg"
               disabled={!isValid}
-              className="w-full"
+              className="w-full bg-architect-primary hover:bg-architect-primary-container text-white"
             >
               Report anfordern
               <ArrowRight className="ml-2 h-4 w-4" />
