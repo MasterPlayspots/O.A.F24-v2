@@ -128,7 +128,40 @@ export async function finalizeBericht(id: string) {
 }
 
 // ---------- Beratungen ----------
-export async function updateBeratung(id: string, body: { status?: string; protokoll?: string; foerderhoehe?: number; eigenanteil?: number }) {
+export type BeratungPhase = 'anlauf' | 'beratung' | 'nachbereitung' | 'abgeschlossen'
+
+export interface Beratung {
+  id: string
+  berater_id: string
+  unternehmen_id: string
+  user_id: string | null
+  phase: BeratungPhase
+  bafa_antrag_nr: string | null
+  foerderhoehe: number | null
+  eigenanteil: number | null
+  protokoll: string | null
+  branche: string | null
+  unternehmen_name?: string | null
+  created_at: string
+  updated_at: string
+}
+
+// TODO: GET /api/beratungen/:id muss noch im Worker ergänzt werden
+export async function getBeratung(id: string): Promise<Beratung> {
+  return apiCall<Beratung>(API.FUND24, `/api/beratungen/${id}`, undefined, token())
+}
+
+// TODO: phase-Update muss noch im Worker akzeptiert werden
+export async function updateBeratung(
+  id: string,
+  body: {
+    status?: string
+    phase?: BeratungPhase
+    protokoll?: string
+    foerderhoehe?: number
+    eigenanteil?: number
+  }
+) {
   return apiCall(API.FUND24, `/api/beratungen/${id}`, { method: 'PATCH', body: JSON.stringify(body) }, token())
 }
 
