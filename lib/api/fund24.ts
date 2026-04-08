@@ -205,6 +205,35 @@ export async function createAntrag(body: { programm_id: string; beschreibung?: s
   )
 }
 
+// ---------- Vorlagen (Template-Library) ----------
+export interface Vorlage {
+  id: string
+  user_id: string
+  titel: string
+  kategorie: string | null
+  inhalt: string
+  created_at: string
+  updated_at: string
+}
+
+export async function listVorlagen(): Promise<Vorlage[]> {
+  return apiCall<Vorlage[]>(API.FUND24, '/api/vorlagen', undefined, token())
+}
+
+export async function createVorlage(body: { titel: string; kategorie?: string; inhalt: string }): Promise<{ id: string }> {
+  return apiCall<{ id: string }>(
+    API.FUND24,
+    '/api/vorlagen',
+    { method: 'POST', body: JSON.stringify(body) },
+    token()
+  )
+}
+
+// TODO: DELETE /api/vorlagen/:id muss noch im Worker ergänzt werden
+export async function deleteVorlage(id: string) {
+  return apiCall(API.FUND24, `/api/vorlagen/${id}`, { method: 'DELETE' }, token())
+}
+
 // TODO: GET /api/antraege/:id/dokumente muss noch im Worker ergänzt werden
 export async function listAntragDokumente(antragId: string): Promise<AntragDokumentDTO[]> {
   return apiCall<AntragDokumentDTO[]>(API.FUND24, `/api/antraege/${antragId}/dokumente`, undefined, token())
