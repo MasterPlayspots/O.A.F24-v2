@@ -92,7 +92,7 @@ export default function AbwicklungPage() {
 
   if (!isMounted || guardLoading || ladet) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-architect-surface font-body text-white p-6">
         <div className="max-w-6xl mx-auto">
           <Skeleton className="h-12 w-48 mb-8" />
           <Skeleton className="h-96" />
@@ -103,7 +103,7 @@ export default function AbwicklungPage() {
 
   if (fehler) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-architect-surface font-body text-white p-6">
         <div className="max-w-6xl mx-auto">
           <FehlerBox fehler={fehler} />
         </div>
@@ -142,11 +142,11 @@ export default function AbwicklungPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-architect-surface font-body text-white p-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Provisionsabwicklung</h1>
-          <p className="text-slate-600">Verwalten Sie Ihre Provisionsverträge und Nachweise</p>
+          <h1 className="font-display text-4xl font-bold text-white mb-2">Provisionsabwicklung</h1>
+          <p className="text-white/60">Verwalten Sie Ihre Provisionsverträge und Nachweise</p>
         </div>
 
         {fehler && <FehlerBox fehler={fehler} />}
@@ -157,25 +157,25 @@ export default function AbwicklungPage() {
             beschreibung="Sie haben noch keine abrechenbaren Provisionen"
           />
         ) : (
-          <Card className="border-slate-200 overflow-hidden">
+          <Card className="bg-architect-surface/60 border-0 text-white overflow-hidden">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-slate-200 bg-slate-50">
-                    <TableHead>Unternehmen</TableHead>
-                    <TableHead>Provision (EUR)</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Dokument</TableHead>
-                    <TableHead>Aktionen</TableHead>
+                  <TableRow className="border-0 bg-architect-surface-low/30 hover:bg-architect-surface-low/30">
+                    <TableHead className="text-white/70">Unternehmen</TableHead>
+                    <TableHead className="text-white/70">Provision (EUR)</TableHead>
+                    <TableHead className="text-white/70">Status</TableHead>
+                    <TableHead className="text-white/70">Dokument</TableHead>
+                    <TableHead className="text-white/70">Aktionen</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {vertraege.map((vertrag) => (
-                    <TableRow key={vertrag.id} className="border-slate-200 hover:bg-slate-50">
+                    <TableRow key={vertrag.id} className="border-0 hover:bg-architect-surface/40">
                       <TableCell className="font-medium">
                         {vertrag.unternehmen_name || 'Unbekannt'}
                       </TableCell>
-                      <TableCell className="font-semibold text-slate-900">
+                      <TableCell className="font-semibold text-white">
                         {(vertrag.provisionBetrag || 0).toLocaleString('de-DE', {
                           style: 'currency',
                           currency: 'EUR',
@@ -192,13 +192,13 @@ export default function AbwicklungPage() {
                             href={vertrag.dokument_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                            className="flex items-center gap-2 text-architect-primary-light hover:text-white"
                           >
                             <File className="w-4 h-4" />
                             PDF
                           </a>
                         ) : (
-                          <span className="text-slate-500 text-sm flex items-center gap-1">
+                          <span className="text-white/50 text-sm flex items-center gap-1">
                             <AlertCircle className="w-4 h-4" />
                             Fehlt
                           </span>
@@ -240,12 +240,12 @@ export default function AbwicklungPage() {
           </Card>
         )}
 
-        <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="mt-8 p-6 bg-architect-primary/20 rounded-lg">
           <div className="flex gap-3">
-            <AlertCircle className="w-6 h-6 text-blue-600 shrink-0 mt-0.5" />
+            <AlertCircle className="w-6 h-6 text-architect-primary-light shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-blue-900">Dokumentenrichtlinien</h3>
-              <ul className="text-sm text-blue-800 mt-2 space-y-1">
+              <h3 className="font-display font-semibold text-white">Dokumentenrichtlinien</h3>
+              <ul className="text-sm text-architect-primary-light mt-2 space-y-1">
                 <li>Nur PDF-Dateien werden akzeptiert</li>
                 <li>Maximale Dateigröße: 10 MB</li>
                 <li>Dokumente müssen Nachweise über erbrachte Leistungen enthalten</li>

@@ -125,17 +125,18 @@ export default function BeraterProfilPage() {
   }
 
   return (
+    <div className="min-h-screen bg-architect-surface font-body text-white">
     <div className="mx-auto max-w-2xl px-6 py-12 sm:px-8 space-y-8">
       {/* Header */}
       <div>
-        <Link href="/dashboard/berater" className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4">
+        <Link href="/dashboard/berater" className="inline-flex items-center text-sm text-white/60 hover:text-white mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Zurück
         </Link>
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+        <h1 className="font-display text-4xl font-bold text-white">
           Mein Profil bearbeiten
         </h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-white/60">
           Aktualisieren Sie Ihre Profilinformationen und Spezialisierungen
         </p>
       </div>
@@ -145,14 +146,14 @@ export default function BeraterProfilPage() {
 
       {/* Success Message */}
       {successMessage && (
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 flex items-center gap-3">
-          <Check className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-          <p className="text-sm text-green-900 dark:text-green-100">{successMessage}</p>
+        <div className="bg-architect-tertiary/25 rounded-lg p-4 flex items-center gap-3">
+          <Check className="h-5 w-5 text-architect-tertiary-light flex-shrink-0" />
+          <p className="text-sm text-architect-tertiary-light">{successMessage}</p>
         </div>
       )}
 
       {/* Form Card */}
-      <Card className="bg-white dark:bg-gray-800">
+      <Card className="bg-architect-surface/60 border-0 text-white">
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 sm:p-8 space-y-6">
           {/* Display Name */}
           <div>
@@ -215,7 +216,7 @@ export default function BeraterProfilPage() {
               rows={2}
               className="mt-2"
             />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs text-white/50 mt-1">
               Geben Sie mehrere Branchen ein, getrennt durch Kommas
             </p>
             {errors.branchen && (
@@ -235,7 +236,7 @@ export default function BeraterProfilPage() {
               rows={2}
               className="mt-2"
             />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs text-white/50 mt-1">
               Geben Sie mehrere Spezialisierungen ein, getrennt durch Kommas
             </p>
             {errors.spezialisierungen && (
@@ -261,7 +262,7 @@ export default function BeraterProfilPage() {
           </div>
 
           {/* Info Box */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-sm text-blue-900 dark:text-blue-100">
+          <div className="bg-architect-primary/20 rounded-lg p-4 text-sm text-architect-primary-light">
             <p>
               Diese Informationen werden in Ihrem öffentlichen Profil angezeigt. Dies hilft Unternehmen, Sie als passenden Berater zu finden.
             </p>
@@ -272,7 +273,7 @@ export default function BeraterProfilPage() {
             type="submit"
             size="lg"
             disabled={!isValid || isSubmitting}
-            className="w-full"
+            className="w-full bg-architect-primary hover:bg-architect-primary-container text-white"
           >
             {isSubmitting ? 'Wird gespeichert...' : 'Änderungen speichern'}
           </Button>
@@ -281,36 +282,36 @@ export default function BeraterProfilPage() {
 
       {/* Stats Preview */}
       {profil && (
-        <Card className="bg-gray-50 dark:bg-gray-900/50 border">
+        <Card className="bg-architect-surface-low/40 border-0 text-white">
           <div className="p-6 sm:p-8 space-y-4">
-            <h3 className="font-semibold text-gray-900 dark:text-white">
+            <h3 className="font-display font-semibold text-white">
               Profilstatistiken
             </h3>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
+                <p className="text-xs font-semibold text-white/60 uppercase">
                   Rating
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="font-display text-2xl font-bold text-white">
                   {profil.ratingAvg.toFixed(1)}
                 </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
+                <p className="text-xs text-white/60">
                   ({profil.ratingCount} Bewertungen)
                 </p>
               </div>
               <div>
-                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
+                <p className="text-xs font-semibold text-white/60 uppercase">
                   Verfügbar
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="font-display text-2xl font-bold text-white">
                   {profil.verfuegbar ? 'Ja' : 'Nein'}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
+                <p className="text-xs font-semibold text-white/60 uppercase">
                   Erfolgsquote
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="font-display text-2xl font-bold text-white">
                   {(profil.erfolgsquote ?? 0).toFixed(0)}%
                 </p>
               </div>
@@ -318,6 +319,7 @@ export default function BeraterProfilPage() {
           </div>
         </Card>
       )}
+    </div>
     </div>
   )
 }

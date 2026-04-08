@@ -18,11 +18,11 @@ interface TrackerItem extends TrackerVorgang {
 }
 
 const phasen: { id: TrackerPhase; label: string; color: string }[] = [
-  { id: 'vorbereitung', label: 'Vorbereitung', color: 'bg-slate-100 border-slate-300' },
-  { id: 'antrag', label: 'Antrag', color: 'bg-blue-50 border-blue-300' },
-  { id: 'pruefung', label: 'Prüfung', color: 'bg-amber-50 border-amber-300' },
-  { id: 'bewilligt', label: 'Bewilligt', color: 'bg-green-50 border-green-300' },
-  { id: 'abgeschlossen', label: 'Fertig', color: 'bg-purple-50 border-purple-300' },
+  { id: 'vorbereitung', label: 'Vorbereitung', color: 'bg-architect-surface-low/30' },
+  { id: 'antrag', label: 'Antrag', color: 'bg-architect-primary/20' },
+  { id: 'pruefung', label: 'Prüfung', color: 'bg-architect-primary/15' },
+  { id: 'bewilligt', label: 'Bewilligt', color: 'bg-architect-tertiary/20' },
+  { id: 'abgeschlossen', label: 'Fertig', color: 'bg-architect-primary/30' },
 ];
 
 export default function BeraterTrackerPage() {
@@ -86,7 +86,7 @@ export default function BeraterTrackerPage() {
 
   if (!isMounted || guardLoading || ladet) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-architect-surface font-body text-white p-6">
         <div className="max-w-7xl mx-auto">
           <Skeleton className="h-12 w-48 mb-8" />
           <div className="grid grid-cols-5 gap-4">
@@ -100,11 +100,11 @@ export default function BeraterTrackerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-architect-surface font-body text-white p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Projekttracker</h1>
-          <p className="text-slate-600">Verwalten Sie den Status Ihrer aktiven Projekte</p>
+          <h1 className="font-display text-4xl font-bold text-white mb-2">Projekttracker</h1>
+          <p className="text-white/60">Verwalten Sie den Status Ihrer aktiven Projekte</p>
         </div>
 
         {fehler && <FehlerBox fehler={fehler} />}
@@ -129,18 +129,18 @@ export default function BeraterTrackerPage() {
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`rounded-lg border-2 p-4 min-h-[500px] transition ${
+                        className={`rounded-lg p-4 min-h-[500px] transition ${
                           phase.color
                         } ${
                           snapshot.isDraggingOver
-                            ? 'ring-2 ring-blue-500 ring-offset-2'
+                            ? 'ring-2 ring-architect-primary'
                             : ''
                         }`}
                       >
-                        <h2 className="font-bold text-slate-900 mb-4 text-center">{phase.label}</h2>
+                        <h2 className="font-display font-bold text-white mb-4 text-center">{phase.label}</h2>
                         <div className="space-y-3">
                           {phaseItems.length === 0 && (
-                            <p className="text-center text-slate-400 text-sm py-8">
+                            <p className="text-center text-white/40 text-sm py-8">
                               Keine Einträge
                             </p>
                           )}
@@ -150,21 +150,21 @@ export default function BeraterTrackerPage() {
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  className={`bg-white rounded border border-slate-200 p-3 transition ${
+                                  className={`bg-architect-surface/60 rounded p-3 transition ${
                                     snapshot.isDragging
-                                      ? 'shadow-lg ring-2 ring-blue-500'
-                                      : 'shadow-sm hover:shadow-md'
+                                      ? 'shadow-lg ring-2 ring-architect-primary'
+                                      : 'shadow-sm hover:bg-architect-surface/70'
                                   }`}
                                 >
                                   <div className="flex gap-2">
                                     <div {...provided.dragHandleProps} className="mt-1">
-                                      <GripVertical className="w-4 h-4 text-slate-400" />
+                                      <GripVertical className="w-4 h-4 text-white/40" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium text-slate-900 truncate">
+                                      <p className="text-sm font-medium text-white truncate">
                                         {item.programmName || 'Projekt'}
                                       </p>
-                                      <p className="text-xs text-slate-600 mt-1">
+                                      <p className="text-xs text-white/60 mt-1">
                                         {item.phase}
                                       </p>
                                       <Badge className="mt-2 text-xs" variant="secondary">

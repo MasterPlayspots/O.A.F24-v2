@@ -75,14 +75,14 @@ export default function VorlagenPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-architect-surface font-body text-white p-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">Vorlagen</h1>
-            <p className="text-slate-600">Wiederverwendbare Textbausteine für deine Berichte</p>
+            <h1 className="font-display text-4xl font-bold text-white mb-2">Vorlagen</h1>
+            <p className="text-white/60">Wiederverwendbare Textbausteine für deine Berichte</p>
           </div>
-          <Button onClick={() => setModalOpen(true)} className="shrink-0">
+          <Button onClick={() => setModalOpen(true)} className="shrink-0 bg-architect-primary hover:bg-architect-primary-container text-white">
             <Plus className="w-4 h-4 mr-2" /> Neue Vorlage
           </Button>
         </div>
@@ -96,39 +96,39 @@ export default function VorlagenPage() {
             ))}
           </div>
         ) : vorlagen.length === 0 ? (
-          <Card className="p-12 text-center border-slate-200">
-            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-slate-900 mb-2">Noch keine Vorlagen</h2>
-            <p className="text-sm text-slate-600 mb-6">
+          <Card className="p-12 text-center bg-architect-surface/60 border-0 text-white">
+            <FileText className="w-12 h-12 text-white/40 mx-auto mb-4" />
+            <h2 className="font-display text-xl font-semibold text-white mb-2">Noch keine Vorlagen</h2>
+            <p className="text-sm text-white/60 mb-6">
               Lege deinen ersten Textbaustein an.
             </p>
-            <Button onClick={() => setModalOpen(true)}>
+            <Button onClick={() => setModalOpen(true)} className="bg-architect-primary hover:bg-architect-primary-container text-white">
               <Plus className="w-4 h-4 mr-2" /> Vorlage erstellen
             </Button>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {vorlagen.map((v) => (
-              <Card key={v.id} className="p-5 border-slate-200 flex flex-col">
+              <Card key={v.id} className="p-5 bg-architect-surface/60 border-0 text-white flex flex-col">
                 <div className="flex-1 mb-4">
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-semibold text-slate-900 leading-tight">{v.titel}</h3>
+                    <h3 className="font-display font-semibold text-white leading-tight">{v.titel}</h3>
                     {v.kategorie && (
-                      <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-medium">
+                      <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded bg-architect-primary/20 text-architect-primary-light text-xs font-medium">
                         {v.kategorie}
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-slate-600 line-clamp-4 whitespace-pre-wrap">{v.inhalt}</p>
-                  <p className="text-xs text-slate-400 mt-3">
+                  <p className="text-sm text-white/60 line-clamp-4 whitespace-pre-wrap">{v.inhalt}</p>
+                  <p className="text-xs text-white/40 mt-3">
                     {new Date(v.created_at).toLocaleDateString('de-DE')}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                <div className="flex items-center gap-2 pt-3">
                   <Button
                     size="sm"
                     variant="outline"
-                    className="flex-1"
+                    className="flex-1 bg-architect-surface-low/40 border-0 text-white hover:bg-architect-surface-low/60 hover:text-white"
                     onClick={() => handleCopy(v)}
                   >
                     {copiedId === v.id ? (
@@ -142,7 +142,7 @@ export default function VorlagenPage() {
                     variant="outline"
                     onClick={() => handleDelete(v.id)}
                     disabled={deletingId === v.id}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="bg-architect-error/20 border-0 text-architect-error-container hover:bg-architect-error/30 hover:text-white"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </Button>

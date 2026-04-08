@@ -99,7 +99,7 @@ export default function BeraterDashboardPage() {
 
   if (!isMounted || guardLoading || ladet) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-architect-surface font-body text-white p-6">
         <div className="max-w-6xl mx-auto">
           <Skeleton className="h-12 w-48 mb-8" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -115,7 +115,7 @@ export default function BeraterDashboardPage() {
 
   if (fehler) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+      <div className="min-h-screen bg-architect-surface font-body text-white p-6">
         <div className="max-w-6xl mx-auto">
           <FehlerBox fehler={fehler} />
         </div>
@@ -128,26 +128,26 @@ export default function BeraterDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-architect-surface font-body text-white p-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Berater Dashboard</h1>
-          <p className="text-slate-600">Übersicht Ihrer Anfragen und Projekte</p>
+          <h1 className="font-display text-4xl font-bold text-white mb-2">Berater Dashboard</h1>
+          <p className="text-white/60">Übersicht Ihrer Anfragen und Projekte</p>
         </div>
 
         {kunden.length > 0 && (
-          <Card className="border-slate-200 mb-8">
-            <div className="p-6 border-b border-slate-200">
-              <h2 className="text-xl font-bold text-slate-900">Meine Kunden ({kunden.length})</h2>
+          <Card className="bg-architect-surface/60 border-0 text-white mb-8">
+            <div className="p-6">
+              <h2 className="font-display text-xl font-bold text-white">Meine Kunden ({kunden.length})</h2>
             </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="p-6 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {kunden.map((k) => (
-                <div key={k.unternehmen_id} className="border border-slate-200 rounded-lg p-4">
-                  <p className="font-semibold text-slate-900">{k.firmenname || 'Unbenannt'}</p>
-                  {k.branche && <p className="text-xs text-slate-500">{k.branche}</p>}
-                  <p className="text-sm text-slate-600 mt-2">{k.antraege_count} Antrag/Anträge</p>
+                <div key={k.unternehmen_id} className="bg-architect-surface-low/30 rounded-lg p-4">
+                  <p className="font-display font-semibold text-white">{k.firmenname || 'Unbenannt'}</p>
+                  {k.branche && <p className="text-xs text-white/50">{k.branche}</p>}
+                  <p className="text-sm text-white/60 mt-2">{k.antraege_count} Antrag/Anträge</p>
                   {k.letzte_aktivitaet && (
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-white/40 mt-1">
                       Zuletzt: {new Date(k.letzte_aktivitaet).toLocaleDateString('de-DE')}
                     </p>
                   )}
@@ -158,60 +158,60 @@ export default function BeraterDashboardPage() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="p-6 border-slate-200">
+          <Card className="p-6 bg-architect-surface/60 border-0 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 font-medium">Neue Anfragen</p>
-                <p className="text-3xl font-bold text-slate-900 mt-2">
+                <p className="text-sm text-white/60 font-medium">Neue Anfragen</p>
+                <p className="font-display text-3xl font-bold text-white mt-2">
                   {data.neueAnfragen?.length || 0}
                 </p>
               </div>
-              <AlertCircle className="w-10 h-10 text-orange-500" />
+              <AlertCircle className="w-10 h-10 text-architect-primary-light" />
             </div>
           </Card>
 
-          <Card className="p-6 border-slate-200">
+          <Card className="p-6 bg-architect-surface/60 border-0 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 font-medium">Aktive Projekte</p>
-                <p className="text-3xl font-bold text-slate-900 mt-2">
+                <p className="text-sm text-white/60 font-medium">Aktive Projekte</p>
+                <p className="font-display text-3xl font-bold text-white mt-2">
                   {data.aktiveProjekte?.length || 0}
                 </p>
               </div>
-              <Briefcase className="w-10 h-10 text-blue-500" />
+              <Briefcase className="w-10 h-10 text-architect-primary-light" />
             </div>
           </Card>
 
-          <Card className="p-6 border-slate-200">
+          <Card className="p-6 bg-architect-surface/60 border-0 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 font-medium">Offene Provisionen</p>
-                <p className="text-3xl font-bold text-slate-900 mt-2">
+                <p className="text-sm text-white/60 font-medium">Offene Provisionen</p>
+                <p className="font-display text-3xl font-bold text-white mt-2">
                   {data.offeneProvisionen || 0}
                 </p>
               </div>
-              <TrendingUp className="w-10 h-10 text-green-500" />
+              <TrendingUp className="w-10 h-10 text-architect-tertiary-light" />
             </div>
           </Card>
         </div>
 
         {data.neueAnfragen && data.neueAnfragen.length > 0 && (
-          <Card className="border-slate-200 mb-8">
-            <div className="p-6 border-b border-slate-200">
-              <h2 className="text-xl font-bold text-slate-900">Neue Anfragen</h2>
+          <Card className="bg-architect-surface/60 border-0 text-white mb-8">
+            <div className="p-6">
+              <h2 className="font-display text-xl font-bold text-white">Neue Anfragen</h2>
             </div>
-            <div className="divide-y divide-slate-200">
+            <div className="space-y-1">
               {(data.neueAnfragen as AnfrageWithDetails[]).map((anfrage: AnfrageWithDetails) => (
-                <div key={anfrage.id} className="p-6 hover:bg-slate-50 transition">
+                <div key={anfrage.id} className="p-6 hover:bg-architect-surface/40 transition">
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-slate-900">
+                      <h3 className="font-display text-lg font-semibold text-white">
                         {anfrage.vonUserName || 'Unbekannt'}
                       </h3>
-                      <p className="text-sm text-slate-600 mt-1">
+                      <p className="text-sm text-white/60 mt-1">
                         Dienstleistung: {anfrage.nachricht || '-'}
                       </p>
-                      <p className="text-sm text-slate-500 mt-2">
+                      <p className="text-sm text-white/50 mt-2">
                         {new Date(anfrage.createdAt).toLocaleDateString('de-DE')}
                       </p>
                     </div>
@@ -220,7 +220,7 @@ export default function BeraterDashboardPage() {
                         onClick={() => handleAccept(anfrage.id)}
                         disabled={processing === anfrage.id}
                         size="sm"
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-architect-tertiary hover:bg-architect-tertiary/80 text-white"
                       >
                         {processing === anfrage.id ? (
                           <LadeSpinner />
@@ -236,6 +236,7 @@ export default function BeraterDashboardPage() {
                         disabled={processing === anfrage.id}
                         variant="outline"
                         size="sm"
+                        className="bg-architect-surface-low/40 border-0 text-white hover:bg-architect-surface-low/60 hover:text-white"
                       >
                         {processing === anfrage.id ? (
                           <LadeSpinner />
@@ -255,22 +256,22 @@ export default function BeraterDashboardPage() {
         )}
 
         {data.aktiveProjekte && data.aktiveProjekte.length > 0 && (
-          <Card className="border-slate-200">
-            <div className="p-6 border-b border-slate-200">
-              <h2 className="text-xl font-bold text-slate-900">Aktive Projekte</h2>
+          <Card className="bg-architect-surface/60 border-0 text-white">
+            <div className="p-6">
+              <h2 className="font-display text-xl font-bold text-white">Aktive Projekte</h2>
             </div>
-            <div className="divide-y divide-slate-200">
+            <div className="space-y-1">
               {data.aktiveProjekte.map((projekt: ProjektWithDetails) => (
-                <div key={projekt.id} className="p-6 hover:bg-slate-50 transition">
+                <div key={projekt.id} className="p-6 hover:bg-architect-surface/40 transition">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-slate-900">
+                      <h3 className="font-display text-lg font-semibold text-white">
                         {projekt.programmName || 'Projekt'}
                       </h3>
-                      <p className="text-sm text-slate-600 mt-1">
+                      <p className="text-sm text-white/60 mt-1">
                         {projekt.phase}
                       </p>
-                      <p className="text-sm text-slate-500 mt-2">
+                      <p className="text-sm text-white/50 mt-2">
                         Aktualisiert: {new Date(projekt.updatedAt).toLocaleDateString('de-DE')}
                       </p>
                     </div>
@@ -283,13 +284,13 @@ export default function BeraterDashboardPage() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-          <Button asChild variant="outline" size="lg">
+          <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
             <a href="/dashboard/berater/anfragen">Alle Anfragen</a>
           </Button>
-          <Button asChild variant="outline" size="lg">
+          <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
             <a href="/dashboard/berater/nachrichten">Nachrichten</a>
           </Button>
-          <Button asChild variant="outline" size="lg">
+          <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
             <a href="/dashboard/berater/abwicklung">Provisionen</a>
           </Button>
         </div>
