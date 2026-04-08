@@ -39,6 +39,20 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Institutional Architect Design System (stitch-export/DESIGN.md) */
+  --color-architect-primary: #6575ad;
+  --color-architect-primary-container: #4a5a8f;
+  --color-architect-tertiary: #069e7c;
+  --color-architect-surface: #737688;
+  --color-architect-surface-low: #637c74;
+  --color-architect-error: #ba1a1a;
+  --color-architect-error-container: #ffdad6;
+  --color-architect-on-primary: #ffffff;
+  --color-architect-on-tertiary: #000000;
+  --font-display: var(--font-manrope);
+  --font-body: var(--font-inter);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
