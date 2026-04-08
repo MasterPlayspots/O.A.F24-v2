@@ -104,12 +104,10 @@ export interface Bericht {
   updated_at: string
 }
 
-// TODO: GET /api/berichte/:id muss noch im Worker ergänzt werden
 export async function getBericht(id: string): Promise<Bericht> {
   return apiCall<Bericht>(API.FUND24, `/api/berichte/${id}`, undefined, token())
 }
 
-// TODO: GET /api/berichte muss noch im Worker ergänzt werden
 export async function listBerichte(): Promise<Bericht[]> {
   return apiCall<Bericht[]>(API.FUND24, '/api/berichte', undefined, token())
 }
@@ -146,12 +144,10 @@ export interface Beratung {
   updated_at: string
 }
 
-// TODO: GET /api/beratungen/:id muss noch im Worker ergänzt werden
 export async function getBeratung(id: string): Promise<Beratung> {
   return apiCall<Beratung>(API.FUND24, `/api/beratungen/${id}`, undefined, token())
 }
 
-// TODO: phase-Update muss noch im Worker akzeptiert werden
 export async function updateBeratung(
   id: string,
   body: {
