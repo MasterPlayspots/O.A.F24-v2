@@ -234,6 +234,45 @@ export async function deleteVorlage(id: string) {
   return apiCall(API.FUND24, `/api/vorlagen/${id}`, { method: 'DELETE' }, token())
 }
 
+// ---------- Admin: Email Outbox ----------
+export type EmailOutboxStatus = 'queued' | 'sending' | 'sent' | 'failed'
+
+export interface EmailOutbox {
+  id: string
+  to_email: string
+  to?: string | null
+  subject: string
+  status: EmailOutboxStatus
+  created_at: string
+  sent_at: string | null
+  error: string | null
+}
+
+// TODO: GET /api/admin/email-outbox muss noch im Worker ergänzt werden
+export async function listEmailOutbox(filter?: { status?: EmailOutboxStatus; limit?: number; offset?: number }) {
+  const params = new URLSearchParams()
+  if (filter?.status) params.set('status', filter.status)
+  if (filter?.limit) params.set('limit', String(filter.limit))
+  if (filter?.offset) params.set('offset', String(filter.offset))
+  const qs = params.toString()
+  return apiCall<{ results: EmailOutbox[]; limit: number; offset: number }>(
+    API.FUND24,
+    `/api/admin/email-outbox${qs ? `?${qs}` : ''}`,
+    undefined,
+    token()
+  )
+}
+
+// TODO: POST /api/admin/email-outbox/:id/retry muss noch im Worker ergänzt werden
+export async function retryEmail(id: string) {
+  return apiCall<{ ok: boolean }>(
+    API.FUND24,
+    `/api/admin/email-outbox/${id}/retry`,
+    { method: 'POST' },
+    token()
+  )
+}
+
 // TODO: GET /api/antraege/:id/dokumente muss noch im Worker ergänzt werden
 export async function listAntragDokumente(antragId: string): Promise<AntragDokumentDTO[]> {
   return apiCall<AntragDokumentDTO[]>(API.FUND24, `/api/antraege/${antragId}/dokumente`, undefined, token())
