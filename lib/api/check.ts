@@ -71,10 +71,22 @@ interface AnfrageDaten {
 }
 
 export async function sendeAnfrage(daten: AnfrageDaten, token: string): Promise<{ id: string }> {
-  return apiCall(API.CHECK, '/api/anfragen', {
-    method: 'POST',
-    body: JSON.stringify(daten),
-  }, token)
+  // Sprint 16: route to bafa-creator-ai-worker /api/berater/:id/anfrage.
+  // Frontend passes the berater profile id as `anUserId` (legacy field name).
+  const beraterId = daten.anUserId
+  const r = await apiCall<{ success: boolean; anfrage?: { id: string } }>(
+    API.FUND24,
+    `/api/berater/${beraterId}/anfrage`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        typ: 'beratung',
+        nachricht: daten.nachricht ?? null,
+      }),
+    },
+    token
+  )
+  return { id: r.anfrage?.id ?? '' }
 }
 
 export async function updateAnfrage(id: string, status: AnfrageStatus, token: string): Promise<{ ok: boolean }> {
