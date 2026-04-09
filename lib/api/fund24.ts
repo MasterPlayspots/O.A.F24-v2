@@ -193,12 +193,15 @@ export async function listMeineAntraege(): Promise<Antrag[]> {
 }
 
 export async function createAntrag(body: { programm_id: string; beschreibung?: string }): Promise<{ id: string }> {
-  return apiCall<{ id: string }>(
+  // Worker (foerdermittel/cases) returns {success, data:{caseId}}.
+  // Wrapper normalizes to {id} for the existing frontend caller.
+  const r = await apiCall<{ success: boolean; data?: { caseId?: string }; case?: { id: string }; id?: string }>(
     API.FUND24,
     '/api/me/antraege',
     { method: 'POST', body: JSON.stringify(body) },
     token()
   )
+  return { id: r.data?.caseId ?? r.case?.id ?? r.id ?? '' }
 }
 
 // ---------- Vorlagen (Template-Library) ----------
