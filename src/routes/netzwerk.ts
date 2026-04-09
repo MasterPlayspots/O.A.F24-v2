@@ -34,43 +34,10 @@ netzwerk.get("/berater/:id", async (c) => {
 });
 
 // ============================================
-// Auth-required: Own profile
+// /profil handlers REMOVED 2026-04-09 — they wrote to zfbf-db.berater_profile
+// (legacy singular, 0 rows). Source of truth is now bafa_antraege.berater_profiles
+// served by routes/berater.ts (/api/berater/profil).
 // ============================================
-
-// GET /profil — get own berater profile
-netzwerk.get("/profil", requireAuth, async (c) => {
-  const user = c.get("user");
-  const profile = await NetzwerkRepo.getBeraterProfile(c.env.DB, user.id);
-  return c.json({ success: true, profile });
-});
-
-const profilSchema = z.object({
-  spezialisierung: z.string().optional(),
-  regionen: z.string().optional(),
-  bio: z.string().max(2000).optional(),
-  erfahrung_jahre: z.number().int().min(0).max(99).optional(),
-  verfuegbar: z.boolean().optional(),
-});
-
-// POST /profil — create or update own berater profile
-netzwerk.post("/profil", requireAuth, async (c) => {
-  const user = c.get("user");
-  const body = await c.req.json();
-  const parsed = profilSchema.safeParse(body);
-  if (!parsed.success) {
-    return c.json(
-      {
-        success: false,
-        error: "Validierungsfehler",
-        details: parsed.error.issues.map((e) => e.message),
-      },
-      400
-    );
-  }
-
-  const profile = await NetzwerkRepo.createOrUpdateProfile(c.env.DB, user.id, parsed.data);
-  return c.json({ success: true, profile });
-});
 
 // ============================================
 // Auth-required: Anfragen (connection requests)
