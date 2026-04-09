@@ -56,7 +56,7 @@ function VerifyForm() {
       } else if (role === 'admin') {
         router.push('/admin')
       } else {
-        router.push('/dashboard/unternehmen')
+        router.push('/onboarding/unternehmen')
       }
     } catch {
       setFehler('Ungültiger Code. Bitte erneut versuchen.')

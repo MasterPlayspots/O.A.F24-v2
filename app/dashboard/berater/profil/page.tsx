@@ -6,8 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuth } from '@/lib/store/authStore'
-import { getBeraterProfil as getBeraterProfilLegacy } from '@/lib/api/check'
-import { updateBeraterProfil } from '@/lib/api/berater'
+import { getBeraterProfil, updateBeraterProfil } from '@/lib/api/berater'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,7 +16,7 @@ import { LadeSpinner } from '@/components/shared/LadeSpinner'
 import { FehlerBox } from '@/components/shared/FehlerBox'
 import { ArrowLeft, Check } from 'lucide-react'
 import Link from 'next/link'
-import type { BeraterProfil } from '@/lib/types'
+import type { BeraterProfil } from '@/lib/api/berater'
 
 const schema = z.object({
   displayName: z.string().min(2, 'Name muss mindestens 2 Zeichen lang sein'),
@@ -58,15 +57,20 @@ export default function BeraterProfilPage() {
     const fetchProfil = async () => {
       try {
         if (!token || !nutzer?.id) throw new Error('Authentifizierung erforderlich')
-        const data = await getBeraterProfilLegacy(nutzer.id)
+        const data = await getBeraterProfil()
+        if (!data) {
+          // Berater hat noch kein Profil → ins Onboarding leiten
+          router.push('/onboarding/profil')
+          return
+        }
         setProfil(data)
         reset({
-          displayName: data.displayName,
+          displayName: data.display_name,
           bio: data.bio || '',
-          region: data.region,
-          branchen: data.branchen.join(', '),
-          spezialisierungen: data.spezialisierungen.join(', '),
-          websiteUrl: data.websiteUrl || '',
+          region: data.region || '',
+          branchen: (data.branchen ?? []).join(', '),
+          spezialisierungen: (data.spezialisierungen ?? []).join(', '),
+          websiteUrl: data.website || '',
         })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Fehler beim Laden')
@@ -287,10 +291,10 @@ export default function BeraterProfilPage() {
                   Rating
                 </p>
                 <p className="font-display text-2xl font-bold text-white">
-                  {profil.ratingAvg.toFixed(1)}
+                  {profil.rating_avg.toFixed(1)}
                 </p>
                 <p className="text-xs text-white/60">
-                  ({profil.ratingCount} Bewertungen)
+                  ({profil.rating_count} Bewertungen)
                 </p>
               </div>
               <div>
@@ -303,10 +307,10 @@ export default function BeraterProfilPage() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-white/60 uppercase">
-                  Erfolgsquote
+                  Profil-Views
                 </p>
                 <p className="font-display text-2xl font-bold text-white">
-                  {(profil.erfolgsquote ?? 0).toFixed(0)}%
+                  {profil.profil_views}
                 </p>
               </div>
             </div>
