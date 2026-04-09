@@ -9,18 +9,27 @@ import { useAuth } from '@/lib/store/authStore';
 import { getBeratung, updateBeratung, type Beratung, type BeratungPhase } from '@/lib/api/fund24';
 import { AutosaveIndicator, type SaveState } from '@/components/berichte/AutosaveIndicator';
 
+// Sprint 18: aligned with DB CHECK (8 BAFA process phases).
 const PHASEN: { value: BeratungPhase; label: string }[] = [
   { value: 'anlauf',         label: 'Anlauf' },
-  { value: 'beratung',       label: 'Beratung' },
-  { value: 'nachbereitung',  label: 'Nachbereitung' },
+  { value: 'datenerhebung',  label: 'Datenerhebung' },
+  { value: 'durchfuehrung',  label: 'Durchführung' },
+  { value: 'bericht',        label: 'Bericht' },
+  { value: 'eingereicht',    label: 'Eingereicht' },
+  { value: 'bewilligt',      label: 'Bewilligt' },
   { value: 'abgeschlossen',  label: 'Abgeschlossen' },
+  { value: 'abgelehnt',      label: 'Abgelehnt' },
 ];
 
 const PHASE_STYLE: Record<BeratungPhase, { bg: string; fg: string }> = {
-  anlauf:        { bg: 'bg-architect-surface/40', fg: 'text-white' },
-  beratung:      { bg: 'bg-architect-primary/30', fg: 'text-architect-primary-light' },
-  nachbereitung: { bg: 'bg-architect-primary/40', fg: 'text-architect-primary-light' },
-  abgeschlossen: { bg: 'bg-architect-tertiary/35', fg: 'text-architect-tertiary-light' },
+  anlauf:        { bg: 'bg-architect-surface/40',   fg: 'text-white' },
+  datenerhebung: { bg: 'bg-architect-primary/20',   fg: 'text-architect-primary-light' },
+  durchfuehrung: { bg: 'bg-architect-primary/30',   fg: 'text-architect-primary-light' },
+  bericht:       { bg: 'bg-architect-primary/40',   fg: 'text-architect-primary-light' },
+  eingereicht:   { bg: 'bg-architect-primary/50',   fg: 'text-architect-primary-light' },
+  bewilligt:     { bg: 'bg-architect-tertiary/35',  fg: 'text-architect-tertiary-light' },
+  abgeschlossen: { bg: 'bg-architect-tertiary/50',  fg: 'text-architect-tertiary-light' },
+  abgelehnt:     { bg: 'bg-architect-error/25',     fg: 'text-architect-error-container' },
 };
 
 function fmtEUR(n: number | null) {

@@ -126,7 +126,16 @@ export async function finalizeBericht(id: string) {
 }
 
 // ---------- Beratungen ----------
-export type BeratungPhase = 'anlauf' | 'beratung' | 'nachbereitung' | 'abgeschlossen'
+// Sprint 18: aligned with bafa_beratungen.phase CHECK constraint.
+export type BeratungPhase =
+  | 'anlauf'
+  | 'datenerhebung'
+  | 'durchfuehrung'
+  | 'bericht'
+  | 'eingereicht'
+  | 'bewilligt'
+  | 'abgeschlossen'
+  | 'abgelehnt'
 
 export interface Beratung {
   id: string
