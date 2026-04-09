@@ -47,6 +47,23 @@ me.get("/unternehmen", requireAuth, forwardToUnternehmen("/profil"));
 me.put("/unternehmen", requireAuth, forwardToUnternehmen("/profil"));
 me.post("/unternehmen", requireAuth, forwardToUnternehmen("/profil"));
 
+// GET /api/me/anfragen — outgoing anfragen (von_user_id = self),
+// joined with berater profile metadata for display.
+me.get("/anfragen", requireAuth, async (c) => {
+  const user = c.get("user");
+  const result = await c.env.BAFA_DB
+    .prepare(
+      `SELECT na.*, bp.display_name AS berater_name, bp.region AS berater_region
+         FROM netzwerk_anfragen na
+         LEFT JOIN berater_profiles bp ON bp.id = na.an_berater_id
+        WHERE na.von_user_id = ?
+        ORDER BY na.created_at DESC`
+    )
+    .bind(user.id)
+    .all<Record<string, unknown>>();
+  return c.json({ success: true, anfragen: result.results ?? [] });
+});
+
 // TODO: GET /api/me/dashboard — kein Backend-Endpoint vorhanden.
 // Frontend ruft `/api/me/dashboard` (lib/api/fund24.ts: getDashboard).
 // Sobald ein Aggregations-Endpoint existiert, hier mappen.

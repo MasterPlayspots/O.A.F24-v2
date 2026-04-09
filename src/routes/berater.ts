@@ -363,4 +363,110 @@ berater.post("/dienstleistungen", requireAuth, requireRole("berater"), async (c)
   });
 });
 
+// ============================================================
+// /anfragen — Unternehmen → Berater + Berater inbox
+// ============================================================
+const anfrageSchema = z.object({
+  typ: z.enum(["beratung", "zusammenarbeit", "frage"]).default("beratung"),
+  nachricht: z.string().max(1000).optional().nullable(),
+});
+
+// GET /api/berater/anfragen — berater inbox  (must be defined BEFORE /:id/anfrage
+// so the static segment doesn't get swallowed by the dynamic route)
+berater.get("/anfragen", requireAuth, requireRole("berater"), async (c) => {
+  const user = c.get("user");
+  const beraterId = await getOwnBeraterId(c.env.BAFA_DB, user.id);
+  if (!beraterId) return c.json({ success: true, anfragen: [] });
+
+  const result = await c.env.BAFA_DB.prepare(
+    `SELECT * FROM netzwerk_anfragen
+       WHERE an_berater_id = ?
+       ORDER BY created_at DESC`
+  )
+    .bind(beraterId)
+    .all<Record<string, unknown>>();
+
+  return c.json({ success: true, anfragen: result.results ?? [] });
+});
+
+// PATCH /api/berater/anfragen/:id — accept/reject
+const anfrageStatusSchema = z.object({
+  status: z.enum(["angenommen", "abgelehnt"]),
+});
+
+berater.patch("/anfragen/:id", requireAuth, requireRole("berater"), async (c) => {
+  const user = c.get("user");
+  const anfrageId = c.req.param("id");
+  const beraterId = await getOwnBeraterId(c.env.BAFA_DB, user.id);
+  if (!beraterId) return c.json({ success: false, error: "Kein Berater-Profil" }, 403);
+
+  const parsed = anfrageStatusSchema.safeParse(await c.req.json());
+  if (!parsed.success)
+    return c.json({ success: false, error: "Validierungsfehler" }, 400);
+
+  await c.env.BAFA_DB.prepare(
+    `UPDATE netzwerk_anfragen SET status = ?, updated_at = datetime('now')
+       WHERE id = ? AND an_berater_id = ?`
+  )
+    .bind(parsed.data.status, anfrageId, beraterId)
+    .run();
+
+  const updated = await c.env.BAFA_DB.prepare(
+    "SELECT * FROM netzwerk_anfragen WHERE id = ?"
+  )
+    .bind(anfrageId)
+    .first<Record<string, unknown>>();
+
+  return c.json({ success: !!updated, anfrage: updated ?? null });
+});
+
+// POST /api/berater/:id/anfrage — any auth role can send
+berater.post("/:id/anfrage", requireAuth, async (c) => {
+  const user = c.get("user");
+  const beraterId = c.req.param("id");
+
+  const parsed = anfrageSchema.safeParse(await c.req.json());
+  if (!parsed.success) {
+    return c.json(
+      {
+        success: false,
+        error: "Validierungsfehler",
+        details: parsed.error.issues.map((e) => e.message),
+      },
+      400
+    );
+  }
+
+  const profil = await c.env.BAFA_DB
+    .prepare("SELECT id FROM berater_profiles WHERE id = ?")
+    .bind(beraterId)
+    .first<{ id: string }>();
+  if (!profil)
+    return c.json({ success: false, error: "Berater nicht gefunden" }, 404);
+
+  const ownProfil = await c.env.BAFA_DB
+    .prepare("SELECT id FROM berater_profiles WHERE user_id = ?")
+    .bind(user.id)
+    .first<{ id: string }>();
+  if (ownProfil?.id === beraterId) {
+    return c.json(
+      { success: false, error: "Kann keine Anfrage an sich selbst senden" },
+      400
+    );
+  }
+
+  const d = parsed.data;
+  const insert = await c.env.BAFA_DB
+    .prepare(
+      `INSERT INTO netzwerk_anfragen
+        (von_user_id, an_berater_id, typ, nachricht)
+       VALUES (?, ?, ?, ?)
+       RETURNING *`
+    )
+    .bind(user.id, beraterId, d.typ, d.nachricht ?? null)
+    .first<Record<string, unknown>>();
+
+  return c.json({ success: true, anfrage: insert }, 201);
+});
+
 export { berater };
