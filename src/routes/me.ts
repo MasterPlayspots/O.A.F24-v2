@@ -23,8 +23,10 @@ function forward(targetPath: string) {
   };
 }
 
-// GET /api/me/antraege  →  /api/foerdermittel/cases
+// GET  /api/me/antraege → /api/foerdermittel/cases
 me.get("/antraege", requireAuth, forward("/cases"));
+// POST /api/me/antraege → /api/foerdermittel/cases  (auto-bridge handles profile)
+me.post("/antraege", requireAuth, forward("/cases"));
 
 // GET /api/me/favoriten →  /api/foerdermittel/favorites
 me.get("/favoriten", requireAuth, forward("/favorites"));
