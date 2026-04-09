@@ -7,6 +7,7 @@ import { Hono } from "hono";
 import type { Bindings, Variables } from "../types";
 import { requireAuth } from "../middleware/auth";
 import { foerdermittel } from "./foerdermittel";
+import { unternehmen as unternehmenRoutes } from "./unternehmen";
 
 const me = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -30,6 +31,19 @@ me.get("/favoriten", requireAuth, forward("/favorites"));
 
 // GET /api/me/notifications → /api/foerdermittel/notifications
 me.get("/notifications", requireAuth, forward("/notifications"));
+
+// /api/me/unternehmen → /api/unternehmen/profil  (sub-app dispatch)
+function forwardToUnternehmen(targetPath: string) {
+  return async (c: import("hono").Context<{ Bindings: Bindings; Variables: Variables }>) => {
+    const url = new URL(c.req.url);
+    url.pathname = targetPath;
+    const proxied = new Request(url.toString(), c.req.raw);
+    return unternehmenRoutes.fetch(proxied, c.env, c.executionCtx);
+  };
+}
+me.get("/unternehmen", requireAuth, forwardToUnternehmen("/profil"));
+me.put("/unternehmen", requireAuth, forwardToUnternehmen("/profil"));
+me.post("/unternehmen", requireAuth, forwardToUnternehmen("/profil"));
 
 // TODO: GET /api/me/dashboard — kein Backend-Endpoint vorhanden.
 // Frontend ruft `/api/me/dashboard` (lib/api/fund24.ts: getDashboard).

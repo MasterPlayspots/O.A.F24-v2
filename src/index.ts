@@ -25,6 +25,7 @@ import { beratungen } from "./routes/beratungen";
 import { vorlagen } from "./routes/vorlagen";
 import { me } from "./routes/me";
 import { berater } from "./routes/berater";
+import { unternehmen as unternehmenRoutes } from "./routes/unternehmen";
 import { performBackup, cleanupOldBackups } from "./services/backup";
 import { cleanupAuditLogs } from "./services/audit";
 import { cleanupExpiredData } from "./services/retention";
@@ -105,6 +106,7 @@ app.route("/api/beratungen", beratungen);
 app.route("/api/vorlagen", vorlagen);
 app.route("/api/me", me);
 app.route("/api/berater", berater);
+app.route("/api/unternehmen", unternehmenRoutes);
 
 // ============================================
 // 404 Handler
