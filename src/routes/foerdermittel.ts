@@ -502,35 +502,55 @@ foerdermittel.post("/cases", requireAuth, async (c) => {
   }
   const body = { ...rawBody, programm_id: coercedProgrammId };
 
-  // Get profile — auto-bridge from bafa_antraege.unternehmen if missing.
-  // Sprint 13/14: unternehmen onboarding writes to `unternehmen`, but this
-  // legacy handler reads `foerdermittel_profile`. Mirror once on demand.
-  let profile = await bafaDb
-    .prepare("SELECT * FROM foerdermittel_profile WHERE user_id = ? LIMIT 1")
+  // Sprint 19: always read fresh from bafa_antraege.unternehmen and
+  // upsert foerdermittel_profile so subsequent updates to the company
+  // profile sync through to the funnel generator. Replaces the
+  // Sprint-14 one-shot mirror that froze data on first antrag.
+  const u = await bafaDb
+    .prepare("SELECT * FROM unternehmen WHERE user_id = ? AND deleted_at IS NULL LIMIT 1")
     .bind(user.id)
-    .first<FoerdermittelProfileRow>();
-  if (!profile) {
-    const u = await bafaDb
-      .prepare("SELECT * FROM unternehmen WHERE user_id = ? AND deleted_at IS NULL LIMIT 1")
-      .bind(user.id)
-      .first<{
-        firmenname: string;
-        branche: string | null;
-        ort: string | null;
-        bundesland: string | null;
-        rechtsform: string | null;
-        mitarbeiter_anzahl: number | null;
-        jahresumsatz: number | null;
-        gruendungsjahr: number | null;
-      }>();
-    if (!u) {
-      return c.json(
-        { success: false, error: "Bitte zuerst Unternehmensprofil unter /onboarding/unternehmen anlegen" },
-        400
-      );
-    }
-    const newProfileId = crypto.randomUUID();
-    const standort = [u.ort, u.bundesland].filter(Boolean).join(", ") || null;
+    .first<{
+      firmenname: string;
+      branche: string | null;
+      ort: string | null;
+      bundesland: string | null;
+      rechtsform: string | null;
+      mitarbeiter_anzahl: number | null;
+      jahresumsatz: number | null;
+      gruendungsjahr: number | null;
+    }>();
+  if (!u) {
+    return c.json(
+      { success: false, error: "Bitte zuerst Unternehmensprofil unter /onboarding/unternehmen anlegen" },
+      400
+    );
+  }
+  const standort = [u.ort, u.bundesland].filter(Boolean).join(", ") || null;
+  const existing = await bafaDb
+    .prepare("SELECT id FROM foerdermittel_profile WHERE user_id = ? LIMIT 1")
+    .bind(user.id)
+    .first<{ id: string }>();
+  if (existing) {
+    await bafaDb
+      .prepare(
+        `UPDATE foerdermittel_profile SET
+            company_name = ?, branche = ?, standort = ?, rechtsform = ?,
+            mitarbeiter_anzahl = ?, jahresumsatz = ?, gruendungsjahr = ?,
+            updated_at = datetime('now')
+          WHERE id = ?`
+      )
+      .bind(
+        u.firmenname,
+        u.branche,
+        standort,
+        u.rechtsform,
+        u.mitarbeiter_anzahl,
+        u.jahresumsatz,
+        u.gruendungsjahr,
+        existing.id
+      )
+      .run();
+  } else {
     await bafaDb
       .prepare(
         `INSERT INTO foerdermittel_profile
@@ -539,7 +559,7 @@ foerdermittel.post("/cases", requireAuth, async (c) => {
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
-        newProfileId,
+        crypto.randomUUID(),
         user.id,
         u.firmenname,
         u.branche,
@@ -550,12 +570,12 @@ foerdermittel.post("/cases", requireAuth, async (c) => {
         u.gruendungsjahr
       )
       .run();
-    profile = await bafaDb
-      .prepare("SELECT * FROM foerdermittel_profile WHERE id = ?")
-      .bind(newProfileId)
-      .first<FoerdermittelProfileRow>();
-    if (!profile) return c.json({ success: false, error: "Profil-Mirror fehlgeschlagen" }, 500);
   }
+  const profile = await bafaDb
+    .prepare("SELECT * FROM foerdermittel_profile WHERE user_id = ? LIMIT 1")
+    .bind(user.id)
+    .first<FoerdermittelProfileRow>();
+  if (!profile) return c.json({ success: false, error: "Profil-Sync fehlgeschlagen" }, 500);
 
   // Get program details for funnel generation
   const program = await foerderDb
