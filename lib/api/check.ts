@@ -59,8 +59,11 @@ export async function getMatching(sessionId: string, token: string): Promise<{ b
 // ── ANFRAGEN ─────────────────────────────────────────────────
 
 export async function getAnfragen(token: string, rolle?: 'unternehmen' | 'berater'): Promise<{ anfragen: Anfrage[] }> {
-  const qs = rolle ? `?rolle=${rolle}` : ''
-  return apiCall(API.CHECK, `/api/anfragen${qs}`, undefined, token)
+  // Sprint 16: route to bafa-creator-ai-worker.
+  // berater rolle  → GET /api/berater/anfragen   (inbox)
+  // unternehmen    → GET /api/me/anfragen        (outgoing, with berater join)
+  const path = rolle === 'berater' ? '/api/berater/anfragen' : '/api/me/anfragen'
+  return apiCall(API.FUND24, path, undefined, token)
 }
 
 interface AnfrageDaten {
@@ -90,10 +93,19 @@ export async function sendeAnfrage(daten: AnfrageDaten, token: string): Promise<
 }
 
 export async function updateAnfrage(id: string, status: AnfrageStatus, token: string): Promise<{ ok: boolean }> {
-  return apiCall(API.CHECK, `/api/anfragen/${id}`, {
-    method: 'PATCH',
-    body: JSON.stringify({ status }),
-  }, token)
+  // Sprint 16: PATCH /api/berater/anfragen/:id (berater accept/reject)
+  // Worker only allows status ∈ {angenommen, abgelehnt}; map other values
+  // to abgelehnt as a safe default to keep the legacy AnfrageStatus union
+  // ('angenommen' | 'abgelehnt' | 'pending' | …) compatible.
+  const mapped: 'angenommen' | 'abgelehnt' =
+    status === 'angenommen' ? 'angenommen' : 'abgelehnt'
+  const r = await apiCall<{ success: boolean }>(
+    API.FUND24,
+    `/api/berater/anfragen/${id}`,
+    { method: 'PATCH', body: JSON.stringify({ status: mapped }) },
+    token
+  )
+  return { ok: !!r.success }
 }
 
 // ── DASHBOARD ────────────────────────────────────────────────
