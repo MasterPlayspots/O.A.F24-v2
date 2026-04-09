@@ -157,6 +157,16 @@ export async function getBeratung(id: string): Promise<Beratung> {
   return apiCall<Beratung>(API.FUND24, `/api/beratungen/${id}`, undefined, token())
 }
 
+export async function listBeratungen(): Promise<Beratung[]> {
+  const r = await apiCall<{ success: boolean; beratungen: Beratung[] }>(
+    API.FUND24,
+    '/api/beratungen',
+    undefined,
+    token()
+  )
+  return r.beratungen ?? []
+}
+
 export async function updateBeratung(
   id: string,
   body: {
