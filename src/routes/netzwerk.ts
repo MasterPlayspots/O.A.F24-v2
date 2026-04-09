@@ -7,30 +7,116 @@ import * as NetzwerkRepo from "../repositories/netzwerk.repository";
 
 const netzwerk = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
+// JSON-Array helper (mirrors routes/berater.ts pattern)
+function parseJsonArray(raw: string | null): string[] {
+  try { return raw ? (JSON.parse(raw) as string[]) : []; } catch { return []; }
+}
+
 // ============================================
 // Public: List berater
 // ============================================
 
-// GET /berater — list consultants with optional filters
+// GET /berater — public listing from BAFA_DB.berater_profiles
 netzwerk.get("/berater", async (c) => {
-  const { spezialisierung, region, page, pageSize } = c.req.query();
-  const result = await NetzwerkRepo.listBerater(c.env.DB, {
-    spezialisierung: spezialisierung || undefined,
-    region: region || undefined,
-    page: page ? parseInt(page, 10) : 1,
-    pageSize: pageSize ? parseInt(pageSize, 10) : 20,
-  });
-  return c.json({ success: true, ...result });
+  const { branche, region, page, pageSize } = c.req.query();
+  const p = page ? parseInt(page, 10) : 1;
+  const ps = pageSize ? parseInt(pageSize, 10) : 20;
+  const offset = (p - 1) * ps;
+
+  const conditions: string[] = ["bp.verfuegbar = 1"];
+  const binds: (string | number)[] = [];
+
+  if (region) {
+    conditions.push("bp.region LIKE ?");
+    binds.push(`%${region}%`);
+  }
+  if (branche) {
+    conditions.push("bp.branchen LIKE ?");
+    binds.push(`%${branche}%`);
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+
+  const total =
+    (
+      await c.env.BAFA_DB.prepare(
+        `SELECT COUNT(*) as n FROM berater_profiles bp ${where}`
+      )
+        .bind(...binds)
+        .first<{ n: number }>()
+    )?.n ?? 0;
+
+  const rows = await c.env.BAFA_DB.prepare(
+    `SELECT bp.id, bp.display_name, bp.bio, bp.photo_url,
+            bp.branchen, bp.spezialisierungen, bp.region,
+            bp.verfuegbar, bp.rating_avg, bp.rating_count,
+            bp.profil_views, bp.created_at
+       FROM berater_profiles bp ${where}
+       ORDER BY bp.rating_avg DESC
+       LIMIT ? OFFSET ?`
+  )
+    .bind(...binds, ps, offset)
+    .all<Record<string, unknown>>();
+
+  const profiles = (rows.results ?? []).map((r) => ({
+    ...r,
+    verfuegbar: !!r.verfuegbar,
+    branchen: parseJsonArray(r.branchen as string | null),
+    spezialisierungen: parseJsonArray(r.spezialisierungen as string | null),
+  }));
+
+  return c.json({ success: true, profiles, total, page: p, pageSize: ps });
 });
 
-// GET /berater/:id — consultant profile by profile ID
+// GET /berater/:id — public detail with expertise + dienstleistungen
 netzwerk.get("/berater/:id", async (c) => {
   const id = c.req.param("id");
-  const profile = await NetzwerkRepo.getBeraterProfileById(c.env.DB, id);
-  if (!profile) {
-    return c.json({ success: false, error: "Berater nicht gefunden" }, 404);
-  }
-  return c.json({ success: true, profile });
+  const profil = await c.env.BAFA_DB
+    .prepare("SELECT * FROM berater_profiles WHERE id = ?")
+    .bind(id)
+    .first<Record<string, unknown>>();
+
+  if (!profil) return c.json({ success: false, error: "Berater nicht gefunden" }, 404);
+
+  const expertise =
+    (
+      await c.env.BAFA_DB.prepare(
+        "SELECT * FROM berater_foerder_expertise WHERE berater_id = ? ORDER BY created_at DESC"
+      )
+        .bind(id)
+        .all<Record<string, unknown>>()
+    ).results ?? [];
+
+  const dienstleistungen =
+    (
+      await c.env.BAFA_DB.prepare(
+        "SELECT * FROM berater_dienstleistungen WHERE berater_id = ? AND aktiv = 1 ORDER BY created_at DESC"
+      )
+        .bind(id)
+        .all<Record<string, unknown>>()
+    ).results ?? [];
+
+  return c.json({
+    success: true,
+    profile: {
+      ...profil,
+      verfuegbar: !!profil.verfuegbar,
+      branchen: parseJsonArray(profil.branchen as string | null),
+      spezialisierungen: parseJsonArray(profil.spezialisierungen as string | null),
+      expertise: expertise.map((e) => ({
+        ...e,
+        bundeslaender: parseJsonArray(e.bundeslaender as string | null),
+      })),
+      dienstleistungen: dienstleistungen.map((d) => ({
+        ...d,
+        aktiv: !!d.aktiv,
+        bafa_required: !!d.bafa_required,
+        foerderbereiche: parseJsonArray(d.foerderbereiche as string | null),
+        foerderarten: parseJsonArray(d.foerderarten as string | null),
+        inklusiv_leistungen: parseJsonArray(d.inklusiv_leistungen as string | null),
+      })),
+    },
+  });
 });
 
 // ============================================
