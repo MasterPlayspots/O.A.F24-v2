@@ -36,6 +36,17 @@ const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 // ============================================
 // Global Middleware
 // ============================================
+// Sprint 18: normalize trailing slashes (Hono routes don't auto-match
+// /api/foo/ when only /api/foo is registered). 301 to the canonical URL.
+app.use("*", async (c, next) => {
+  const url = new URL(c.req.url);
+  if (url.pathname !== "/" && url.pathname.endsWith("/")) {
+    url.pathname = url.pathname.slice(0, -1);
+    return c.redirect(url.toString(), 301);
+  }
+  return next();
+});
+
 app.use("/*", securityHeaders);
 app.use("/*", corsMiddleware);
 app.use("/api/*", strictCorsCheck);

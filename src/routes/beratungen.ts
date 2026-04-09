@@ -15,15 +15,42 @@ interface BeratungRow {
   bafa_antrag_nr: string | null;
   foerderhoehe: number | null;
   eigenanteil: number | null;
-  protokoll: string | null;
-  branche: string | null;
+  // Sprint 18: real DB column is `ausgangslage`; we map it to the
+  // semantic `protokoll` field that the frontend uses.
+  ausgangslage: string | null;
   unternehmen_name: string | null;
   created_at: string;
   updated_at: string;
 }
 
-type BeratungPhase = "anlauf" | "beratung" | "nachbereitung" | "abgeschlossen";
-const ALLOWED_PHASES: BeratungPhase[] = ["anlauf", "beratung", "nachbereitung", "abgeschlossen"];
+function shapeBeratung(r: BeratungRow & { ausgangslage: string | null }) {
+  const { ausgangslage, ...rest } = r;
+  return { ...rest, protokoll: ausgangslage, branche: null as string | null };
+}
+
+// Sprint 18: aligned with bafa_beratungen.phase CHECK constraint.
+// Sprint 9 originally allowed (anlauf|beratung|nachbereitung|abgeschlossen)
+// — only 2 of those exist in the DB constraint, so 'beratung'+'nachbereitung'
+// would fire SQLITE_CONSTRAINT_CHECK on every editor interaction.
+type BeratungPhase =
+  | "anlauf"
+  | "datenerhebung"
+  | "durchfuehrung"
+  | "bericht"
+  | "eingereicht"
+  | "bewilligt"
+  | "abgeschlossen"
+  | "abgelehnt";
+const ALLOWED_PHASES: BeratungPhase[] = [
+  "anlauf",
+  "datenerhebung",
+  "durchfuehrung",
+  "bericht",
+  "eingereicht",
+  "bewilligt",
+  "abgeschlossen",
+  "abgelehnt",
+];
 
 // GET / — berater lists own beratungen with unternehmen-name join
 beratungen.get("/", requireAuth, requireRole("berater"), async (c) => {
@@ -38,8 +65,11 @@ beratungen.get("/", requireAuth, requireRole("berater"), async (c) => {
         ORDER BY b.created_at DESC`
     )
     .bind(user.id)
-    .all<Record<string, unknown>>();
-  return c.json({ success: true, beratungen: result.results ?? [] });
+    .all<BeratungRow>();
+  return c.json({
+    success: true,
+    beratungen: (result.results ?? []).map(shapeBeratung),
+  });
 });
 
 // GET /:id — Beratung-Detail (nur eigene)
@@ -47,11 +77,14 @@ beratungen.get("/:id", requireAuth, requireRole("berater"), async (c) => {
   const id = c.req.param("id");
   const user = c.get("user");
 
+  // Sprint 18: berater_id = berater_profiles.id, not user.id.
+  // Also use u.user_id (not owner_user_id) per Sprint 17 join convention.
   const row = await c.env.BAFA_DB.prepare(
     `SELECT b.*, u.firmenname AS unternehmen_name
        FROM bafa_beratungen b
-       LEFT JOIN unternehmen u ON u.owner_user_id = b.unternehmen_id
-      WHERE b.id = ? AND b.berater_id = ?`
+       LEFT JOIN unternehmen u ON u.user_id = b.unternehmen_id
+      WHERE b.id = ?
+        AND b.berater_id = (SELECT id FROM berater_profiles WHERE user_id = ?)`
   )
     .bind(id, user.id)
     .first<BeratungRow>();
@@ -60,7 +93,7 @@ beratungen.get("/:id", requireAuth, requireRole("berater"), async (c) => {
     return c.json({ success: false, error: "Beratung nicht gefunden" }, 404);
   }
 
-  return c.json({ success: true, beratung: row });
+  return c.json({ success: true, beratung: shapeBeratung(row) });
 });
 
 // PATCH /:id — Update Beratung (nur eigene). Whitelisted fields only.
@@ -85,12 +118,10 @@ beratungen.patch("/:id", requireAuth, requireRole("berater"), async (c) => {
     sets.push("phase = ?");
     vals.push(body.phase);
   }
-  if (body.status !== undefined) {
-    sets.push("status = ?");
-    vals.push(body.status);
-  }
+  // Sprint 18: bafa_beratungen has no `status` or `protokoll` columns —
+  // they were Sprint 4 wishful thinking. Map to existing columns instead.
   if (body.protokoll !== undefined) {
-    sets.push("protokoll = ?");
+    sets.push("ausgangslage = ?");
     vals.push(body.protokoll);
   }
   if (body.foerderhoehe !== undefined) {
@@ -107,10 +138,14 @@ beratungen.patch("/:id", requireAuth, requireRole("berater"), async (c) => {
   }
 
   sets.push("updated_at = datetime('now')");
+  // Sprint 18: berater_id in bafa_beratungen is the berater_profiles.id,
+  // not user.id. Use a subquery to scope by ownership.
   vals.push(id, user.id);
 
   const result = await c.env.BAFA_DB.prepare(
-    `UPDATE bafa_beratungen SET ${sets.join(", ")} WHERE id = ? AND berater_id = ?`
+    `UPDATE bafa_beratungen SET ${sets.join(", ")}
+       WHERE id = ?
+         AND berater_id = (SELECT id FROM berater_profiles WHERE user_id = ?)`
   )
     .bind(...vals)
     .run();
