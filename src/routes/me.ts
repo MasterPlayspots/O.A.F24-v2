@@ -47,6 +47,22 @@ me.get("/unternehmen", requireAuth, forwardToUnternehmen("/profil"));
 me.put("/unternehmen", requireAuth, forwardToUnternehmen("/profil"));
 me.post("/unternehmen", requireAuth, forwardToUnternehmen("/profil"));
 
+// GET /api/me/beratungen — unternehmen sees own beratungen with berater meta
+me.get("/beratungen", requireAuth, async (c) => {
+  const user = c.get("user");
+  const result = await c.env.BAFA_DB
+    .prepare(
+      `SELECT b.*, bp.display_name AS berater_name, bp.region AS berater_region
+         FROM bafa_beratungen b
+         LEFT JOIN berater_profiles bp ON bp.id = b.berater_id
+        WHERE b.user_id = ? AND b.deleted_at IS NULL
+        ORDER BY b.created_at DESC`
+    )
+    .bind(user.id)
+    .all<Record<string, unknown>>();
+  return c.json({ success: true, beratungen: result.results ?? [] });
+});
+
 // GET /api/me/anfragen — outgoing anfragen (von_user_id = self),
 // joined with berater profile metadata for display.
 me.get("/anfragen", requireAuth, async (c) => {

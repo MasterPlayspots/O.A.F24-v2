@@ -404,20 +404,58 @@ berater.patch("/anfragen/:id", requireAuth, requireRole("berater"), async (c) =>
   if (!parsed.success)
     return c.json({ success: false, error: "Validierungsfehler" }, 400);
 
-  await c.env.BAFA_DB.prepare(
-    `UPDATE netzwerk_anfragen SET status = ?, updated_at = datetime('now')
-       WHERE id = ? AND an_berater_id = ?`
-  )
-    .bind(parsed.data.status, anfrageId, beraterId)
+  // Idempotency guard: only transition from 'offen'. Prevents double-create
+  // of bafa_beratungen on repeat PATCH.
+  const anfrage = await c.env.BAFA_DB
+    .prepare(
+      `SELECT * FROM netzwerk_anfragen
+         WHERE id = ? AND an_berater_id = ? AND status = 'offen'`
+    )
+    .bind(anfrageId, beraterId)
+    .first<Record<string, unknown>>();
+  if (!anfrage) {
+    return c.json(
+      { success: false, error: "Anfrage nicht gefunden oder bereits bearbeitet" },
+      404
+    );
+  }
+
+  await c.env.BAFA_DB
+    .prepare(
+      "UPDATE netzwerk_anfragen SET status = ?, updated_at = datetime('now') WHERE id = ?"
+    )
+    .bind(parsed.data.status, anfrageId)
     .run();
 
-  const updated = await c.env.BAFA_DB.prepare(
-    "SELECT * FROM netzwerk_anfragen WHERE id = ?"
-  )
+  let beratung: Record<string, unknown> | null = null;
+
+  if (parsed.data.status === "angenommen") {
+    // Sprint 17: auto-create bafa_beratungen row.
+    // unternehmen_id mirrors von_user_id (per existing JOIN convention
+    // in beratungen.ts: u.owner_user_id = b.unternehmen_id). user_id is
+    // the company-side user that filed the anfrage.
+    beratung = await c.env.BAFA_DB
+      .prepare(
+        `INSERT INTO bafa_beratungen
+            (berater_id, unternehmen_id, user_id, beratungsanlass, phase)
+          VALUES (?, ?, ?, ?, 'anlauf')
+          RETURNING *`
+      )
+      .bind(
+        beraterId,
+        anfrage.von_user_id as string,
+        anfrage.von_user_id as string,
+        anfrage.typ as string
+      )
+      .first<Record<string, unknown>>();
+  }
+
+  const updated = await c.env.BAFA_DB
+    .prepare("SELECT * FROM netzwerk_anfragen WHERE id = ?")
     .bind(anfrageId)
     .first<Record<string, unknown>>();
 
-  return c.json({ success: !!updated, anfrage: updated ?? null });
+  return c.json({ success: true, anfrage: updated, beratung });
 });
 
 // POST /api/berater/:id/anfrage — any auth role can send

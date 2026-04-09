@@ -25,6 +25,23 @@ interface BeratungRow {
 type BeratungPhase = "anlauf" | "beratung" | "nachbereitung" | "abgeschlossen";
 const ALLOWED_PHASES: BeratungPhase[] = ["anlauf", "beratung", "nachbereitung", "abgeschlossen"];
 
+// GET / — berater lists own beratungen with unternehmen-name join
+beratungen.get("/", requireAuth, requireRole("berater"), async (c) => {
+  const user = c.get("user");
+  const result = await c.env.BAFA_DB
+    .prepare(
+      `SELECT b.*, u.firmenname AS unternehmen_name
+         FROM bafa_beratungen b
+         LEFT JOIN unternehmen u ON u.user_id = b.unternehmen_id
+        WHERE b.berater_id = (SELECT id FROM berater_profiles WHERE user_id = ?)
+          AND b.deleted_at IS NULL
+        ORDER BY b.created_at DESC`
+    )
+    .bind(user.id)
+    .all<Record<string, unknown>>();
+  return c.json({ success: true, beratungen: result.results ?? [] });
+});
+
 // GET /:id — Beratung-Detail (nur eigene)
 beratungen.get("/:id", requireAuth, requireRole("berater"), async (c) => {
   const id = c.req.param("id");
