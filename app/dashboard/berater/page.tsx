@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/lib/store/authStore';
 import { useVerifiedGuard } from '@/lib/hooks/useVerifiedGuard';
 import { useMount } from '@/lib/hooks/useMount';
@@ -285,16 +286,16 @@ export default function BeraterDashboardPage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
           <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
-            <a href="/dashboard/berater/anfragen">Alle Anfragen</a>
+            <Link href="/dashboard/berater/anfragen">Alle Anfragen</Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
-            <a href="/dashboard/berater/beratungen">Meine Beratungen</a>
+            <Link href="/dashboard/berater/beratungen">Meine Beratungen</Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
-            <a href="/dashboard/berater/nachrichten">Nachrichten</a>
+            <Link href="/dashboard/berater/nachrichten">Nachrichten</Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
-            <a href="/dashboard/berater/abwicklung">Provisionen</a>
+            <Link href="/dashboard/berater/abwicklung">Provisionen</Link>
           </Button>
         </div>
       </div>
