@@ -155,13 +155,13 @@ export async function getBeraterListe(
   if (filter?.verfuegbar !== undefined) params.set('verfuegbar', String(filter.verfuegbar))
   if (filter?.bundesland) params.set('bundesland', filter.bundesland)
   const qs = params.toString()
-  return apiCall(API.CHECK, `/api/netzwerk/berater${qs ? `?${qs}` : ''}`)
+  return apiCall(API.FUND24, `/api/netzwerk/berater${qs ? `?${qs}` : ''}`)
 }
 
 export async function getBeraterProfil(
   id: string
 ): Promise<BeraterProfil & { expertise: BeraterExpertise[]; dienstleistungen: Dienstleistung[] }> {
-  return apiCall(API.CHECK, `/api/netzwerk/berater/${id}`)
+  return apiCall(API.FUND24, `/api/netzwerk/berater/${id}`)
 }
 
 // ── BERATER PROFIL/EXPERTISE/DIENSTLEISTUNGEN ────────────────
