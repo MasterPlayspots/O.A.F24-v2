@@ -283,9 +283,12 @@ export default function BeraterDashboardPage() {
           </Card>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
           <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
             <a href="/dashboard/berater/anfragen">Alle Anfragen</a>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
+            <a href="/dashboard/berater/beratungen">Meine Beratungen</a>
           </Button>
           <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
             <a href="/dashboard/berater/nachrichten">Nachrichten</a>
