@@ -69,7 +69,7 @@ enabled = true
 # Cron Triggers
 # Daily backup at 02:00 UTC + Weekly learning cycle Monday 03:00 UTC
 [triggers]
-crons = ["0 2 * * *", "0 3 * * 1"]
+crons = ["0 2 * * *", "30 2 * * *", "0 3 * * 1"]
 
 # Worker Routes (Zone fund24.io = 809ef77b10e4c17bf959cfe7aadf9e28)
 # Mirrors the route created via Cloudflare API on 2026-04-08 so the

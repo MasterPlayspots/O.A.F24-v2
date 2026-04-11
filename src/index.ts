@@ -26,6 +26,9 @@ import { vorlagen } from "./routes/vorlagen";
 import { me } from "./routes/me";
 import { berater } from "./routes/berater";
 import { unternehmen as unternehmenRoutes } from "./routes/unternehmen";
+import { oa } from "./routes/oa";
+import { runCP } from "./services/oa-cp";
+import { runVA } from "./services/oa-va";
 import { performBackup, cleanupOldBackups } from "./services/backup";
 import { cleanupAuditLogs } from "./services/audit";
 import { cleanupExpiredData } from "./services/retention";
@@ -118,6 +121,7 @@ app.route("/api/vorlagen", vorlagen);
 app.route("/api/me", me);
 app.route("/api/berater", berater);
 app.route("/api/unternehmen", unternehmenRoutes);
+app.route("/api/oa", oa);
 
 // ============================================
 // 404 Handler
@@ -149,6 +153,38 @@ export default {
   async scheduled(event: ScheduledEvent, env: Bindings, ctx: ExecutionContext) {
     ctx.waitUntil(
       (async () => {
+        const trigger = new Date(event.scheduledTime);
+        const triggerHour = trigger.getUTCHours();
+        const triggerMinute = trigger.getUTCMinutes();
+
+        // OA-CP + OA-VA: daily at 02:30 UTC
+        if (triggerHour === 2 && triggerMinute === 30) {
+          try {
+            log("info", "oa_cp_start", { scheduledTime: trigger.toISOString() });
+            const cpReport = await runCP(env);
+            log("info", "oa_cp_complete", {
+              endpoints_ok: cpReport.summary.endpoints_ok,
+              endpoints_failed: cpReport.summary.endpoints_failed,
+              db_total_rows: cpReport.summary.db_total_rows,
+            });
+
+            // OA-VA runs immediately after CP
+            log("info", "oa_va_start", {});
+            const vaReport = await runVA(env);
+            log("info", "oa_va_complete", {
+              verdict: vaReport.verdict,
+              issues: vaReport.issues.length,
+              uptime_pct: vaReport.uptime_pct,
+              growth_direction: vaReport.growth_trend.direction,
+            });
+          } catch (err) {
+            log("error", "oa_agents_failed", {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+          return; // OA agents only, don't run backup in this trigger
+        }
+
         try {
           // Daily backup at 02:00 UTC
           await performBackup(
@@ -167,7 +203,6 @@ export default {
           await cleanupExpiredData(env.DB, env.BAFA_DB);
 
           // Weekly learning cycle (cron: 0 3 * * 1 - Monday 03:00 UTC)
-          const trigger = new Date(event.scheduledTime);
           if (trigger.getUTCDay() === 1 && trigger.getUTCHours() === 3) {
             log("info", "weekly_learning_cycle_start", {
               scheduledTime: trigger.toISOString(),
