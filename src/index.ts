@@ -62,7 +62,43 @@ app.use("/api/*", globalRateLimit);
 app.get("/", (c) =>
   c.json({ status: "ok", service: "zfbf-api", version: c.env.API_VERSION || "v1" })
 );
+
+// /health — only reachable if Worker route covers root (currently doesn't for api.fund24.io)
 app.get("/health", async (c) => {
+  const checks: Record<string, boolean> = {};
+  try {
+    await c.env.DB.prepare("SELECT 1").first();
+    checks.database = true;
+  } catch {
+    checks.database = false;
+  }
+  try {
+    await c.env.BAFA_DB.prepare("SELECT 1").first();
+    checks.bafa_db = true;
+  } catch {
+    checks.bafa_db = false;
+  }
+  try {
+    await c.env.CACHE.get("health-check");
+    checks.kv = true;
+  } catch {
+    checks.kv = false;
+  }
+  try {
+    await c.env.REPORTS.head("health-check");
+    checks.r2 = true;
+  } catch {
+    checks.r2 = false;
+  }
+  const allHealthy = Object.values(checks).every(Boolean);
+  return c.json(
+    { status: allHealthy ? "healthy" : "degraded", checks, timestamp: new Date().toISOString() },
+    allHealthy ? 200 : 503
+  );
+});
+
+// /api/health — reachable via Worker route (api.fund24.io/api/*)
+app.get("/api/health", async (c) => {
   const checks: Record<string, boolean> = {};
   try {
     await c.env.DB.prepare("SELECT 1").first();

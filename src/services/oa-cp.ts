@@ -38,6 +38,7 @@ const FRONTEND_CHECKS = [
 ];
 
 const API_CHECKS: Array<{ url: string; expected: number }> = [
+  { url: "https://api.fund24.io/api/health", expected: 200 },
   { url: "https://api.fund24.io/api/foerdermittel/katalog?limit=1", expected: 200 },
   { url: "https://api.fund24.io/api/netzwerk/berater?pageSize=1", expected: 200 },
 ];
