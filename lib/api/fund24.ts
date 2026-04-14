@@ -291,9 +291,37 @@ export async function retryEmail(id: string) {
   )
 }
 
-// TODO: GET /api/antraege/:id/dokumente muss noch im Worker ergänzt werden
 export async function listAntragDokumente(antragId: string): Promise<AntragDokumentDTO[]> {
-  return apiCall<AntragDokumentDTO[]>(API.FUND24, `/api/antraege/${antragId}/dokumente`, undefined, token())
+  const r = await apiCall<{ data?: AntragDokumentDTO[] } | AntragDokumentDTO[]>(
+    API.FUND24, `/api/antraege/${antragId}/dokumente`, undefined, token()
+  )
+  return Array.isArray(r) ? r : (r.data ?? [])
+}
+
+export async function uploadAntragDokument(
+  antragId: string,
+  file: File,
+  dokumentTyp?: string
+): Promise<AntragDokumentDTO> {
+  const fd = new FormData()
+  fd.append('file', file)
+  if (dokumentTyp) fd.append('dokument_typ', dokumentTyp)
+  const r = await apiCall<{ data: AntragDokumentDTO }>(
+    API.FUND24,
+    `/api/antraege/${antragId}/dokumente`,
+    { method: 'POST', body: fd },
+    token()
+  )
+  return r.data
+}
+
+export async function deleteAntragDokument(antragId: string, dokId: string) {
+  return apiCall(
+    API.FUND24,
+    `/api/antraege/${antragId}/dokumente/${dokId}`,
+    { method: 'DELETE' },
+    token()
+  )
 }
 
 // ---------- Antrag-Zugriff (Berater einladen / entziehen) ----------
@@ -309,7 +337,10 @@ export interface AntragZugriff {
   last_name?: string
 }
 export async function listAntragZugriff(antragId: string): Promise<AntragZugriff[]> {
-  return apiCall<AntragZugriff[]>(API.FUND24, `/api/antraege/${antragId}/zugriff`, undefined, token())
+  const r = await apiCall<{ data?: AntragZugriff[] } | AntragZugriff[]>(
+    API.FUND24, `/api/antraege/${antragId}/zugriff`, undefined, token()
+  )
+  return Array.isArray(r) ? r : (r.data ?? [])
 }
 export async function grantAntragZugriff(antragId: string, body: { user_id?: string; berater_id?: string; rolle: 'editor' | 'viewer' | 'reviewer' }) {
   return apiCall<{ id: string }>(

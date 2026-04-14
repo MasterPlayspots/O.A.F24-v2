@@ -9,6 +9,8 @@ import { useAuth } from '@/lib/store/authStore';
 import {
   getAntrag,
   listAntragDokumente,
+  uploadAntragDokument,
+  deleteAntragDokument,
   listAntragZugriff,
   grantAntragZugriff,
   revokeAntragZugriff,
@@ -49,6 +51,25 @@ export default function AntragDetailPage() {
   useEffect(() => {
     if (!token) { router.replace('/login'); }
   }, [token, router]);
+
+  const reloadDokumente = useCallback(async () => {
+    try {
+      const list = await listAntragDokumente(id);
+      setDokumente((list ?? []) as AntragDokument[]);
+    } catch (e) {
+      setFehler(e instanceof Error ? e.message : 'Dokumente konnten nicht geladen werden.');
+    }
+  }, [id]);
+
+  const handleUpload = useCallback(async (file: File) => {
+    await uploadAntragDokument(id, file);
+    await reloadDokumente();
+  }, [id, reloadDokumente]);
+
+  const handleDeleteDokument = useCallback(async (dokId: string) => {
+    await deleteAntragDokument(id, dokId);
+    await reloadDokumente();
+  }, [id, reloadDokumente]);
 
   const reloadACL = useCallback(async () => {
     try {
@@ -155,7 +176,11 @@ export default function AntragDetailPage() {
               <h2 className="font-display text-2xl font-bold text-white mb-4 tracking-tight">
                 Dokumente
               </h2>
-              <DokumenteListe dokumente={dokumente} />
+              <DokumenteListe
+                dokumente={dokumente}
+                onUpload={handleUpload}
+                onDelete={handleDeleteDokument}
+              />
             </section>
 
             {/* ACL */}
