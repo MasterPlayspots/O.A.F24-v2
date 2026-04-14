@@ -65,6 +65,19 @@ export const strictCorsCheck: MiddlewareHandler<{
     await next();
     return;
   }
+  // Same-origin requests (Origin host === request Host) are always allowed.
+  // CF Workers inject an Origin header on self-zone fetches, which would
+  // otherwise 403 our own cron/monitoring jobs (OA-CP).
+  try {
+    const originHost = new URL(origin).host;
+    const reqHost = c.req.header("Host");
+    if (reqHost && originHost === reqHost) {
+      await next();
+      return;
+    }
+  } catch {
+    // fall through to allowlist check
+  }
   if (!isAllowedOrigin(origin, c.env.ENVIRONMENT)) {
     return c.json({ success: false, error: "Forbidden" }, 403);
   }
