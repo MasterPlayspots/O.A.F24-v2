@@ -2,6 +2,7 @@
 import { Hono } from "hono";
 import { Resend } from "resend";
 import type { Bindings, Variables } from "../../types";
+import { getClientOrigin } from "../../utils/origin";
 
 const magicLink = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -49,8 +50,7 @@ magicLink.post("/", async (c) => {
       .run();
 
     // Build verify URL — derive base from request origin, fall back to FRONTEND_URL
-    const origin = c.req.header("origin") || c.req.header("referer") || c.env.FRONTEND_URL;
-    const baseUrl = origin.replace(/\/$/, "");
+    const baseUrl = getClientOrigin(c).replace(/\/$/, "");
     const roleParam = role ? `&role=${encodeURIComponent(role)}` : "";
     const verifyUrl = `${baseUrl}/api/auth/magic-link/verify?token=${token}${roleParam}`;
 
@@ -154,8 +154,9 @@ magicLink.get("/verify", async (c) => {
       { expirationTtl: 604800 } // 7 days
     );
 
-    // Redirect to frontend callback
-    const callbackUrl = `${c.env.FRONTEND_URL}/api/auth/magic-link/callback?token=${sessionToken}`;
+    // Redirect to frontend callback — verify request may have no Origin
+    // (cross-site navigation from email). getClientOrigin falls back to env.
+    const callbackUrl = `${getClientOrigin(c)}/api/auth/magic-link/callback?token=${sessionToken}`;
     return c.redirect(callbackUrl, 302);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unbekannter Fehler";

@@ -13,7 +13,9 @@ compatibility_flags = ["nodejs_compat"]
 
 ENVIRONMENT = "production"
 API_VERSION = "v1"
-FRONTEND_URL = "https://zfbf.info"
+# Fallback only — getClientOrigin() prefers Origin/Referer headers at runtime
+# since the worker serves both zfbf.info and fund24.io.
+FRONTEND_URL = "https://fund24.io"
 
 # D1 Databases
 [[d1_databases]]

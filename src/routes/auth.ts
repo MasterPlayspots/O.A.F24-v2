@@ -16,6 +16,7 @@ import { requireAuth } from "../middleware/auth";
 import { sendPasswordResetEmail, sendVerificationCodeEmail } from "../services/email";
 import * as UserRepo from "../repositories/user.repository";
 import * as OrderRepo from "../repositories/order.repository";
+import { getClientOrigin } from "../utils/origin";
 
 const auth = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -501,7 +502,7 @@ auth.post("/forgot-password", forgotPasswordRateLimit, async (c) => {
 
   await c.env.RATE_LIMIT.put(rlKey, "1", { expirationTtl: 300 });
 
-  const frontendUrl = c.env.FRONTEND_URL || "https://zfbf.info";
+  const frontendUrl = getClientOrigin(c);
   if (c.env.RESEND_API_KEY) {
     await sendPasswordResetEmail(
       c.env.RESEND_API_KEY,

@@ -28,6 +28,8 @@ export const csrfProtection: MiddlewareHandler = async (c, next) => {
       "www.zfbf.info",
       "fund24.info",
       "www.fund24.info",
+      "fund24.io",
+      "www.fund24.io",
       "localhost",
     ];
     try {
