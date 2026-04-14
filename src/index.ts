@@ -6,8 +6,6 @@ import { securityHeaders, csrfProtection } from "./middleware/security";
 import { corsMiddleware, strictCorsCheck } from "./middleware/cors";
 import { globalRateLimit } from "./middleware/rateLimit";
 import { auth } from "./routes/auth";
-import { webauthn } from "./routes/auth/webauthn";
-import { magicLink } from "./routes/auth/magic-link";
 import { reports } from "./routes/reports";
 import { branchen } from "./routes/branchen";
 import { promo } from "./routes/promo";
@@ -17,7 +15,6 @@ import { verifyPayment } from "./routes/verify-payment";
 import { admin } from "./routes/admin";
 import { gdpr } from "./routes/gdpr";
 import { foerdermittel } from "./routes/foerdermittel";
-import { forum } from "./routes/forum";
 import { nachrichten } from "./routes/nachrichten";
 import { netzwerk } from "./routes/netzwerk";
 import { check } from "./routes/check";
@@ -136,8 +133,6 @@ app.get("/api/health", async (c) => {
 // Route Mounting
 // ============================================
 app.route("/api/auth", auth);
-app.route("/api/auth/webauthn", webauthn);
-app.route("/api/auth/magic-link", magicLink);
 app.route("/api/reports", reports);
 app.route("/api/bafa", reports); // Legacy alias for /api/reports
 app.route("/api/berichte", reports); // v2 frontend alias for /api/reports
@@ -149,7 +144,6 @@ app.route("/api", verifyPayment); // POST /api/verify-payment
 app.route("/api/admin", admin);
 app.route("/api/user", gdpr);
 app.route("/api/foerdermittel", foerdermittel);
-app.route("/api/forum", forum);
 app.route("/api/nachrichten", nachrichten);
 app.route("/api/netzwerk", netzwerk);
 app.route("/api/check", check);
