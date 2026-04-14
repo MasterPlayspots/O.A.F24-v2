@@ -80,11 +80,79 @@ me.get("/anfragen", requireAuth, async (c) => {
   return c.json({ success: true, anfragen: result.results ?? [] });
 });
 
-// TODO: GET /api/me/dashboard — kein Backend-Endpoint vorhanden.
-// Frontend ruft `/api/me/dashboard` (lib/api/fund24.ts: getDashboard).
-// Sobald ein Aggregations-Endpoint existiert, hier mappen.
-me.get("/dashboard", requireAuth, (c) =>
-  c.json({ success: false, error: "Dashboard-Endpoint noch nicht implementiert" }, 501)
-);
+// GET /api/me/dashboard — aggregated summary for the logged-in user.
+// Antrag status is derived the same way as /api/antraege/:id:
+//   status='rejected' | status='completed' & phase < submission → abgelehnt
+//   status='completed' & phase in (submission, follow_up)       → bewilligt
+//   phase in (submission, follow_up)                            → eingereicht
+//   else                                                        → entwurf
+me.get("/dashboard", requireAuth, async (c) => {
+  const user = c.get("user");
+
+  const casesQuery = c.env.BAFA_DB
+    .prepare(
+      `SELECT fc.phase, fc.status
+         FROM foerdermittel_cases fc
+         JOIN foerdermittel_profile fp ON fp.id = fc.profile_id
+        WHERE fp.user_id = ?`
+    )
+    .bind(user.id)
+    .all<{ phase: string; status: string }>();
+
+  const dokumenteQuery = c.env.BAFA_DB
+    .prepare(
+      `SELECT COUNT(*) AS n
+         FROM foerdermittel_dokumente fd
+         JOIN foerdermittel_cases fc ON fc.id = fd.case_id
+         JOIN foerdermittel_profile fp ON fp.id = fc.profile_id
+        WHERE fp.user_id = ?`
+    )
+    .bind(user.id)
+    .first<{ n: number }>();
+
+  const reportsQuery = c.env.DB
+    .prepare("SELECT COUNT(*) AS n FROM reports WHERE user_id = ?")
+    .bind(user.id)
+    .first<{ n: number }>();
+
+  const [cases, dokCount, repCount] = await Promise.all([
+    casesQuery,
+    dokumenteQuery,
+    reportsQuery,
+  ]);
+
+  let entwurf = 0;
+  let eingereicht = 0;
+  let bewilligt = 0;
+  let abgelehnt = 0;
+  for (const row of cases.results ?? []) {
+    const phase = row.phase;
+    const status = row.status;
+    const submitted = phase === "submission" || phase === "follow_up";
+    if (status === "rejected") {
+      abgelehnt++;
+    } else if (status === "completed") {
+      if (submitted) bewilligt++;
+      else abgelehnt++;
+    } else if (submitted) {
+      eingereicht++;
+    } else {
+      entwurf++;
+    }
+  }
+
+  return c.json({
+    success: true,
+    antraege: {
+      n: (cases.results ?? []).length,
+      entwurf,
+      eingereicht,
+      bewilligt,
+      abgelehnt,
+    },
+    reports: { n: Number(repCount?.n ?? 0) },
+    dokumente: { n: Number(dokCount?.n ?? 0) },
+  });
+});
 
 export { me };
