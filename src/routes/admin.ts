@@ -191,4 +191,100 @@ admin.get("/check-foerdermittel", async (c) => {
   });
 });
 
+// ============================================================
+// Email Outbox — list + retry (admin only)
+// Table: bafa_antraege.email_outbox (columns: id, to_addr, from_addr,
+// subject, status, last_error, sent_at, created_at, attempts, ...)
+// ============================================================
+
+interface EmailOutboxRow {
+  id: string;
+  to_addr: string;
+  from_addr: string;
+  subject: string;
+  status: string;
+  last_error: string | null;
+  sent_at: string | null;
+  created_at: string;
+  attempts: number;
+}
+
+const EMAIL_OUTBOX_STATUSES = new Set(["queued", "sending", "sent", "failed"]);
+
+admin.get("/email-outbox", async (c) => {
+  const status = c.req.query("status");
+  const limit = Math.min(Math.max(1, parseInt(c.req.query("limit") || "50") || 50), 200);
+  const offset = Math.max(0, parseInt(c.req.query("offset") || "0") || 0);
+
+  const conds: string[] = [];
+  const params: (string | number)[] = [];
+  if (status && EMAIL_OUTBOX_STATUSES.has(status)) {
+    conds.push("status = ?");
+    params.push(status);
+  }
+  const where = conds.length ? `WHERE ${conds.join(" AND ")}` : "";
+
+  const rows = await c.env.BAFA_DB
+    .prepare(
+      `SELECT id, to_addr, from_addr, subject, status, last_error, sent_at, created_at, attempts
+         FROM email_outbox
+         ${where}
+         ORDER BY created_at DESC
+         LIMIT ? OFFSET ?`
+    )
+    .bind(...params, limit, offset)
+    .all<EmailOutboxRow>();
+
+  const results = (rows.results ?? []).map((r) => ({
+    id: r.id,
+    to_email: r.to_addr,
+    to: r.to_addr,
+    from_email: r.from_addr,
+    subject: r.subject,
+    status: r.status,
+    error: r.last_error,
+    sent_at: r.sent_at,
+    created_at: r.created_at,
+    attempts: r.attempts,
+  }));
+
+  return c.json({ success: true, results, limit, offset });
+});
+
+admin.post("/email-outbox/:id/retry", async (c) => {
+  const id = c.req.param("id");
+  const row = await c.env.BAFA_DB
+    .prepare("SELECT id, status FROM email_outbox WHERE id = ?")
+    .bind(id)
+    .first<{ id: string; status: string }>();
+  if (!row) return c.json({ success: false, error: "Email nicht gefunden" }, 404);
+  if (row.status !== "failed") {
+    return c.json(
+      { success: false, error: "Nur fehlgeschlagene Emails koennen erneut versendet werden" },
+      400
+    );
+  }
+
+  await c.env.BAFA_DB
+    .prepare(
+      `UPDATE email_outbox
+          SET status = 'queued',
+              last_error = NULL,
+              scheduled_at = datetime('now')
+        WHERE id = ?`
+    )
+    .bind(id)
+    .run();
+
+  const user = c.get("user");
+  await writeAuditLog(c.env.DB, {
+    userId: user.id,
+    eventType: "email_outbox_retry",
+    detail: id,
+    ip: c.req.header("CF-Connecting-IP"),
+  });
+
+  return c.json({ success: true, ok: true });
+});
+
 export { admin };
