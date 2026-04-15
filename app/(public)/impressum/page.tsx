@@ -59,7 +59,7 @@ export default function ImpressumPage() {
                 <p>
                   <strong>Handelsregister:</strong> Amtsgericht Coburg<br />
                   <strong>Registernummer:</strong> HRB-Nr. wird nachgereicht<br />
-                  <strong>USt-ID:</strong> beantragt
+                  <strong>USt-ID:</strong> DE460878500
                 </p>
               </div>
             </div>
@@ -69,7 +69,7 @@ export default function ImpressumPage() {
               <h3 className="font-display text-lg font-semibold text-white mb-3">Umsatzsteuer-Identifikationsnummer</h3>
               <div className="bg-architect-surface-low/40 rounded-lg p-6 space-y-2 text-white/80">
                 <p>
-                  <strong>USt-IdNr.:</strong> beantragt<br />
+                  <strong>USt-IdNr.:</strong> DE460878500<br />
                   Gemäß § 27a Umsatzsteuergesetz (UStG)
                 </p>
               </div>
