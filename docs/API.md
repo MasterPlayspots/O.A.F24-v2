@@ -136,29 +136,29 @@ _Last generated: 2026-04-15_
 
 | Method | Path | Auth | Source |
 |---|---|---|---|
-| `GET` | `/cases` | requireAuth | [`foerdermittel.ts:830`](../worker/src/routes/foerdermittel.ts#L830) |
-| `POST` | `/cases` | requireAuth | [`foerdermittel.ts:486`](../worker/src/routes/foerdermittel.ts#L486) |
-| `GET` | `/cases/:caseId/dokumente` | requireAuth | [`foerdermittel.ts:1349`](../worker/src/routes/foerdermittel.ts#L1349) |
-| `POST` | `/cases/:caseId/dokumente` | requireAuth | [`foerdermittel.ts:1288`](../worker/src/routes/foerdermittel.ts#L1288) |
-| `PATCH` | `/cases/:caseId/steps/:stepId` | requireAuth | [`foerdermittel.ts:915`](../worker/src/routes/foerdermittel.ts#L915) |
-| `GET` | `/cases/:id` | requireAuth | [`foerdermittel.ts:876`](../worker/src/routes/foerdermittel.ts#L876) |
-| `POST` | `/cases/:id/chat` | requireAuth | [`foerdermittel.ts:999`](../worker/src/routes/foerdermittel.ts#L999) |
-| `POST` | `/chat` | requireAuth | [`foerdermittel.ts:1140`](../worker/src/routes/foerdermittel.ts#L1140) |
-| `GET` | `/chat/:id` | requireAuth | [`foerdermittel.ts:1257`](../worker/src/routes/foerdermittel.ts#L1257) |
-| `GET` | `/favorites` | requireAuth | [`foerdermittel.ts:1423`](../worker/src/routes/foerdermittel.ts#L1423) |
-| `POST` | `/favorites` | requireAuth | [`foerdermittel.ts:1432`](../worker/src/routes/foerdermittel.ts#L1432) |
-| `DELETE` | `/favorites/:programId` | requireAuth | [`foerdermittel.ts:1457`](../worker/src/routes/foerdermittel.ts#L1457) |
-| `GET` | `/favorites/:programId/check` | requireAuth | [`foerdermittel.ts:1475`](../worker/src/routes/foerdermittel.ts#L1475) |
-| `GET` | `/katalog` | - | [`foerdermittel.ts:36`](../worker/src/routes/foerdermittel.ts#L36) |
-| `GET` | `/katalog/:id` | - | [`foerdermittel.ts:165`](../worker/src/routes/foerdermittel.ts#L165) |
-| `GET` | `/katalog/filters` | - | [`foerdermittel.ts:124`](../worker/src/routes/foerdermittel.ts#L124) |
-| `POST` | `/match` | requireAuth | [`foerdermittel.ts:286`](../worker/src/routes/foerdermittel.ts#L286) |
-| `GET` | `/matches` | requireAuth | [`foerdermittel.ts:441`](../worker/src/routes/foerdermittel.ts#L441) |
-| `GET` | `/notifications` | requireAuth | [`foerdermittel.ts:1378`](../worker/src/routes/foerdermittel.ts#L1378) |
-| `PATCH` | `/notifications/:id/read` | requireAuth | [`foerdermittel.ts:1406`](../worker/src/routes/foerdermittel.ts#L1406) |
-| `GET` | `/profile` | requireAuth | [`foerdermittel.ts:195`](../worker/src/routes/foerdermittel.ts#L195) |
-| `POST` | `/profile` | requireAuth | [`foerdermittel.ts:211`](../worker/src/routes/foerdermittel.ts#L211) |
-| `GET` | `/program-documents/:programId` | requireAuth | [`foerdermittel.ts:1490`](../worker/src/routes/foerdermittel.ts#L1490) |
+| `GET` | `/cases` | requireAuth | [`cases.ts:365`](../worker/src/routes/foerdermittel/cases.ts#L365) |
+| `POST` | `/cases` | requireAuth | [`cases.ts:21`](../worker/src/routes/foerdermittel/cases.ts#L21) |
+| `GET` | `/cases/:caseId/dokumente` | requireAuth | [`cases.ts:591`](../worker/src/routes/foerdermittel/cases.ts#L591) |
+| `POST` | `/cases/:caseId/dokumente` | requireAuth | [`cases.ts:530`](../worker/src/routes/foerdermittel/cases.ts#L530) |
+| `PATCH` | `/cases/:caseId/steps/:stepId` | requireAuth | [`cases.ts:450`](../worker/src/routes/foerdermittel/cases.ts#L450) |
+| `GET` | `/cases/:id` | requireAuth | [`cases.ts:411`](../worker/src/routes/foerdermittel/cases.ts#L411) |
+| `POST` | `/cases/:id/chat` | requireAuth | [`chat.ts:20`](../worker/src/routes/foerdermittel/chat.ts#L20) |
+| `POST` | `/chat` | requireAuth | [`chat.ts:152`](../worker/src/routes/foerdermittel/chat.ts#L152) |
+| `GET` | `/chat/:id` | requireAuth | [`chat.ts:261`](../worker/src/routes/foerdermittel/chat.ts#L261) |
+| `GET` | `/favorites` | requireAuth | [`favoriten.ts:8`](../worker/src/routes/foerdermittel/favoriten.ts#L8) |
+| `POST` | `/favorites` | requireAuth | [`favoriten.ts:17`](../worker/src/routes/foerdermittel/favoriten.ts#L17) |
+| `DELETE` | `/favorites/:programId` | requireAuth | [`favoriten.ts:42`](../worker/src/routes/foerdermittel/favoriten.ts#L42) |
+| `GET` | `/favorites/:programId/check` | requireAuth | [`favoriten.ts:60`](../worker/src/routes/foerdermittel/favoriten.ts#L60) |
+| `GET` | `/katalog` | - | [`katalog.ts:19`](../worker/src/routes/foerdermittel/katalog.ts#L19) |
+| `GET` | `/katalog/:id` | - | [`katalog.ts:140`](../worker/src/routes/foerdermittel/katalog.ts#L140) |
+| `GET` | `/katalog/filters` | - | [`katalog.ts:103`](../worker/src/routes/foerdermittel/katalog.ts#L103) |
+| `POST` | `/match` | requireAuth | [`match.ts:110`](../worker/src/routes/foerdermittel/match.ts#L110) |
+| `GET` | `/matches` | requireAuth | [`match.ts:259`](../worker/src/routes/foerdermittel/match.ts#L259) |
+| `GET` | `/notifications` | requireAuth | [`notifications.ts:7`](../worker/src/routes/foerdermittel/notifications.ts#L7) |
+| `PATCH` | `/notifications/:id/read` | requireAuth | [`notifications.ts:35`](../worker/src/routes/foerdermittel/notifications.ts#L35) |
+| `GET` | `/profile` | requireAuth | [`match.ts:25`](../worker/src/routes/foerdermittel/match.ts#L25) |
+| `POST` | `/profile` | requireAuth | [`match.ts:41`](../worker/src/routes/foerdermittel/match.ts#L41) |
+| `GET` | `/program-documents/:programId` | requireAuth | [`notifications.ts:51`](../worker/src/routes/foerdermittel/notifications.ts#L51) |
 
 ## gdpr (3)
 
