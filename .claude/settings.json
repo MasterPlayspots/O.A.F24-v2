@@ -2,10 +2,29 @@
   "permissions": {
     "allow": [
       "Bash(curl -s -o /dev/null -w '__TRACKED_VAR__: %{http_code}\\\\n' https://__TRACKED_VAR__)",
-      "Bash(ls /Users/our.ark./Desktop/02_AUTOMATISIERUNG/O.A.F24/*.md)"
+      "Bash(ls /Users/our.ark./Desktop/02_AUTOMATISIERUNG/O.A.F24/*.md)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -X DELETE \"https://api.fund24.io/api/vorlagen/test\" -H \"Origin: https://fund24.io\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://api.fund24.io/api/admin/email-outbox\")",
+      "Bash(grep -n \"getAdmin\\\\|listAdmin\\\\|adminApi\" app/admin/**/*.tsx)",
+      "Bash(git commit:*)",
+      "Read(//Users/our.ark./Desktop/02_AUTOMATISIERUNG/**)",
+      "Bash(curl -s https://foerdermittel-check-api.froeba-kevin.workers.dev/)",
+      "Bash(curl -s -o /dev/null -w \"root: %{http_code}\\\\n\" https://foerdermittel-check-api.froeba-kevin.workers.dev/)",
+      "Bash(curl -s -o /dev/null -w \"health: %{http_code}\\\\n\" https://foerdermittel-check-api.froeba-kevin.workers.dev/health)",
+      "Bash(curl -s -o /dev/null -w \"/api/checks: %{http_code}\\\\n\" https://foerdermittel-check-api.froeba-kevin.workers.dev/api/checks)",
+      "Read(//Users/our.ark./Desktop/**)",
+      "Bash(head -25 echo \"---\" grep -l \"foerdermittel-check-api\\\\|foerdermittel_check\\\\|checkStarten\" ~/Desktop/02_AUTOMATISIERUNG/fund24/*.toml ~/Desktop/02_AUTOMATISIERUNG/fund24/**/wrangler.toml)",
+      "Bash(ls ~/Desktop/02_AUTOMATISIERUNG/fund24/apps/*/wrangler.toml)",
+      "Bash(curl -s \"https://foerdermittel-check-api.froeba-kevin.workers.dev/api/checks/nonexistent\" -o /tmp/resp.txt -w \"status: %{http_code}\\\\n\")",
+      "Read(//Users/our.ark./Developer/foerdermittel-check-api/**)",
+      "Bash(git stash:*)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' https://foerdermittel-check-api.froeba-kevin.workers.dev__TRACKED_VAR__)",
+      "Bash(curl -s -o /dev/null -w \"/api/bafa: %{http_code}\\\\n\" \"https://api.fund24.io/api/bafa\")",
+      "Bash(curl -s -o /dev/null -w \"/api/berichte: %{http_code}\\\\n\" \"https://api.fund24.io/api/berichte\")"
     ],
     "additionalDirectories": [
-      "/Users/our.ark./Desktop/02_AUTOMATISIERUNG/O.A.F24"
+      "/Users/our.ark./Desktop/02_AUTOMATISIERUNG/O.A.F24",
+      "/tmp"
     ]
   }
 }

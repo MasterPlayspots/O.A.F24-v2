@@ -134,7 +134,6 @@ app.get("/api/health", async (c) => {
 // ============================================
 app.route("/api/auth", auth);
 app.route("/api/reports", reports);
-app.route("/api/bafa", reports); // Legacy alias for /api/reports
 app.route("/api/berichte", reports); // v2 frontend alias for /api/reports
 app.route("/api/branchen", branchen);
 app.route("/api/promo", promo);
