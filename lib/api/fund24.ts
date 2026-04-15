@@ -400,6 +400,40 @@ export interface AuditLog {
   user_agent?: string | null
   created_at: string
 }
+// ---------- Admin: Users ----------
+import type { Nutzer } from '../types'
+
+export async function getAdminUsers(params?: { page?: number; limit?: number }) {
+  const qs = new URLSearchParams()
+  if (params?.page) qs.set('page', String(params.page))
+  if (params?.limit) qs.set('limit', String(params.limit))
+  const suffix = qs.toString() ? `?${qs.toString()}` : ''
+  return apiCall<{ success: boolean; users: Nutzer[]; total: number; page: number; limit: number }>(
+    API.FUND24, `/api/admin/users${suffix}`, undefined, token()
+  )
+}
+
+export async function updateAdminUser(
+  id: string,
+  daten: { role?: Nutzer['role']; first_name?: string; last_name?: string; company?: string }
+) {
+  // Worker 1 splits role changes onto /role subroute.
+  if (daten.role && Object.keys(daten).length === 1) {
+    return apiCall(API.FUND24, `/api/admin/users/${id}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role: daten.role }),
+    }, token())
+  }
+  return apiCall(API.FUND24, `/api/admin/users/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(daten),
+  }, token())
+}
+
+export async function deleteAdminUser(id: string) {
+  return apiCall(API.FUND24, `/api/admin/users/${id}`, { method: 'DELETE' }, token())
+}
+
 export async function listAuditLogs(filter?: { user_id?: string; action?: string; limit?: number; offset?: number }) {
   const params = new URLSearchParams()
   if (filter?.user_id) params.set('user_id', filter.user_id)

@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/store/authStore'
-import { getAdminUsers, updateAdminUser } from '@/lib/api/check'
+import { getAdminUsers, updateAdminUser, deleteAdminUser } from '@/lib/api/fund24'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -45,7 +45,7 @@ export default function AdminUsersPage() {
     const fetchUsers = async () => {
       try {
         if (!token) throw new Error('Kein Token')
-        const data = await getAdminUsers(token)
+        const data = await getAdminUsers()
         setUsers(data.users)
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Fehler beim Laden'
@@ -77,7 +77,7 @@ export default function AdminUsersPage() {
     }
     try {
       setUpdatingId(userId)
-      await updateAdminUser(userId, { role: newRole as Nutzer['role'] }, token)
+      await updateAdminUser(userId, { role: newRole as Nutzer['role'] })
       setUsers(users.map((u) => (u.id === userId ? { ...u, role: newRole as Nutzer['role'] } : u)))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Update')
@@ -92,7 +92,7 @@ export default function AdminUsersPage() {
     try {
       setUpdatingId(userId)
       if (!token) throw new Error('Kein Token')
-      await updateAdminUser(userId, { deleted_at: new Date().toISOString() }, token)
+      await deleteAdminUser(userId)
       setUsers(users.filter((u) => u.id !== userId))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Löschen')

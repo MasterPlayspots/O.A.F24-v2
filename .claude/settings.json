@@ -20,11 +20,24 @@
       "Bash(git stash:*)",
       "Bash(curl -s -o /dev/null -w '%{http_code}' https://foerdermittel-check-api.froeba-kevin.workers.dev__TRACKED_VAR__)",
       "Bash(curl -s -o /dev/null -w \"/api/bafa: %{http_code}\\\\n\" \"https://api.fund24.io/api/bafa\")",
-      "Bash(curl -s -o /dev/null -w \"/api/berichte: %{http_code}\\\\n\" \"https://api.fund24.io/api/berichte\")"
+      "Bash(curl -s -o /dev/null -w \"/api/berichte: %{http_code}\\\\n\" \"https://api.fund24.io/api/berichte\")",
+      "Bash(curl -s -o /dev/null -w \"fund24.io: %{http_code}\\\\n\" https://fund24.io/)",
+      "Bash(curl -s -o /dev/null -w \"api.fund24.io/api/health: %{http_code}\\\\n\" https://api.fund24.io/api/health)",
+      "Bash(curl -s -o /dev/null -w \"api.fund24.io/api/bafa \\(should 404 now\\): %{http_code}\\\\n\" https://api.fund24.io/api/bafa)",
+      "Bash(curl -s -o /dev/null -w \"check-api/health: %{http_code}\\\\n\" https://foerdermittel-check-api.froeba-kevin.workers.dev/health)",
+      "Bash(curl -s -o /dev/null -w \"check-api/api/foerderprogramme: %{http_code}\\\\n\" https://foerdermittel-check-api.froeba-kevin.workers.dev/api/foerderprogramme)",
+      "Bash(curl -s -o /dev/null -w \"  fund24.io → %{http_code} \\(%{time_total}s\\)\\\\n\" https://fund24.io/)",
+      "Bash(curl -s -o /dev/null -w \"  api.fund24.io/api/health → %{http_code}\\\\n\" https://api.fund24.io/api/health)",
+      "Bash(curl -s -o /dev/null -w \"  check-api/health → %{http_code}\\\\n\" https://foerdermittel-check-api.froeba-kevin.workers.dev/health)",
+      "Read(//Users/our.ark./O.A.F24-v2/**)",
+      "Bash(python3 -c \"import json,sys; print\\('zfbf-db.users:', json.load\\(sys.stdin\\)[0]['results'][0]['n'], 'rows'\\)\" npx wrangler d1 execute bafa_antraege --remote --json --command \"SELECT name FROM sqlite_master WHERE type='table' AND name='users'\")",
+      "Bash(python3 -c \"import json,sys; print\\('bafa_antraege.users exists:', bool\\(json.load\\(sys.stdin\\)[0]['results']\\)\\)\")",
+      "Read(//Users/our.ark./**)"
     ],
     "additionalDirectories": [
       "/Users/our.ark./Desktop/02_AUTOMATISIERUNG/O.A.F24",
-      "/tmp"
+      "/tmp",
+      "/Users/our.ark./Developer/foerdermittel-check-api"
     ]
   }
 }

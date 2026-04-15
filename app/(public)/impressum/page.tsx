@@ -6,8 +6,6 @@ export const metadata: Metadata = {
 }
 
 export default function ImpressumPage() {
-  // TODO: Alle Platzhalter vor Go-Live ersetzen
-
   return (
     <div className="min-h-screen bg-architect-surface font-body text-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto bg-architect-surface/60 rounded-lg p-8 md:p-12">
