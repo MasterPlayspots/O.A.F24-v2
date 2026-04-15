@@ -247,7 +247,6 @@ export async function createVorlage(body: { titel: string; kategorie?: string; i
   )
 }
 
-// TODO: DELETE /api/vorlagen/:id muss noch im Worker ergänzt werden
 export async function deleteVorlage(id: string) {
   return apiCall(API.FUND24, `/api/vorlagen/${id}`, { method: 'DELETE' }, token())
 }
@@ -266,7 +265,6 @@ export interface EmailOutbox {
   error: string | null
 }
 
-// TODO: GET /api/admin/email-outbox muss noch im Worker ergänzt werden
 export async function listEmailOutbox(filter?: { status?: EmailOutboxStatus; limit?: number; offset?: number }) {
   const params = new URLSearchParams()
   if (filter?.status) params.set('status', filter.status)
@@ -281,7 +279,6 @@ export async function listEmailOutbox(filter?: { status?: EmailOutboxStatus; lim
   )
 }
 
-// TODO: POST /api/admin/email-outbox/:id/retry muss noch im Worker ergänzt werden
 export async function retryEmail(id: string) {
   return apiCall<{ ok: boolean }>(
     API.FUND24,

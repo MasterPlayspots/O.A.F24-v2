@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -o /dev/null -w '__TRACKED_VAR__: %{http_code}\\\\n' https://__TRACKED_VAR__)",
+      "Bash(ls /Users/our.ark./Desktop/02_AUTOMATISIERUNG/O.A.F24/*.md)"
+    ],
+    "additionalDirectories": [
+      "/Users/our.ark./Desktop/02_AUTOMATISIERUNG/O.A.F24"
+    ]
+  }
+}
