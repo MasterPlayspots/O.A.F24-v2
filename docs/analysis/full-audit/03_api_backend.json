@@ -1,0 +1,5331 @@
+{
+  "generatedAt": "2026-04-15",
+  "workers": [
+    {
+      "name": "fund24 (main)",
+      "wranglerFile": "worker/wrangler.toml",
+      "workerName": "bafa-creator-ai-worker",
+      "prodRoute": "api.fund24.io/api/*",
+      "entryFile": "worker/src/index.ts",
+      "bindings": {
+        "d1": [
+          "DB (zfbf-db)",
+          "BAFA_DB (bafa_antraege)",
+          "BAFA_CONTENT (bafa_learnings)",
+          "FOERDER_DB (foerderprogramme)",
+          "CHECK_DB (foerdermittel-checks)"
+        ],
+        "kv": [
+          "SESSIONS",
+          "RATE_LIMIT",
+          "CACHE",
+          "WEBHOOK_EVENTS"
+        ],
+        "r2": [
+          "REPORTS (bafa-reports)"
+        ],
+        "ai": [
+          "Workers-AI"
+        ]
+      },
+      "crons": [
+        "0 2 * * *",
+        "30 2 * * *",
+        "0 3 * * 1",
+        "0 10 * * *"
+      ],
+      "globalMiddleware": [
+        "trailing-slash redirect (301)",
+        "securityHeaders on /*",
+        "corsMiddleware on /*",
+        "strictCorsCheck on /api/*",
+        "csrfProtection on /api/*",
+        "globalRateLimit on /api/*"
+      ],
+      "endpointCount": 151
+    },
+    {
+      "name": "foerdermittel-check-api (legacy/shadow)",
+      "wranglerFile": "worker-check/wrangler.toml",
+      "workerName": "foerdermittel-check-api",
+      "prodRoute": "foerdermittel-check-api.froeba-kevin.workers.dev (NEXT_PUBLIC_CHECK_API_URL)",
+      "entryFile": "worker-check/src/index.js",
+      "bindings": {
+        "d1": [
+          "CHECK_DB (foerdermittel-checks)",
+          "FOERDER_DB (foerderprogramme)",
+          "PLATFORM_DB (bafa_antraege)"
+        ],
+        "r2": [
+          "DOCS_BUCKET (foerdermittel-check-docs)"
+        ],
+        "ai": [
+          "Workers-AI"
+        ]
+      },
+      "note": "Pure JavaScript, 4691 LOC index.js + 523 LOC matching.js. Shares D1 DBs with main worker (bafa_antraege, foerderprogramme, foerdermittel-checks) → same data, different auth.",
+      "sizeLOC": 5214,
+      "endpointCount": "not-exhaustively-inventoried (see findings)"
+    }
+  ],
+  "nextApiRoutes": [
+    {
+      "path": "/api/session",
+      "file": "app/api/session/route.ts",
+      "methods": [
+        "POST",
+        "DELETE"
+      ],
+      "summary": "POST sets fund24-token HttpOnly cookie from body.token; DELETE clears it",
+      "validation": "length >= 10 only — no JWT signature check before storing"
+    }
+  ],
+  "middleware": {
+    "file": "middleware.ts",
+    "publicPaths": [
+      "/",
+      "/programme",
+      "/berater",
+      "/preise",
+      "/aktuelles",
+      "/support",
+      "/foerder-schnellcheck",
+      "/login",
+      "/registrieren",
+      "/verifizieren",
+      "/passwort-vergessen",
+      "/passwort-reset",
+      "/datenschutz",
+      "/impressum",
+      "/agb"
+    ],
+    "publicPrefixes": [
+      "/programme/",
+      "/berater/",
+      "/aktuelles/",
+      "/foerder-schnellcheck/"
+    ],
+    "protectedPrefixes": [
+      "/foerdercheck",
+      "/onboarding",
+      "/dashboard",
+      "/admin"
+    ],
+    "adminPrefix": "/admin",
+    "jwtVerification": "jose (HS256) with JWT_SECRET env",
+    "gaps": [
+      "/antraege — missing from PROTECTED_PREFIXES (Phase-1 H-P1-02)"
+    ]
+  },
+  "endpointStats": {
+    "totalEndpoints": 151,
+    "frontendCalls": 114,
+    "matched": 68,
+    "dead_endpoints_count": 83,
+    "unmatched_calls_count": 46
+  },
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "auth": "rate-limited-only",
+      "validation": "zod",
+      "file": "worker/src/routes/auth.ts",
+      "line": 47,
+      "summary": "Register user (PBKDF2 hash, sends 6-digit code)",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/auth.ts:register@63",
+          "usedBy": [
+            "/registrieren"
+          ],
+          "authHeader": "no"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "auth": "rate-limited-only",
+      "validation": "zod",
+      "file": "worker/src/routes/auth.ts",
+      "line": 128,
+      "summary": "Email+password login; auto-migrates SHA-256→PBKDF2; returns JWT + refresh",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/auth.ts:login@90",
+          "usedBy": [
+            "/login"
+          ],
+          "authHeader": "no"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/refresh",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/auth.ts",
+      "line": 241,
+      "summary": "Rotate refresh token, issue new access JWT",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/verify-email",
+      "auth": "rate-limited-only",
+      "validation": "manual",
+      "file": "worker/src/routes/auth.ts",
+      "line": 279,
+      "summary": "Verify email via UUID token (legacy path)",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/auth.ts:verifyEmail@103",
+          "usedBy": [],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/verify-code",
+      "auth": "rate-limited-only",
+      "validation": "manual",
+      "file": "worker/src/routes/auth.ts",
+      "line": 289,
+      "summary": "Verify 6-digit email code, mark verified, issue JWT + refresh",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/auth.ts:verifyCode@82",
+          "usedBy": [
+            "/verifizieren"
+          ],
+          "authHeader": "no"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/resend-code",
+      "auth": "rate-limited-only",
+      "validation": "manual",
+      "file": "worker/src/routes/auth.ts",
+      "line": 402,
+      "summary": "Resend 6-digit verification code (silent on unknown email)",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/auth.ts:resendVerification@108",
+          "usedBy": [
+            "/verifizieren"
+          ],
+          "authHeader": "no"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/auth.ts",
+      "line": 428,
+      "summary": "Return current user profile",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/auth.ts:getMe@98",
+          "usedBy": [],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/auth/me",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/auth.ts",
+      "line": 452,
+      "summary": "Patch own user profile (whitelist phone/website/onboarding_completed)",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/forgot-password",
+      "auth": "rate-limited-only",
+      "validation": "manual",
+      "file": "worker/src/routes/auth.ts",
+      "line": 476,
+      "summary": "Generate reset token + send email (silent on unknown email)",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/auth.ts:forgotPassword@114",
+          "usedBy": [
+            "/passwort-vergessen"
+          ],
+          "authHeader": "no"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/reset-password",
+      "auth": "none",
+      "validation": "zod",
+      "file": "worker/src/routes/auth.ts",
+      "line": 528,
+      "summary": "Reset password via UUID token, revokes refresh tokens",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/auth.ts:resetPassword@119",
+          "usedBy": [
+            "/passwort-reset"
+          ],
+          "authHeader": "no"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/auth.ts",
+      "line": 576,
+      "summary": "Revoke all refresh tokens for user",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/auth.ts:logout@124",
+          "usedBy": [
+            "components/layout/Navbar.tsx"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/generate",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/reports.ts",
+      "line": 59,
+      "summary": "Generate 5-phase BAFA report via Workers AI; reserves 1 kontingent",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/preview/:id",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 194,
+      "summary": "Render HTML preview of a report (owner only)",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/unlock",
+      "auth": "hmac",
+      "validation": "zod",
+      "file": "worker/src/routes/reports.ts",
+      "line": 211,
+      "summary": "HMAC-signed unlock + create download token; emails URL",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/download/:token",
+      "auth": "rate-limited-only",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 249,
+      "summary": "Validate download token, return HTML attachment",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 287,
+      "summary": "Paginated list of own reports, enriched from BAFA_DB",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/:id",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 338,
+      "summary": "Single report + antrag + bausteine (owner only)",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 356,
+      "summary": "Create empty draft report (no quota)",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/reports/:id",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/reports.ts",
+      "line": 371,
+      "summary": "Whitelisted update of report (zfbf + bafa fields)",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/:id/finalize",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 429,
+      "summary": "Finalize draft (reserves kontingent, status=pending)",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/reports/:id/finalize",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 447,
+      "summary": "v2 frontend alias for POST /finalize",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/branchen/",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/branchen.ts",
+      "line": 20,
+      "summary": "Public list of 10 branchen (KV cached)",
+      "routeFile": "worker/src/routes/branchen.ts",
+      "mountPath": "/api/branchen",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/branchen/:id",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/branchen.ts",
+      "line": 29,
+      "summary": "Public single branche detail",
+      "routeFile": "worker/src/routes/branchen.ts",
+      "mountPath": "/api/branchen",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/promo/validate",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/promo.ts",
+      "line": 21,
+      "summary": "Validate gutschein code (public)",
+      "routeFile": "worker/src/routes/promo.ts",
+      "mountPath": "/api/promo",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/promo/redeem",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/promo.ts",
+      "line": 40,
+      "summary": "Atomically redeem gutschein with race-safe insert+update",
+      "routeFile": "worker/src/routes/promo.ts",
+      "mountPath": "/api/promo",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/promo/codes",
+      "auth": "jwt-admin",
+      "validation": "none",
+      "file": "worker/src/routes/promo.ts",
+      "line": 87,
+      "summary": "Admin: list all gutscheine",
+      "routeFile": "worker/src/routes/promo.ts",
+      "mountPath": "/api/promo",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/promo/create",
+      "auth": "jwt-admin",
+      "validation": "zod",
+      "file": "worker/src/routes/promo.ts",
+      "line": 93,
+      "summary": "Admin: create gutschein",
+      "routeFile": "worker/src/routes/promo.ts",
+      "mountPath": "/api/promo",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders/create",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/orders.ts",
+      "line": 17,
+      "summary": "Create order (einzel/starter/standard/pro) with optional promo; auto-completes for 0EUR/invoice",
+      "routeFile": "worker/src/routes/orders.ts",
+      "mountPath": "/api/orders",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/stripe/create-session",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/payments.ts",
+      "line": 20,
+      "summary": "Create Stripe checkout session for a report",
+      "routeFile": "worker/src/routes/payments.ts",
+      "mountPath": "/api/payments",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/stripe/webhook",
+      "auth": "hmac",
+      "validation": "manual",
+      "file": "worker/src/routes/payments.ts",
+      "line": 77,
+      "summary": "Stripe webhook (signature-verified, KV-idempotent); handles checkout.session.completed + charge.refunded",
+      "routeFile": "worker/src/routes/payments.ts",
+      "mountPath": "/api/payments",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/paypal/create-order",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/payments.ts",
+      "line": 146,
+      "summary": "Create PayPal order for a report",
+      "routeFile": "worker/src/routes/payments.ts",
+      "mountPath": "/api/payments",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/paypal/capture-order",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/payments.ts",
+      "line": 185,
+      "summary": "Capture PayPal order, validate amount, issue download token",
+      "routeFile": "worker/src/routes/payments.ts",
+      "mountPath": "/api/payments",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/verify-payment",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/verify-payment.ts",
+      "line": 12,
+      "summary": "Polls payment status by sessionId/paymentId; for PayPal performs fallback capture",
+      "routeFile": "worker/src/routes/verify-payment.ts",
+      "mountPath": "/api (POST /api/verify-payment)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/provisionen",
+      "auth": "jwt-admin",
+      "validation": "none",
+      "file": "worker/src/routes/admin.ts",
+      "line": 41,
+      "summary": "List provisionen (BAFA_DB, top 500)",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:getAdminProvisionen@574",
+          "usedBy": [
+            "/admin/provisionen"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/provisionen/:id",
+      "auth": "jwt-admin",
+      "validation": "zod",
+      "file": "worker/src/routes/admin.ts",
+      "line": 59,
+      "summary": "Update provision status/notes",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:updateAdminProvision@580",
+          "usedBy": [
+            "/admin/provisionen"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/onboarding/dispatch",
+      "auth": "jwt-admin",
+      "validation": "manual",
+      "file": "worker/src/routes/admin.ts",
+      "line": 95,
+      "summary": "Manual onboarding dispatch (?dryRun=1)",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/dashboard",
+      "auth": "jwt-admin",
+      "validation": "none",
+      "file": "worker/src/routes/admin.ts",
+      "line": 103,
+      "summary": "4-KPI dashboard aggregation across DBs",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:getAdminDashboard@524",
+          "usedBy": [
+            "/admin"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/audit-logs",
+      "auth": "jwt-admin",
+      "validation": "manual",
+      "file": "worker/src/routes/admin.ts",
+      "line": 135,
+      "summary": "Query audit logs (filterable)",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:listAuditLogs@600",
+          "usedBy": [
+            "/admin/audit-logs"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/audit-logs/cleanup",
+      "auth": "jwt-admin",
+      "validation": "none",
+      "file": "worker/src/routes/admin.ts",
+      "line": 149,
+      "summary": "Cleanup old audit logs",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/users",
+      "auth": "jwt-admin",
+      "validation": "manual",
+      "file": "worker/src/routes/admin.ts",
+      "line": 155,
+      "summary": "Paginated user list",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:getAdminUsers@542",
+          "usedBy": [
+            "/admin/users"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/users/:id",
+      "auth": "jwt-admin",
+      "validation": "manual",
+      "file": "worker/src/routes/admin.ts",
+      "line": 164,
+      "summary": "Update user profile (whitelist)",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:updateAdminUser@552",
+          "usedBy": [
+            "/admin/users"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/users/:id/role",
+      "auth": "jwt-admin",
+      "validation": "manual",
+      "file": "worker/src/routes/admin.ts",
+      "line": 193,
+      "summary": "Set user role to user|admin",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:updateAdminUser@557",
+          "usedBy": [
+            "/admin/users (when only role is changed)"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/users/:id",
+      "auth": "jwt-admin",
+      "validation": "none",
+      "file": "worker/src/routes/admin.ts",
+      "line": 207,
+      "summary": "Soft-delete + anonymize user",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:deleteAdminUser@569",
+          "usedBy": [
+            "/admin/users"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/stats",
+      "auth": "jwt-admin",
+      "validation": "none",
+      "file": "worker/src/routes/admin.ts",
+      "line": 236,
+      "summary": "Aggregated stats (users/reports/payments/antraege/bausteine/promos)",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/check-foerdermittel",
+      "auth": "jwt-admin",
+      "validation": "manual",
+      "file": "worker/src/routes/admin.ts",
+      "line": 261,
+      "summary": "Batch URL HEAD-check of aktiv programs; marks dead as abgelaufen",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/email-outbox",
+      "auth": "jwt-admin",
+      "validation": "manual",
+      "file": "worker/src/routes/admin.ts",
+      "line": 334,
+      "summary": "List email_outbox rows (status filter)",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:listEmailOutbox@281",
+          "usedBy": [
+            "/admin/email-outbox"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/email-outbox/:id/retry",
+      "auth": "jwt-admin",
+      "validation": "manual",
+      "file": "worker/src/routes/admin.ts",
+      "line": 374,
+      "summary": "Re-queue failed email",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:retryEmail@295",
+          "usedBy": [
+            "/admin/email-outbox"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/bafa-cert/pending",
+      "auth": "jwt-admin",
+      "validation": "none",
+      "file": "worker/src/routes/admin.ts",
+      "line": 427,
+      "summary": "List users with bafa_cert_status=pending (GAP-001)",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:listPendingCerts@393",
+          "usedBy": [
+            "/admin"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/bafa-cert/:userId/approve",
+      "auth": "jwt-admin",
+      "validation": "manual",
+      "file": "worker/src/routes/admin.ts",
+      "line": 446,
+      "summary": "Approve BAFA cert (GAP-001)",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:approveCert@402",
+          "usedBy": [
+            "/admin"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/bafa-cert/:userId/reject",
+      "auth": "jwt-admin",
+      "validation": "manual",
+      "file": "worker/src/routes/admin.ts",
+      "line": 446,
+      "summary": "Reject BAFA cert (GAP-001)",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:rejectCert@405",
+          "usedBy": [
+            "/admin"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/export",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/gdpr.ts",
+      "line": 13,
+      "summary": "DSGVO Art. 15 data export (JSON download)",
+      "routeFile": "worker/src/routes/gdpr.ts",
+      "mountPath": "/api/user",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/user/account",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/gdpr.ts",
+      "line": 48,
+      "summary": "DSGVO Art. 17 anonymization; keeps payments per HGB §257",
+      "routeFile": "worker/src/routes/gdpr.ts",
+      "mountPath": "/api/user",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/privacy-consent",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/gdpr.ts",
+      "line": 79,
+      "summary": "Record privacy consent",
+      "routeFile": "worker/src/routes/gdpr.ts",
+      "mountPath": "/api/user",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/favorites",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/favoriten.ts",
+      "line": 8,
+      "summary": "List own favorited programs",
+      "routeFile": "worker/src/routes/foerdermittel/favoriten.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/favorites",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/favoriten.ts",
+      "line": 17,
+      "summary": "Add program to favorites",
+      "routeFile": "worker/src/routes/foerdermittel/favoriten.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/foerdermittel/favorites/:programId",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/favoriten.ts",
+      "line": 42,
+      "summary": "Remove favorite",
+      "routeFile": "worker/src/routes/foerdermittel/favoriten.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/favorites/:programId/check",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/favoriten.ts",
+      "line": 60,
+      "summary": "Check if program is favorite",
+      "routeFile": "worker/src/routes/foerdermittel/favoriten.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/katalog",
+      "auth": "none",
+      "validation": "zod",
+      "file": "worker/src/routes/foerdermittel/katalog.ts",
+      "line": 19,
+      "summary": "Public paginated/filterable foerderprogramme listing",
+      "routeFile": "worker/src/routes/foerdermittel/katalog.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/katalog/filters",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/katalog.ts",
+      "line": 103,
+      "summary": "Distinct filter values for the catalog",
+      "routeFile": "worker/src/routes/foerdermittel/katalog.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/katalog/:id",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/katalog.ts",
+      "line": 140,
+      "summary": "Public foerderprogramm detail",
+      "routeFile": "worker/src/routes/foerdermittel/katalog.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/profile",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/match.ts",
+      "line": 25,
+      "summary": "Get own foerdermittel_profile",
+      "routeFile": "worker/src/routes/foerdermittel/match.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/profile",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/foerdermittel/match.ts",
+      "line": 41,
+      "summary": "Upsert own foerdermittel_profile",
+      "routeFile": "worker/src/routes/foerdermittel/match.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/match",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/match.ts",
+      "line": 110,
+      "summary": "Run rule + AI matching (top 50 saved)",
+      "routeFile": "worker/src/routes/foerdermittel/match.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/matches",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/match.ts",
+      "line": 259,
+      "summary": "List own matches enriched with program data",
+      "routeFile": "worker/src/routes/foerdermittel/match.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/cases/:id/chat",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/foerdermittel/chat.ts",
+      "line": 20,
+      "summary": "Case-scoped AI chat (loads program + steps)",
+      "routeFile": "worker/src/routes/foerdermittel/chat.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/chat",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/foerdermittel/chat.ts",
+      "line": 152,
+      "summary": "General AI chat with optional case context",
+      "routeFile": "worker/src/routes/foerdermittel/chat.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/chat/:id",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/chat.ts",
+      "line": 261,
+      "summary": "Get conversation by id (owner only)",
+      "routeFile": "worker/src/routes/foerdermittel/chat.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/cases",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/cases.ts",
+      "line": 21,
+      "summary": "Create case + AI-generated or fallback funnel; copies steps",
+      "routeFile": "worker/src/routes/foerdermittel/cases.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/cases",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/cases.ts",
+      "line": 365,
+      "summary": "List own cases enriched with program + step counts",
+      "routeFile": "worker/src/routes/foerdermittel/cases.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/cases/:id",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/cases.ts",
+      "line": 411,
+      "summary": "Get case + steps + program (owner only)",
+      "routeFile": "worker/src/routes/foerdermittel/cases.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/foerdermittel/cases/:caseId/steps/:stepId",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/cases.ts",
+      "line": 450,
+      "summary": "Update step status; auto-advance phase when all required done",
+      "routeFile": "worker/src/routes/foerdermittel/cases.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/cases/:caseId/dokumente",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/cases.ts",
+      "line": 530,
+      "summary": "Multipart upload (10 MB) to R2 + DB metadata",
+      "routeFile": "worker/src/routes/foerdermittel/cases.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/cases/:caseId/dokumente",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/cases.ts",
+      "line": 591,
+      "summary": "List documents for a case",
+      "routeFile": "worker/src/routes/foerdermittel/cases.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/notifications",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/notifications.ts",
+      "line": 7,
+      "summary": "List notifications + unread count",
+      "routeFile": "worker/src/routes/foerdermittel/notifications.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/foerdermittel/notifications/:id/read",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/notifications.ts",
+      "line": 35,
+      "summary": "Mark notification as read",
+      "routeFile": "worker/src/routes/foerdermittel/notifications.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/program-documents/:programId",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/notifications.ts",
+      "line": 51,
+      "summary": "Documents required for a program (or '*')",
+      "routeFile": "worker/src/routes/foerdermittel/notifications.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/nachrichten/",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/nachrichten.ts",
+      "line": 14,
+      "summary": "List own conversations",
+      "routeFile": "worker/src/routes/nachrichten.ts",
+      "mountPath": "/api/nachrichten",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/nachrichten/",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/nachrichten.ts",
+      "line": 21,
+      "summary": "Start new conversation",
+      "routeFile": "worker/src/routes/nachrichten.ts",
+      "mountPath": "/api/nachrichten",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/nachrichten/:conversationId",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/nachrichten.ts",
+      "line": 63,
+      "summary": "Get messages of a conversation",
+      "routeFile": "worker/src/routes/nachrichten.ts",
+      "mountPath": "/api/nachrichten",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/nachrichten/:conversationId",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/nachrichten.ts",
+      "line": 76,
+      "summary": "Send message in conversation",
+      "routeFile": "worker/src/routes/nachrichten.ts",
+      "mountPath": "/api/nachrichten",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/nachrichten/:conversationId/read",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/nachrichten.ts",
+      "line": 111,
+      "summary": "Mark conversation as read",
+      "routeFile": "worker/src/routes/nachrichten.ts",
+      "mountPath": "/api/nachrichten",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/netzwerk/berater",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/netzwerk.ts",
+      "line": 20,
+      "summary": "Public list of available berater (paginated, filterable)",
+      "routeFile": "worker/src/routes/netzwerk.ts",
+      "mountPath": "/api/netzwerk",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/check.ts:getBeraterListe@175",
+          "usedBy": [
+            "/berater"
+          ],
+          "authHeader": "no"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/netzwerk/berater/:id",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/netzwerk.ts",
+      "line": 72,
+      "summary": "Public berater detail with expertise + dienstleistungen",
+      "routeFile": "worker/src/routes/netzwerk.ts",
+      "mountPath": "/api/netzwerk",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/check.ts:getBeraterProfil@185",
+          "usedBy": [
+            "/berater/[id]"
+          ],
+          "authHeader": "no"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/netzwerk/anfragen",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/netzwerk.ts",
+      "line": 133,
+      "summary": "List own connection requests (sent + received)",
+      "routeFile": "worker/src/routes/netzwerk.ts",
+      "mountPath": "/api/netzwerk",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/netzwerk/anfragen",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/netzwerk.ts",
+      "line": 145,
+      "summary": "Send connection request",
+      "routeFile": "worker/src/routes/netzwerk.ts",
+      "mountPath": "/api/netzwerk",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/netzwerk/anfragen/:id",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/netzwerk.ts",
+      "line": 178,
+      "summary": "Accept/reject connection request",
+      "routeFile": "worker/src/routes/netzwerk.ts",
+      "mountPath": "/api/netzwerk",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/check/",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/check.ts",
+      "line": 54,
+      "summary": "Step 1: Submit company form, optionally scrape URL, return session+greeting",
+      "routeFile": "worker/src/routes/check.ts",
+      "mountPath": "/api/check",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/check/:sessionId/chat",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/check.ts",
+      "line": 222,
+      "summary": "Step 2: AI chat for the check session",
+      "routeFile": "worker/src/routes/check.ts",
+      "mountPath": "/api/check",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/check/:sessionId/docs",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/check.ts",
+      "line": 272,
+      "summary": "Step 3: Document upload to R2 + AI extraction",
+      "routeFile": "worker/src/routes/check.ts",
+      "mountPath": "/api/check",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/check/:sessionId/analyze",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/check.ts",
+      "line": 329,
+      "summary": "Step 4: Run full matching, save matches, AI summary",
+      "routeFile": "worker/src/routes/check.ts",
+      "mountPath": "/api/check",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/check/:sessionId/plan",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/check.ts",
+      "line": 420,
+      "summary": "Step 5: Get AI-generated action plan for top matches",
+      "routeFile": "worker/src/routes/check.ts",
+      "mountPath": "/api/check",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/beratungen/",
+      "auth": "jwt-berater",
+      "validation": "none",
+      "file": "worker/src/routes/beratungen.ts",
+      "line": 57,
+      "summary": "List own berater's bafa_beratungen with unternehmen-name join",
+      "routeFile": "worker/src/routes/beratungen.ts",
+      "mountPath": "/api/beratungen",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:listBeratungen@160",
+          "usedBy": [
+            "/dashboard/berater/beratungen"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/beratungen/:id",
+      "auth": "jwt-berater",
+      "validation": "none",
+      "file": "worker/src/routes/beratungen.ts",
+      "line": 77,
+      "summary": "Beratung detail (own only)",
+      "routeFile": "worker/src/routes/beratungen.ts",
+      "mountPath": "/api/beratungen",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:getBeratung@156",
+          "usedBy": [
+            "/dashboard/berater/beratungen/[id]"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/beratungen/:id",
+      "auth": "jwt-berater",
+      "validation": "manual",
+      "file": "worker/src/routes/beratungen.ts",
+      "line": 101,
+      "summary": "Update phase/protokoll/foerderhoehe; emails owner on phase change",
+      "routeFile": "worker/src/routes/beratungen.ts",
+      "mountPath": "/api/beratungen",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:updateBeratung@170",
+          "usedBy": [
+            "/dashboard/berater/beratungen/[id]"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/vorlagen/",
+      "auth": "jwt-berater",
+      "validation": "none",
+      "file": "worker/src/routes/vorlagen.ts",
+      "line": 21,
+      "summary": "List own vorlagen",
+      "routeFile": "worker/src/routes/vorlagen.ts",
+      "mountPath": "/api/vorlagen",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:listVorlagen@250",
+          "usedBy": [
+            "/dashboard/berater/vorlagen"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/vorlagen/",
+      "auth": "jwt-berater",
+      "validation": "manual",
+      "file": "worker/src/routes/vorlagen.ts",
+      "line": 32,
+      "summary": "Create vorlage",
+      "routeFile": "worker/src/routes/vorlagen.ts",
+      "mountPath": "/api/vorlagen",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:createVorlage@254",
+          "usedBy": [
+            "/dashboard/berater/vorlagen"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/vorlagen/:id",
+      "auth": "jwt-berater",
+      "validation": "manual",
+      "file": "worker/src/routes/vorlagen.ts",
+      "line": 48,
+      "summary": "Delete own vorlage",
+      "routeFile": "worker/src/routes/vorlagen.ts",
+      "mountPath": "/api/vorlagen",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:deleteVorlage@263",
+          "usedBy": [
+            "/dashboard/berater/vorlagen"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/antraege",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/me.ts",
+      "line": 27,
+      "summary": "Forwards to /api/foerdermittel/cases",
+      "routeFile": "worker/src/routes/me.ts",
+      "mountPath": "/api/me",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:listMeineAntraege@210",
+          "usedBy": [
+            "/dashboard/unternehmen/antraege"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/me/antraege",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/me.ts",
+      "line": 29,
+      "summary": "Forwards to /api/foerdermittel/cases",
+      "routeFile": "worker/src/routes/me.ts",
+      "mountPath": "/api/me",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:createAntrag@227",
+          "usedBy": [
+            "/dashboard/unternehmen/antraege"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/favoriten",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/me.ts",
+      "line": 32,
+      "summary": "Forwards to /api/foerdermittel/favorites",
+      "routeFile": "worker/src/routes/me.ts",
+      "mountPath": "/api/me",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:listFavoriten@54",
+          "usedBy": [
+            "/dashboard/unternehmen/favoriten"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/notifications",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/me.ts",
+      "line": 35,
+      "summary": "Forwards to /api/foerdermittel/notifications",
+      "routeFile": "worker/src/routes/me.ts",
+      "mountPath": "/api/me",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:listNotifications@76",
+          "usedBy": [
+            "components/shared/NotificationsBell.tsx (mounted in Navbar → every protected page)"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/unternehmen",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/me.ts",
+      "line": 46,
+      "summary": "Forwards to /api/unternehmen/profil",
+      "routeFile": "worker/src/routes/me.ts",
+      "mountPath": "/api/me",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "PUT",
+      "path": "/api/me/unternehmen",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/me.ts",
+      "line": 47,
+      "summary": "Forwards to /api/unternehmen/profil (PUT)",
+      "routeFile": "worker/src/routes/me.ts",
+      "mountPath": "/api/me",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/me/unternehmen",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/me.ts",
+      "line": 48,
+      "summary": "Forwards to /api/unternehmen/profil",
+      "routeFile": "worker/src/routes/me.ts",
+      "mountPath": "/api/me",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/beratungen",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/me.ts",
+      "line": 51,
+      "summary": "Own beratungen with berater meta",
+      "routeFile": "worker/src/routes/me.ts",
+      "mountPath": "/api/me",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/anfragen",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/me.ts",
+      "line": 68,
+      "summary": "Outgoing anfragen with berater profile",
+      "routeFile": "worker/src/routes/me.ts",
+      "mountPath": "/api/me",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/check.ts:getAnfragen@61 (default branch)",
+          "usedBy": [
+            "/dashboard/unternehmen/anfragen"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/me/dashboard",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/me.ts",
+      "line": 89,
+      "summary": "Aggregated user dashboard (cases by status, dokumente count, reports count)",
+      "routeFile": "worker/src/routes/me.ts",
+      "mountPath": "/api/me",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:getDashboard@92",
+          "usedBy": [
+            "/dashboard/unternehmen (imported as getFund24Dashboard)"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/berater/profil",
+      "auth": "jwt-berater",
+      "validation": "none",
+      "file": "worker/src/routes/berater.ts",
+      "line": 141,
+      "summary": "Get own berater profile",
+      "routeFile": "worker/src/routes/berater.ts",
+      "mountPath": "/api/berater",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/berater.ts:getBeraterProfil@44",
+          "usedBy": [
+            "/dashboard/berater/profil"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/berater/profil",
+      "auth": "jwt-berater",
+      "validation": "zod",
+      "file": "worker/src/routes/berater.ts",
+      "line": 151,
+      "summary": "Upsert own berater profile",
+      "routeFile": "worker/src/routes/berater.ts",
+      "mountPath": "/api/berater",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/berater.ts:updateBeraterProfil@54",
+          "usedBy": [
+            "/onboarding/profil",
+            "/dashboard/berater/profil"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/berater/expertise",
+      "auth": "jwt-berater",
+      "validation": "none",
+      "file": "worker/src/routes/berater.ts",
+      "line": 238,
+      "summary": "List own expertise rows",
+      "routeFile": "worker/src/routes/berater.ts",
+      "mountPath": "/api/berater",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/berater.ts:listExpertise@123",
+          "usedBy": [],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/berater/expertise",
+      "auth": "jwt-berater",
+      "validation": "zod",
+      "file": "worker/src/routes/berater.ts",
+      "line": 253,
+      "summary": "Add expertise row",
+      "routeFile": "worker/src/routes/berater.ts",
+      "mountPath": "/api/berater",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/berater.ts:addExpertise@104",
+          "usedBy": [
+            "/onboarding/expertise"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/berater/dienstleistungen",
+      "auth": "jwt-berater",
+      "validation": "none",
+      "file": "worker/src/routes/berater.ts",
+      "line": 316,
+      "summary": "List own dienstleistungen",
+      "routeFile": "worker/src/routes/berater.ts",
+      "mountPath": "/api/berater",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/berater.ts:listDienstleistungen@204",
+          "usedBy": [],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/berater/dienstleistungen",
+      "auth": "jwt-berater",
+      "validation": "zod",
+      "file": "worker/src/routes/berater.ts",
+      "line": 331,
+      "summary": "Add dienstleistung",
+      "routeFile": "worker/src/routes/berater.ts",
+      "mountPath": "/api/berater",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/berater.ts:addDienstleistung@178",
+          "usedBy": [
+            "/onboarding/dienstleistungen"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/berater/anfragen",
+      "auth": "jwt-berater",
+      "validation": "none",
+      "file": "worker/src/routes/berater.ts",
+      "line": 393,
+      "summary": "Berater inbox (anfragen received)",
+      "routeFile": "worker/src/routes/berater.ts",
+      "mountPath": "/api/berater",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/check.ts:getAnfragen@61 (rolle=berater branch)",
+          "usedBy": [
+            "/dashboard/berater/anfragen",
+            "/dashboard/berater/nachrichten"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/berater/anfragen/:id",
+      "auth": "jwt-berater",
+      "validation": "zod",
+      "file": "worker/src/routes/berater.ts",
+      "line": 414,
+      "summary": "Accept/reject anfrage; auto-creates bafa_beratungen on accept",
+      "routeFile": "worker/src/routes/berater.ts",
+      "mountPath": "/api/berater",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/check.ts:updateAnfrage@95",
+          "usedBy": [
+            "/dashboard/berater",
+            "/dashboard/berater/anfragen"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/berater/:id/anfrage",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/berater.ts",
+      "line": 501,
+      "summary": "Send anfrage to a berater (any auth role)",
+      "routeFile": "worker/src/routes/berater.ts",
+      "mountPath": "/api/berater",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/check.ts:sendeAnfrage@76",
+          "usedBy": [
+            "/berater/[id]",
+            "/foerdercheck/[sessionId]/ergebnisse"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/berater/provision-vertraege",
+      "auth": "jwt-berater",
+      "validation": "none",
+      "file": "worker/src/routes/berater.ts",
+      "line": 595,
+      "summary": "List own provisionen as contracts",
+      "routeFile": "worker/src/routes/berater.ts",
+      "mountPath": "/api/berater",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:getProvisionVertraege@465",
+          "usedBy": [
+            "/dashboard/berater/abwicklung"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/berater/abwicklung/upload",
+      "auth": "jwt-berater",
+      "validation": "manual",
+      "file": "worker/src/routes/berater.ts",
+      "line": 629,
+      "summary": "Multipart upload (25 MB) to R2 — stub ack",
+      "routeFile": "worker/src/routes/berater.ts",
+      "mountPath": "/api/berater",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:uploadAbwicklungDokument@471",
+          "usedBy": [
+            "/dashboard/berater/abwicklung"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/unternehmen/profil",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/unternehmen.ts",
+      "line": 77,
+      "summary": "Get own unternehmen profile (BAFA_DB)",
+      "routeFile": "worker/src/routes/unternehmen.ts",
+      "mountPath": "/api/unternehmen",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/unternehmen.ts:getUnternehmen@57",
+          "usedBy": [],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/unternehmen/profil",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/unternehmen.ts",
+      "line": 88,
+      "summary": "Upsert own unternehmen profile",
+      "routeFile": "worker/src/routes/unternehmen.ts",
+      "mountPath": "/api/unternehmen",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/unternehmen.ts:updateUnternehmen@67",
+          "usedBy": [
+            "/onboarding/unternehmen"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/antraege/:id",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/antraege.ts",
+      "line": 91,
+      "summary": "Antrag detail (owner OR antrag_zugriff entry)",
+      "routeFile": "worker/src/routes/antraege.ts",
+      "mountPath": "/api/antraege",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:getAntrag@206",
+          "usedBy": [
+            "/antraege/[id]"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/antraege/:id",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/antraege.ts",
+      "line": 192,
+      "summary": "Owner-only status change with email notify",
+      "routeFile": "worker/src/routes/antraege.ts",
+      "mountPath": "/api/antraege",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:updateAntragStatus@214",
+          "usedBy": [
+            "/antraege/[id]"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/antraege/:id/dokumente",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/antraege.ts",
+      "line": 281,
+      "summary": "List documents for antrag (owner or ACL)",
+      "routeFile": "worker/src/routes/antraege.ts",
+      "mountPath": "/api/antraege",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:listAntragDokumente@304",
+          "usedBy": [
+            "/antraege/[id]"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/antraege/:id/dokumente",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/antraege.ts",
+      "line": 313,
+      "summary": "Multipart upload (25 MB) to R2 + insert metadata",
+      "routeFile": "worker/src/routes/antraege.ts",
+      "mountPath": "/api/antraege",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:uploadAntragDokument@311",
+          "usedBy": [
+            "/antraege/[id]"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/antraege/:id/dokumente/:dokId",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/antraege.ts",
+      "line": 364,
+      "summary": "Owner-only delete document + R2 object",
+      "routeFile": "worker/src/routes/antraege.ts",
+      "mountPath": "/api/antraege",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:deleteAntragDokument@328",
+          "usedBy": [
+            "/antraege/[id]"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/antraege/:id/zugriff",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/antraege.ts",
+      "line": 411,
+      "summary": "List ACL entries (owner or ACL)",
+      "routeFile": "worker/src/routes/antraege.ts",
+      "mountPath": "/api/antraege",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:listAntragZugriff@349",
+          "usedBy": [
+            "/antraege/[id]"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/antraege/:id/zugriff",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/antraege.ts",
+      "line": 458,
+      "summary": "Owner-only grant access (user_id or berater_id)",
+      "routeFile": "worker/src/routes/antraege.ts",
+      "mountPath": "/api/antraege",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:grantAntragZugriff@355",
+          "usedBy": [
+            "/antraege/[id]"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/antraege/:id/zugriff/:zugriffId",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/antraege.ts",
+      "line": 510,
+      "summary": "Owner-only revoke access",
+      "routeFile": "worker/src/routes/antraege.ts",
+      "mountPath": "/api/antraege",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:revokeAntragZugriff@361",
+          "usedBy": [
+            "/antraege/[id]"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/tracker/",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/tracker.ts",
+      "line": 41,
+      "summary": "List own tracker_vorgaenge (optional phase filter)",
+      "routeFile": "worker/src/routes/tracker.ts",
+      "mountPath": "/api/tracker",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:getTracker@482",
+          "usedBy": [
+            "/dashboard/unternehmen/tracker",
+            "/dashboard/berater/tracker"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/tracker/",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/tracker.ts",
+      "line": 76,
+      "summary": "Create vorgang + activity row",
+      "routeFile": "worker/src/routes/tracker.ts",
+      "mountPath": "/api/tracker",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:createTrackerVorgang@488",
+          "usedBy": [],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/tracker/:id",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/tracker.ts",
+      "line": 124,
+      "summary": "Single vorgang (owner only)",
+      "routeFile": "worker/src/routes/tracker.ts",
+      "mountPath": "/api/tracker",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/tracker/:id",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/tracker.ts",
+      "line": 147,
+      "summary": "Update vorgang; logs phase transitions",
+      "routeFile": "worker/src/routes/tracker.ts",
+      "mountPath": "/api/tracker",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:updateTrackerPhase@504",
+          "usedBy": [
+            "/dashboard/unternehmen/tracker",
+            "/dashboard/berater/tracker"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/tracker/:id",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/tracker.ts",
+      "line": 203,
+      "summary": "Delete own vorgang",
+      "routeFile": "worker/src/routes/tracker.ts",
+      "mountPath": "/api/tracker",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:deleteTrackerVorgang@513",
+          "usedBy": [],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/news/",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/news.ts",
+      "line": 55,
+      "summary": "Public news listing (optional kategorie)",
+      "routeFile": "worker/src/routes/news.ts",
+      "mountPath": "/api/news (public) and /api/admin/news (admin sub-app)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:getNews@427",
+          "usedBy": [
+            "/aktuelles"
+          ],
+          "authHeader": "no"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/news/:slug",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/news.ts",
+      "line": 77,
+      "summary": "Public news article by slug",
+      "routeFile": "worker/src/routes/news.ts",
+      "mountPath": "/api/news (public) and /api/admin/news (admin sub-app)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:getNewsArtikel@432",
+          "usedBy": [
+            "/aktuelles/[slug]"
+          ],
+          "authHeader": "no"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/news/",
+      "auth": "jwt-admin",
+      "validation": "none",
+      "file": "worker/src/routes/news.ts",
+      "line": 107,
+      "summary": "Admin: all articles (any status)",
+      "routeFile": "worker/src/routes/news.ts",
+      "mountPath": "/api/news (public) and /api/admin/news (admin sub-app)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:getAdminNews@437",
+          "usedBy": [
+            "/admin/aktuelles"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/news/",
+      "auth": "jwt-admin",
+      "validation": "zod",
+      "file": "worker/src/routes/news.ts",
+      "line": 115,
+      "summary": "Admin: create news article (slug-collision 409)",
+      "routeFile": "worker/src/routes/news.ts",
+      "mountPath": "/api/news (public) and /api/admin/news (admin sub-app)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:createAdminNews@441",
+          "usedBy": [
+            "/admin/aktuelles"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/news/:id",
+      "auth": "jwt-admin",
+      "validation": "zod",
+      "file": "worker/src/routes/news.ts",
+      "line": 158,
+      "summary": "Admin: partial update (camelCase mapped to snake_case columns)",
+      "routeFile": "worker/src/routes/news.ts",
+      "mountPath": "/api/news (public) and /api/admin/news (admin sub-app)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:updateAdminNews@450",
+          "usedBy": [
+            "/admin/aktuelles"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/news/:id",
+      "auth": "jwt-admin",
+      "validation": "none",
+      "file": "worker/src/routes/news.ts",
+      "line": 204,
+      "summary": "Admin: hard-delete article",
+      "routeFile": "worker/src/routes/news.ts",
+      "mountPath": "/api/news (public) and /api/admin/news (admin sub-app)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/fund24.ts:deleteAdminNews@459",
+          "usedBy": [],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/checks/",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/checks.ts",
+      "line": 72,
+      "summary": "Proxy: create check session",
+      "routeFile": "worker/src/routes/checks.ts",
+      "mountPath": "/api/checks",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": [
+        {
+          "callSite": "lib/api/check.ts:checkStarten@15",
+          "usedBy": [
+            "/foerdercheck"
+          ],
+          "authHeader": "yes"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/checks/",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/checks.ts",
+      "line": 75,
+      "summary": "Proxy: list own check sessions",
+      "routeFile": "worker/src/routes/checks.ts",
+      "mountPath": "/api/checks",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "ALL",
+      "path": "/api/checks/:id",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/checks.ts",
+      "line": 78,
+      "summary": "Proxy: any method on a check session",
+      "routeFile": "worker/src/routes/checks.ts",
+      "mountPath": "/api/checks",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "ALL",
+      "path": "/api/checks/:id/:sub",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/checks.ts",
+      "line": 83,
+      "summary": "Proxy: subpath chat/docs/analyze/optimize/schwarm/plan/berater/matching",
+      "routeFile": "worker/src/routes/checks.ts",
+      "mountPath": "/api/checks",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "ALL",
+      "path": "/api/checks/:id/:sub/:sub2",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/checks.ts",
+      "line": 93,
+      "summary": "Proxy: subpath/sub2 (e.g. /plan/:stepId)",
+      "routeFile": "worker/src/routes/checks.ts",
+      "mountPath": "/api/checks",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/oa/status",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/oa.ts",
+      "line": 11,
+      "summary": "Combined latest CP+VA report from KV",
+      "routeFile": "worker/src/routes/oa.ts",
+      "mountPath": "/api/oa",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/oa/cp",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/oa.ts",
+      "line": 32,
+      "summary": "Latest CP report",
+      "routeFile": "worker/src/routes/oa.ts",
+      "mountPath": "/api/oa",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/oa/va",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/oa.ts",
+      "line": 37,
+      "summary": "Latest VA report",
+      "routeFile": "worker/src/routes/oa.ts",
+      "mountPath": "/api/oa",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/oa/history",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/oa.ts",
+      "line": 42,
+      "summary": "Last N days of CP reports (?days=7)",
+      "routeFile": "worker/src/routes/oa.ts",
+      "mountPath": "/api/oa",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/index.ts",
+      "line": 64,
+      "summary": "Root status ping (zfbf-api version)",
+      "worker": "fund24",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/index.ts",
+      "line": 69,
+      "summary": "Health check (DB/BAFA_DB/KV/R2)",
+      "worker": "fund24",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/index.ts",
+      "line": 103,
+      "summary": "Same as /health, reachable through api.fund24.io route",
+      "worker": "fund24",
+      "called_by": []
+    }
+  ],
+  "frontend_calls": [
+    {
+      "endpoint": "POST /api/auth/register",
+      "callSite": "lib/api/auth.ts:register@63",
+      "authHeader": "no",
+      "usedBy": [
+        "/registrieren"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/auth/verify-code",
+      "callSite": "lib/api/auth.ts:verifyCode@82",
+      "authHeader": "no",
+      "usedBy": [
+        "/verifizieren"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/auth/login",
+      "callSite": "lib/api/auth.ts:login@90",
+      "authHeader": "no",
+      "usedBy": [
+        "/login"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/auth/me",
+      "callSite": "lib/api/auth.ts:getMe@98",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but no page imports it directly (only lib/store/authStore touches /api/session)"
+    },
+    {
+      "endpoint": "POST /api/auth/verify-email",
+      "callSite": "lib/api/auth.ts:verifyEmail@103",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "unused export — candidate for dead-code flag"
+    },
+    {
+      "endpoint": "POST /api/auth/resend-code",
+      "callSite": "lib/api/auth.ts:resendVerification@108",
+      "authHeader": "no",
+      "usedBy": [
+        "/verifizieren"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/auth/forgot-password",
+      "callSite": "lib/api/auth.ts:forgotPassword@114",
+      "authHeader": "no",
+      "usedBy": [
+        "/passwort-vergessen"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/auth/reset-password",
+      "callSite": "lib/api/auth.ts:resetPassword@119",
+      "authHeader": "no",
+      "usedBy": [
+        "/passwort-reset"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/auth/logout",
+      "callSite": "lib/api/auth.ts:logout@124",
+      "authHeader": "yes",
+      "usedBy": [
+        "components/layout/Navbar.tsx"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/stats",
+      "callSite": "lib/api/fund24.ts:getStats@6",
+      "authHeader": "no",
+      "usedBy": [],
+      "notes": "unused export — no page imports it"
+    },
+    {
+      "endpoint": "GET /api/filter-options",
+      "callSite": "lib/api/fund24.ts:getFilterOptions@10",
+      "authHeader": "no",
+      "usedBy": [
+        "/programme"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/foerderprogramme",
+      "callSite": "lib/api/fund24.ts:getProgramme@23",
+      "authHeader": "no",
+      "usedBy": [
+        "components/foerdercheck/ProgrammListe.tsx",
+        "/programme (via ProgrammListe)"
+      ],
+      "notes": "Suspect: worker may only expose /api/foerdermittel/katalog (see sitemap + OG image). Likely broken route for the listing too."
+    },
+    {
+      "endpoint": "GET /api/foerderprogramme/:id",
+      "callSite": "lib/api/fund24.ts:getProgramm@35",
+      "authHeader": "no",
+      "usedBy": [
+        "/programme/[id]"
+      ],
+      "notes": "KNOWN BUG (Phase 1): worker exposes /api/foerdermittel/katalog/:id, not /api/foerderprogramme/:id — page returns 404 live."
+    },
+    {
+      "endpoint": "GET /api/me/favoriten",
+      "callSite": "lib/api/fund24.ts:listFavoriten@54",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen/favoriten"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/me/favoriten/:programmId",
+      "callSite": "lib/api/fund24.ts:addFavorit@57",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but no page calls addFavorit (favorites page only lists/removes). Legacy lib/api/check.ts addFavorit is different (numeric id)."
+    },
+    {
+      "endpoint": "DELETE /api/me/favoriten/:programmId",
+      "callSite": "lib/api/fund24.ts:removeFavorit@60",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen/favoriten"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/me/notifications",
+      "callSite": "lib/api/fund24.ts:listNotifications@76",
+      "authHeader": "yes",
+      "usedBy": [
+        "components/shared/NotificationsBell.tsx (mounted in Navbar → every protected page)"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/me/notifications/:id/read",
+      "callSite": "lib/api/fund24.ts:markNotificationRead@79",
+      "authHeader": "yes",
+      "usedBy": [
+        "components/shared/NotificationsBell.tsx"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/me/notifications/read-all",
+      "callSite": "lib/api/fund24.ts:markAllNotificationsRead@82",
+      "authHeader": "yes",
+      "usedBy": [
+        "components/shared/NotificationsBell.tsx"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/me/dashboard",
+      "callSite": "lib/api/fund24.ts:getDashboard@92",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen (imported as getFund24Dashboard)"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/berichte/:id",
+      "callSite": "lib/api/fund24.ts:getBericht@107",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/berichte",
+      "callSite": "lib/api/fund24.ts:listBerichte@111",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/berichte",
+      "callSite": "lib/api/fund24.ts:createBericht@115",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "PATCH /api/berichte/:id",
+      "callSite": "lib/api/fund24.ts:updateBericht@121",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "PATCH /api/berichte/:id/finalize",
+      "callSite": "lib/api/fund24.ts:finalizeBericht@124",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/beratungen/:id",
+      "callSite": "lib/api/fund24.ts:getBeratung@156",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/beratungen/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/beratungen",
+      "callSite": "lib/api/fund24.ts:listBeratungen@160",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/beratungen"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "PATCH /api/beratungen/:id",
+      "callSite": "lib/api/fund24.ts:updateBeratung@170",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/beratungen/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/antraege/:id",
+      "callSite": "lib/api/fund24.ts:getAntrag@206",
+      "authHeader": "yes",
+      "usedBy": [
+        "/antraege/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/me/antraege",
+      "callSite": "lib/api/fund24.ts:listMeineAntraege@210",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen/antraege"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "PATCH /api/antraege/:id",
+      "callSite": "lib/api/fund24.ts:updateAntragStatus@214",
+      "authHeader": "yes",
+      "usedBy": [
+        "/antraege/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/me/antraege",
+      "callSite": "lib/api/fund24.ts:createAntrag@227",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen/antraege"
+      ],
+      "notes": "Wrapper normalizes worker's {success,data:{caseId}} vs {case:{id}} vs {id} — suggests API-shape drift."
+    },
+    {
+      "endpoint": "GET /api/vorlagen",
+      "callSite": "lib/api/fund24.ts:listVorlagen@250",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/vorlagen"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/vorlagen",
+      "callSite": "lib/api/fund24.ts:createVorlage@254",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/vorlagen"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "DELETE /api/vorlagen/:id",
+      "callSite": "lib/api/fund24.ts:deleteVorlage@263",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/vorlagen"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/admin/email-outbox",
+      "callSite": "lib/api/fund24.ts:listEmailOutbox@281",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin/email-outbox"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/admin/email-outbox/:id/retry",
+      "callSite": "lib/api/fund24.ts:retryEmail@295",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin/email-outbox"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/antraege/:id/dokumente",
+      "callSite": "lib/api/fund24.ts:listAntragDokumente@304",
+      "authHeader": "yes",
+      "usedBy": [
+        "/antraege/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/antraege/:id/dokumente",
+      "callSite": "lib/api/fund24.ts:uploadAntragDokument@311",
+      "authHeader": "yes",
+      "usedBy": [
+        "/antraege/[id]"
+      ],
+      "notes": "multipart/form-data"
+    },
+    {
+      "endpoint": "DELETE /api/antraege/:id/dokumente/:dokId",
+      "callSite": "lib/api/fund24.ts:deleteAntragDokument@328",
+      "authHeader": "yes",
+      "usedBy": [
+        "/antraege/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/antraege/:id/zugriff",
+      "callSite": "lib/api/fund24.ts:listAntragZugriff@349",
+      "authHeader": "yes",
+      "usedBy": [
+        "/antraege/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/antraege/:id/zugriff",
+      "callSite": "lib/api/fund24.ts:grantAntragZugriff@355",
+      "authHeader": "yes",
+      "usedBy": [
+        "/antraege/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "DELETE /api/antraege/:id/zugriff/:zugriffId",
+      "callSite": "lib/api/fund24.ts:revokeAntragZugriff@361",
+      "authHeader": "yes",
+      "usedBy": [
+        "/antraege/[id]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/berater/me/kunden",
+      "callSite": "lib/api/fund24.ts:listBeraterKunden@373",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "DELETE /api/dokumente/:id",
+      "callSite": "lib/api/fund24.ts:deleteDokument@378",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but no page calls it"
+    },
+    {
+      "endpoint": "GET /api/admin/bafa-cert/pending",
+      "callSite": "lib/api/fund24.ts:listPendingCerts@393",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/admin/bafa-cert/:userId/approve",
+      "callSite": "lib/api/fund24.ts:approveCert@402",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/admin/bafa-cert/:userId/reject",
+      "callSite": "lib/api/fund24.ts:rejectCert@405",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/news",
+      "callSite": "lib/api/fund24.ts:getNews@427",
+      "authHeader": "no",
+      "usedBy": [
+        "/aktuelles"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/news/:slug",
+      "callSite": "lib/api/fund24.ts:getNewsArtikel@432",
+      "authHeader": "no",
+      "usedBy": [
+        "/aktuelles/[slug]"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/admin/news",
+      "callSite": "lib/api/fund24.ts:getAdminNews@437",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin/aktuelles"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/admin/news",
+      "callSite": "lib/api/fund24.ts:createAdminNews@441",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin/aktuelles"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "PATCH /api/admin/news/:id",
+      "callSite": "lib/api/fund24.ts:updateAdminNews@450",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin/aktuelles"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "DELETE /api/admin/news/:id",
+      "callSite": "lib/api/fund24.ts:deleteAdminNews@459",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but /admin/aktuelles only uses list/create/update"
+    },
+    {
+      "endpoint": "GET /api/berater/provision-vertraege",
+      "callSite": "lib/api/fund24.ts:getProvisionVertraege@465",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/abwicklung"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/berater/abwicklung/upload",
+      "callSite": "lib/api/fund24.ts:uploadAbwicklungDokument@471",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/abwicklung"
+      ],
+      "notes": "multipart/form-data. Duplicates legacy check.ts:uploadAbwicklungDokument on API.CHECK."
+    },
+    {
+      "endpoint": "GET /api/tracker",
+      "callSite": "lib/api/fund24.ts:getTracker@482",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen/tracker",
+        "/dashboard/berater/tracker"
+      ],
+      "notes": "Collides with lib/api/check.ts:getTracker on API.CHECK. Only the fund24.ts version is actually imported by the tracker pages."
+    },
+    {
+      "endpoint": "POST /api/tracker",
+      "callSite": "lib/api/fund24.ts:createTrackerVorgang@488",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "no page imports it"
+    },
+    {
+      "endpoint": "PATCH /api/tracker/:id",
+      "callSite": "lib/api/fund24.ts:updateTrackerPhase@504",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen/tracker",
+        "/dashboard/berater/tracker"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "DELETE /api/tracker/:id",
+      "callSite": "lib/api/fund24.ts:deleteTrackerVorgang@513",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "no page imports it"
+    },
+    {
+      "endpoint": "GET /api/admin/dashboard",
+      "callSite": "lib/api/fund24.ts:getAdminDashboard@524",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/admin/users",
+      "callSite": "lib/api/fund24.ts:getAdminUsers@542",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin/users"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "PATCH /api/admin/users/:id",
+      "callSite": "lib/api/fund24.ts:updateAdminUser@552",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin/users"
+      ],
+      "notes": "Role-only changes are routed to PATCH /api/admin/users/:id/role (worker split)."
+    },
+    {
+      "endpoint": "PATCH /api/admin/users/:id/role",
+      "callSite": "lib/api/fund24.ts:updateAdminUser@557",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin/users (when only role is changed)"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "DELETE /api/admin/users/:id",
+      "callSite": "lib/api/fund24.ts:deleteAdminUser@569",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin/users"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/admin/provisionen",
+      "callSite": "lib/api/fund24.ts:getAdminProvisionen@574",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin/provisionen"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "PATCH /api/admin/provisionen/:id",
+      "callSite": "lib/api/fund24.ts:updateAdminProvision@580",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin/provisionen"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/admin/audit-logs",
+      "callSite": "lib/api/fund24.ts:listAuditLogs@600",
+      "authHeader": "yes",
+      "usedBy": [
+        "/admin/audit-logs"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/berater/profil",
+      "callSite": "lib/api/berater.ts:getBeraterProfil@44",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/profil"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/berater/profil",
+      "callSite": "lib/api/berater.ts:updateBeraterProfil@54",
+      "authHeader": "yes",
+      "usedBy": [
+        "/onboarding/profil",
+        "/dashboard/berater/profil"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/berater/expertise",
+      "callSite": "lib/api/berater.ts:addExpertise@104",
+      "authHeader": "yes",
+      "usedBy": [
+        "/onboarding/expertise"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/berater/expertise",
+      "callSite": "lib/api/berater.ts:listExpertise@123",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but not imported by any page"
+    },
+    {
+      "endpoint": "POST /api/berater/dienstleistungen",
+      "callSite": "lib/api/berater.ts:addDienstleistung@178",
+      "authHeader": "yes",
+      "usedBy": [
+        "/onboarding/dienstleistungen"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "GET /api/berater/dienstleistungen",
+      "callSite": "lib/api/berater.ts:listDienstleistungen@204",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but not imported by any page"
+    },
+    {
+      "endpoint": "GET /api/unternehmen/profil",
+      "callSite": "lib/api/unternehmen.ts:getUnternehmen@57",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but not imported by any page"
+    },
+    {
+      "endpoint": "POST /api/unternehmen/profil",
+      "callSite": "lib/api/unternehmen.ts:updateUnternehmen@67",
+      "authHeader": "yes",
+      "usedBy": [
+        "/onboarding/unternehmen"
+      ],
+      "notes": null
+    },
+    {
+      "endpoint": "POST /api/checks",
+      "callSite": "lib/api/check.ts:checkStarten@15",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck"
+      ],
+      "notes": "hits API.FUND24 (despite filename)"
+    },
+    {
+      "endpoint": "GET /api/checks/:sessionId",
+      "callSite": "lib/api/check.ts:getCheck@22",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/analyse",
+        "/foerdercheck/[sessionId]/chat",
+        "/foerdercheck/[sessionId]/ergebnisse"
+      ],
+      "notes": "hits API.FUND24"
+    },
+    {
+      "endpoint": "POST /api/checks/:sessionId/chat",
+      "callSite": "lib/api/check.ts:chatNachricht@28",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/chat"
+      ],
+      "notes": "hits API.FUND24"
+    },
+    {
+      "endpoint": "POST /api/checks/:sessionId/docs",
+      "callSite": "lib/api/check.ts:dokumenteHochladen@37",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/dokumente"
+      ],
+      "notes": "multipart/form-data, hits API.FUND24"
+    },
+    {
+      "endpoint": "POST /api/checks/:sessionId/schwarm",
+      "callSite": "lib/api/check.ts:schwarmStarten@49",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/dokumente"
+      ],
+      "notes": "hits API.FUND24"
+    },
+    {
+      "endpoint": "GET /api/checks/:sessionId/matching",
+      "callSite": "lib/api/check.ts:getMatching@55",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/ergebnisse"
+      ],
+      "notes": "hits API.FUND24"
+    },
+    {
+      "endpoint": "GET /api/berater/anfragen",
+      "callSite": "lib/api/check.ts:getAnfragen@61 (rolle=berater branch)",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/anfragen",
+        "/dashboard/berater/nachrichten"
+      ],
+      "notes": "hits API.FUND24"
+    },
+    {
+      "endpoint": "GET /api/me/anfragen",
+      "callSite": "lib/api/check.ts:getAnfragen@61 (default branch)",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen/anfragen"
+      ],
+      "notes": "hits API.FUND24"
+    },
+    {
+      "endpoint": "POST /api/berater/:id/anfrage",
+      "callSite": "lib/api/check.ts:sendeAnfrage@76",
+      "authHeader": "yes",
+      "usedBy": [
+        "/berater/[id]",
+        "/foerdercheck/[sessionId]/ergebnisse"
+      ],
+      "notes": "hits API.FUND24"
+    },
+    {
+      "endpoint": "PATCH /api/berater/anfragen/:id",
+      "callSite": "lib/api/check.ts:updateAnfrage@95",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater",
+        "/dashboard/berater/anfragen"
+      ],
+      "notes": "hits API.FUND24"
+    },
+    {
+      "endpoint": "GET /api/dashboard/:rolle",
+      "callSite": "lib/api/check.ts:getDashboard@113",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen",
+        "/dashboard/berater"
+      ],
+      "notes": "hits API.CHECK (legacy worker) — suspect route; /dashboard/unternehmen now primarily uses getFund24Dashboard()."
+    },
+    {
+      "endpoint": "GET /api/netzwerk/nachrichten?anfrageId=...",
+      "callSite": "lib/api/check.ts:getNachrichten@121",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/nachrichten"
+      ],
+      "notes": "hits API.CHECK (legacy worker) — suspect: may not exist on current worker."
+    },
+    {
+      "endpoint": "POST /api/netzwerk/nachrichten",
+      "callSite": "lib/api/check.ts:sendeNachricht@125",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/nachrichten"
+      ],
+      "notes": "hits API.CHECK (legacy)."
+    },
+    {
+      "endpoint": "GET /api/tracker (CHECK base)",
+      "callSite": "lib/api/check.ts:getTracker@134",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Pages import getTracker from lib/api/fund24.ts — this CHECK variant is shadowed/unused."
+    },
+    {
+      "endpoint": "PATCH /api/tracker/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateTrackerPhase@138",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed by fund24.ts version."
+    },
+    {
+      "endpoint": "GET /api/favoriten",
+      "callSite": "lib/api/check.ts:getFavoriten@147",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Legacy (numeric programmId). Favorites page uses fund24.ts listFavoriten on /api/me/favoriten instead."
+    },
+    {
+      "endpoint": "POST /api/favoriten",
+      "callSite": "lib/api/check.ts:addFavorit@151",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Legacy shadow, unused."
+    },
+    {
+      "endpoint": "DELETE /api/favoriten/:programmId",
+      "callSite": "lib/api/check.ts:removeFavorit@158",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Legacy shadow, unused."
+    },
+    {
+      "endpoint": "GET /api/news (CHECK base)",
+      "callSite": "lib/api/check.ts:getNews@164",
+      "authHeader": "no",
+      "usedBy": [],
+      "notes": "Shadowed by fund24.ts getNews — unused."
+    },
+    {
+      "endpoint": "GET /api/news/:slug (CHECK base)",
+      "callSite": "lib/api/check.ts:getNewsArtikel@169",
+      "authHeader": "no",
+      "usedBy": [],
+      "notes": "Shadowed — unused."
+    },
+    {
+      "endpoint": "GET /api/netzwerk/berater",
+      "callSite": "lib/api/check.ts:getBeraterListe@175",
+      "authHeader": "no",
+      "usedBy": [
+        "/berater"
+      ],
+      "notes": "hits API.FUND24"
+    },
+    {
+      "endpoint": "GET /api/netzwerk/berater/:id",
+      "callSite": "lib/api/check.ts:getBeraterProfil@185",
+      "authHeader": "no",
+      "usedBy": [
+        "/berater/[id]"
+      ],
+      "notes": "hits API.FUND24"
+    },
+    {
+      "endpoint": "GET /api/berater/provision-vertraege (CHECK base)",
+      "callSite": "lib/api/check.ts:getProvisionVertraege@197",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Duplicate of fund24.ts getProvisionVertraege. Abwicklung page imports the fund24.ts version — this one is unused."
+    },
+    {
+      "endpoint": "POST /api/berater/abwicklung/upload (CHECK base)",
+      "callSite": "lib/api/check.ts:uploadAbwicklungDokument@201",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Duplicate/unused."
+    },
+    {
+      "endpoint": "GET /api/admin/dashboard (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminDashboard@216",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed by fund24.ts — unused."
+    },
+    {
+      "endpoint": "GET /api/admin/users (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminUsers@220",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused."
+    },
+    {
+      "endpoint": "PATCH /api/admin/users/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateAdminUser@224",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused."
+    },
+    {
+      "endpoint": "GET /api/admin/provisionen (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminProvisionen@235",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused."
+    },
+    {
+      "endpoint": "PATCH /api/admin/provisionen/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateAdminProvision@239",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused."
+    },
+    {
+      "endpoint": "GET /api/admin/news (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminNews@250",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused."
+    },
+    {
+      "endpoint": "POST /api/admin/news (CHECK base)",
+      "callSite": "lib/api/check.ts:createAdminNews@254",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused."
+    },
+    {
+      "endpoint": "PATCH /api/admin/news/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateAdminNews@263",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused."
+    },
+    {
+      "endpoint": "POST /api/precheck/analyse",
+      "callSite": "lib/api/precheck.ts:analysiereWebsite@6",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck"
+      ],
+      "notes": "hits API.CHECK — public precheck worker."
+    },
+    {
+      "endpoint": "GET /api/precheck/:sessionId/fragen",
+      "callSite": "lib/api/precheck.ts:ladeFragen@13",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/profil"
+      ],
+      "notes": "hits API.CHECK"
+    },
+    {
+      "endpoint": "POST /api/precheck/:sessionId/antwort",
+      "callSite": "lib/api/precheck.ts:sendeAntwort@17",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/chat"
+      ],
+      "notes": "hits API.CHECK"
+    },
+    {
+      "endpoint": "POST /api/precheck/:sessionId/scoring",
+      "callSite": "lib/api/precheck.ts:fuehreScoring@26",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/chat"
+      ],
+      "notes": "hits API.CHECK"
+    },
+    {
+      "endpoint": "GET /api/precheck/:sessionId/status",
+      "callSite": "lib/api/precheck.ts:ladeStatus@30",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/analyse"
+      ],
+      "notes": "hits API.CHECK"
+    },
+    {
+      "endpoint": "POST /api/precheck/bericht",
+      "callSite": "lib/api/precheck.ts:fordereBerichtAn@34",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/bericht"
+      ],
+      "notes": "hits API.CHECK"
+    }
+  ],
+  "direct_fetches": [
+    {
+      "file": "app/sitemap.ts:30",
+      "endpoint": "GET https://api.fund24.io/api/foerdermittel/katalog?page=N&pageSize=50",
+      "notes": "Server-side sitemap build. Reads data.results but worker returns {success,data,pagination} — known shape mismatch."
+    },
+    {
+      "file": "app/sitemap.ts:48",
+      "endpoint": "GET https://api.fund24.io/api/netzwerk/berater?pageSize=200",
+      "notes": "Server-side sitemap build. Reads data.profiles; worker's actual key is likely 'berater' or nested in data — shape should be cross-checked."
+    },
+    {
+      "file": "app/(public)/berater/[id]/opengraph-image.tsx:15",
+      "endpoint": "GET https://api.fund24.io/api/netzwerk/berater/:id",
+      "notes": "OG image generator. ISR revalidate."
+    },
+    {
+      "file": "app/(public)/programme/[id]/opengraph-image.tsx:15",
+      "endpoint": "GET https://api.fund24.io/api/foerdermittel/katalog/:id",
+      "notes": "OG image generator hits the CORRECT worker path — contrast with page code at app/(public)/programme/[id]/page.tsx which hits /api/foerderprogramme/:id (broken)."
+    },
+    {
+      "file": "lib/store/authStore.ts:35",
+      "endpoint": "POST /api/session (same-origin, Next.js API route)",
+      "notes": "Next internal route that sets HttpOnly cookie — not api.fund24.io."
+    },
+    {
+      "file": "lib/store/authStore.ts:50",
+      "endpoint": "DELETE /api/session (same-origin)",
+      "notes": "Clears HttpOnly cookie."
+    }
+  ],
+  "unmatched_frontend_calls": [
+    {
+      "endpoint": "GET /api/stats",
+      "callSite": "lib/api/fund24.ts:getStats@6",
+      "authHeader": "no",
+      "usedBy": [],
+      "notes": "unused export — no page imports it",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/filter-options",
+      "callSite": "lib/api/fund24.ts:getFilterOptions@10",
+      "authHeader": "no",
+      "usedBy": [
+        "/programme"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/foerderprogramme",
+      "callSite": "lib/api/fund24.ts:getProgramme@23",
+      "authHeader": "no",
+      "usedBy": [
+        "components/foerdercheck/ProgrammListe.tsx",
+        "/programme (via ProgrammListe)"
+      ],
+      "notes": "Suspect: worker may only expose /api/foerdermittel/katalog (see sitemap + OG image). Likely broken route for the listing too.",
+      "inWorkerCheck": 5
+    },
+    {
+      "endpoint": "GET /api/foerderprogramme/:id",
+      "callSite": "lib/api/fund24.ts:getProgramm@35",
+      "authHeader": "no",
+      "usedBy": [
+        "/programme/[id]"
+      ],
+      "notes": "KNOWN BUG (Phase 1): worker exposes /api/foerdermittel/katalog/:id, not /api/foerderprogramme/:id — page returns 404 live.",
+      "inWorkerCheck": 5
+    },
+    {
+      "endpoint": "POST /api/me/favoriten/:programmId",
+      "callSite": "lib/api/fund24.ts:addFavorit@57",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but no page calls addFavorit (favorites page only lists/removes). Legacy lib/api/check.ts addFavorit is different (numeric id).",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "DELETE /api/me/favoriten/:programmId",
+      "callSite": "lib/api/fund24.ts:removeFavorit@60",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen/favoriten"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/me/notifications/:id/read",
+      "callSite": "lib/api/fund24.ts:markNotificationRead@79",
+      "authHeader": "yes",
+      "usedBy": [
+        "components/shared/NotificationsBell.tsx"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/me/notifications/read-all",
+      "callSite": "lib/api/fund24.ts:markAllNotificationsRead@82",
+      "authHeader": "yes",
+      "usedBy": [
+        "components/shared/NotificationsBell.tsx"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/berichte/:id",
+      "callSite": "lib/api/fund24.ts:getBericht@107",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/berichte",
+      "callSite": "lib/api/fund24.ts:listBerichte@111",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/berichte",
+      "callSite": "lib/api/fund24.ts:createBericht@115",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/berichte/:id",
+      "callSite": "lib/api/fund24.ts:updateBericht@121",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/berichte/:id/finalize",
+      "callSite": "lib/api/fund24.ts:finalizeBericht@124",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/berater/me/kunden",
+      "callSite": "lib/api/fund24.ts:listBeraterKunden@373",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "DELETE /api/dokumente/:id",
+      "callSite": "lib/api/fund24.ts:deleteDokument@378",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but no page calls it",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/checks/:sessionId",
+      "callSite": "lib/api/check.ts:getCheck@22",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/analyse",
+        "/foerdercheck/[sessionId]/chat",
+        "/foerdercheck/[sessionId]/ergebnisse"
+      ],
+      "notes": "hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/checks/:sessionId/chat",
+      "callSite": "lib/api/check.ts:chatNachricht@28",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/chat"
+      ],
+      "notes": "hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/checks/:sessionId/docs",
+      "callSite": "lib/api/check.ts:dokumenteHochladen@37",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/dokumente"
+      ],
+      "notes": "multipart/form-data, hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/checks/:sessionId/schwarm",
+      "callSite": "lib/api/check.ts:schwarmStarten@49",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/dokumente"
+      ],
+      "notes": "hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/checks/:sessionId/matching",
+      "callSite": "lib/api/check.ts:getMatching@55",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/ergebnisse"
+      ],
+      "notes": "hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/dashboard/:rolle",
+      "callSite": "lib/api/check.ts:getDashboard@113",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen",
+        "/dashboard/berater"
+      ],
+      "notes": "hits API.CHECK (legacy worker) — suspect route; /dashboard/unternehmen now primarily uses getFund24Dashboard().",
+      "inWorkerCheck": 4
+    },
+    {
+      "endpoint": "GET /api/netzwerk/nachrichten?anfrageId=...",
+      "callSite": "lib/api/check.ts:getNachrichten@121",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/nachrichten"
+      ],
+      "notes": "hits API.CHECK (legacy worker) — suspect: may not exist on current worker.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/netzwerk/nachrichten",
+      "callSite": "lib/api/check.ts:sendeNachricht@125",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/nachrichten"
+      ],
+      "notes": "hits API.CHECK (legacy).",
+      "inWorkerCheck": 5
+    },
+    {
+      "endpoint": "GET /api/tracker (CHECK base)",
+      "callSite": "lib/api/check.ts:getTracker@134",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Pages import getTracker from lib/api/fund24.ts — this CHECK variant is shadowed/unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/tracker/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateTrackerPhase@138",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed by fund24.ts version.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/favoriten",
+      "callSite": "lib/api/check.ts:getFavoriten@147",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Legacy (numeric programmId). Favorites page uses fund24.ts listFavoriten on /api/me/favoriten instead.",
+      "inWorkerCheck": 4
+    },
+    {
+      "endpoint": "POST /api/favoriten",
+      "callSite": "lib/api/check.ts:addFavorit@151",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Legacy shadow, unused.",
+      "inWorkerCheck": 4
+    },
+    {
+      "endpoint": "DELETE /api/favoriten/:programmId",
+      "callSite": "lib/api/check.ts:removeFavorit@158",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Legacy shadow, unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/news (CHECK base)",
+      "callSite": "lib/api/check.ts:getNews@164",
+      "authHeader": "no",
+      "usedBy": [],
+      "notes": "Shadowed by fund24.ts getNews — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/news/:slug (CHECK base)",
+      "callSite": "lib/api/check.ts:getNewsArtikel@169",
+      "authHeader": "no",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/berater/provision-vertraege (CHECK base)",
+      "callSite": "lib/api/check.ts:getProvisionVertraege@197",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Duplicate of fund24.ts getProvisionVertraege. Abwicklung page imports the fund24.ts version — this one is unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/berater/abwicklung/upload (CHECK base)",
+      "callSite": "lib/api/check.ts:uploadAbwicklungDokument@201",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Duplicate/unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/admin/dashboard (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminDashboard@216",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed by fund24.ts — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/admin/users (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminUsers@220",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/admin/users/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateAdminUser@224",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/admin/provisionen (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminProvisionen@235",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/admin/provisionen/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateAdminProvision@239",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/admin/news (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminNews@250",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/admin/news (CHECK base)",
+      "callSite": "lib/api/check.ts:createAdminNews@254",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/admin/news/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateAdminNews@263",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/precheck/analyse",
+      "callSite": "lib/api/precheck.ts:analysiereWebsite@6",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck"
+      ],
+      "notes": "hits API.CHECK — public precheck worker.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/precheck/:sessionId/fragen",
+      "callSite": "lib/api/precheck.ts:ladeFragen@13",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/profil"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/precheck/:sessionId/antwort",
+      "callSite": "lib/api/precheck.ts:sendeAntwort@17",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/chat"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/precheck/:sessionId/scoring",
+      "callSite": "lib/api/precheck.ts:fuehreScoring@26",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/chat"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/precheck/:sessionId/status",
+      "callSite": "lib/api/precheck.ts:ladeStatus@30",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/analyse"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/precheck/bericht",
+      "callSite": "lib/api/precheck.ts:fordereBerichtAn@34",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/bericht"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    }
+  ],
+  "dead_endpoints_sample": [
+    {
+      "method": "POST",
+      "path": "/api/auth/refresh",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/auth.ts",
+      "line": 241,
+      "summary": "Rotate refresh token, issue new access JWT",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/auth/me",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/auth.ts",
+      "line": 452,
+      "summary": "Patch own user profile (whitelist phone/website/onboarding_completed)",
+      "routeFile": "worker/src/routes/auth.ts",
+      "mountPath": "/api/auth",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/generate",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/reports.ts",
+      "line": 59,
+      "summary": "Generate 5-phase BAFA report via Workers AI; reserves 1 kontingent",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/preview/:id",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 194,
+      "summary": "Render HTML preview of a report (owner only)",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/unlock",
+      "auth": "hmac",
+      "validation": "zod",
+      "file": "worker/src/routes/reports.ts",
+      "line": 211,
+      "summary": "HMAC-signed unlock + create download token; emails URL",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/download/:token",
+      "auth": "rate-limited-only",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 249,
+      "summary": "Validate download token, return HTML attachment",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 287,
+      "summary": "Paginated list of own reports, enriched from BAFA_DB",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/:id",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 338,
+      "summary": "Single report + antrag + bausteine (owner only)",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 356,
+      "summary": "Create empty draft report (no quota)",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/reports/:id",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/reports.ts",
+      "line": 371,
+      "summary": "Whitelisted update of report (zfbf + bafa fields)",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/:id/finalize",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 429,
+      "summary": "Finalize draft (reserves kontingent, status=pending)",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/reports/:id/finalize",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/reports.ts",
+      "line": 447,
+      "summary": "v2 frontend alias for POST /finalize",
+      "routeFile": "worker/src/routes/reports.ts",
+      "mountPath": "/api/reports (also aliased as /api/berichte)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/branchen/",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/branchen.ts",
+      "line": 20,
+      "summary": "Public list of 10 branchen (KV cached)",
+      "routeFile": "worker/src/routes/branchen.ts",
+      "mountPath": "/api/branchen",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/branchen/:id",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/branchen.ts",
+      "line": 29,
+      "summary": "Public single branche detail",
+      "routeFile": "worker/src/routes/branchen.ts",
+      "mountPath": "/api/branchen",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/promo/validate",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/promo.ts",
+      "line": 21,
+      "summary": "Validate gutschein code (public)",
+      "routeFile": "worker/src/routes/promo.ts",
+      "mountPath": "/api/promo",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/promo/redeem",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/promo.ts",
+      "line": 40,
+      "summary": "Atomically redeem gutschein with race-safe insert+update",
+      "routeFile": "worker/src/routes/promo.ts",
+      "mountPath": "/api/promo",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/promo/codes",
+      "auth": "jwt-admin",
+      "validation": "none",
+      "file": "worker/src/routes/promo.ts",
+      "line": 87,
+      "summary": "Admin: list all gutscheine",
+      "routeFile": "worker/src/routes/promo.ts",
+      "mountPath": "/api/promo",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/promo/create",
+      "auth": "jwt-admin",
+      "validation": "zod",
+      "file": "worker/src/routes/promo.ts",
+      "line": 93,
+      "summary": "Admin: create gutschein",
+      "routeFile": "worker/src/routes/promo.ts",
+      "mountPath": "/api/promo",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders/create",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/orders.ts",
+      "line": 17,
+      "summary": "Create order (einzel/starter/standard/pro) with optional promo; auto-completes for 0EUR/invoice",
+      "routeFile": "worker/src/routes/orders.ts",
+      "mountPath": "/api/orders",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/stripe/create-session",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/payments.ts",
+      "line": 20,
+      "summary": "Create Stripe checkout session for a report",
+      "routeFile": "worker/src/routes/payments.ts",
+      "mountPath": "/api/payments",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/stripe/webhook",
+      "auth": "hmac",
+      "validation": "manual",
+      "file": "worker/src/routes/payments.ts",
+      "line": 77,
+      "summary": "Stripe webhook (signature-verified, KV-idempotent); handles checkout.session.completed + charge.refunded",
+      "routeFile": "worker/src/routes/payments.ts",
+      "mountPath": "/api/payments",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/paypal/create-order",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/payments.ts",
+      "line": 146,
+      "summary": "Create PayPal order for a report",
+      "routeFile": "worker/src/routes/payments.ts",
+      "mountPath": "/api/payments",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/paypal/capture-order",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/payments.ts",
+      "line": 185,
+      "summary": "Capture PayPal order, validate amount, issue download token",
+      "routeFile": "worker/src/routes/payments.ts",
+      "mountPath": "/api/payments",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/verify-payment",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/verify-payment.ts",
+      "line": 12,
+      "summary": "Polls payment status by sessionId/paymentId; for PayPal performs fallback capture",
+      "routeFile": "worker/src/routes/verify-payment.ts",
+      "mountPath": "/api (POST /api/verify-payment)",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/onboarding/dispatch",
+      "auth": "jwt-admin",
+      "validation": "manual",
+      "file": "worker/src/routes/admin.ts",
+      "line": 95,
+      "summary": "Manual onboarding dispatch (?dryRun=1)",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/audit-logs/cleanup",
+      "auth": "jwt-admin",
+      "validation": "none",
+      "file": "worker/src/routes/admin.ts",
+      "line": 149,
+      "summary": "Cleanup old audit logs",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/stats",
+      "auth": "jwt-admin",
+      "validation": "none",
+      "file": "worker/src/routes/admin.ts",
+      "line": 236,
+      "summary": "Aggregated stats (users/reports/payments/antraege/bausteine/promos)",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/check-foerdermittel",
+      "auth": "jwt-admin",
+      "validation": "manual",
+      "file": "worker/src/routes/admin.ts",
+      "line": 261,
+      "summary": "Batch URL HEAD-check of aktiv programs; marks dead as abgelaufen",
+      "routeFile": "worker/src/routes/admin.ts",
+      "mountPath": "/api/admin",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/export",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/gdpr.ts",
+      "line": 13,
+      "summary": "DSGVO Art. 15 data export (JSON download)",
+      "routeFile": "worker/src/routes/gdpr.ts",
+      "mountPath": "/api/user",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/user/account",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/gdpr.ts",
+      "line": 48,
+      "summary": "DSGVO Art. 17 anonymization; keeps payments per HGB §257",
+      "routeFile": "worker/src/routes/gdpr.ts",
+      "mountPath": "/api/user",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/user/privacy-consent",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/gdpr.ts",
+      "line": 79,
+      "summary": "Record privacy consent",
+      "routeFile": "worker/src/routes/gdpr.ts",
+      "mountPath": "/api/user",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/favorites",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/favoriten.ts",
+      "line": 8,
+      "summary": "List own favorited programs",
+      "routeFile": "worker/src/routes/foerdermittel/favoriten.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/favorites",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/favoriten.ts",
+      "line": 17,
+      "summary": "Add program to favorites",
+      "routeFile": "worker/src/routes/foerdermittel/favoriten.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/foerdermittel/favorites/:programId",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/favoriten.ts",
+      "line": 42,
+      "summary": "Remove favorite",
+      "routeFile": "worker/src/routes/foerdermittel/favoriten.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/favorites/:programId/check",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/favoriten.ts",
+      "line": 60,
+      "summary": "Check if program is favorite",
+      "routeFile": "worker/src/routes/foerdermittel/favoriten.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/katalog",
+      "auth": "none",
+      "validation": "zod",
+      "file": "worker/src/routes/foerdermittel/katalog.ts",
+      "line": 19,
+      "summary": "Public paginated/filterable foerderprogramme listing",
+      "routeFile": "worker/src/routes/foerdermittel/katalog.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/katalog/filters",
+      "auth": "none",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/katalog.ts",
+      "line": 103,
+      "summary": "Distinct filter values for the catalog",
+      "routeFile": "worker/src/routes/foerdermittel/katalog.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/katalog/:id",
+      "auth": "none",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/katalog.ts",
+      "line": 140,
+      "summary": "Public foerderprogramm detail",
+      "routeFile": "worker/src/routes/foerdermittel/katalog.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/profile",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/match.ts",
+      "line": 25,
+      "summary": "Get own foerdermittel_profile",
+      "routeFile": "worker/src/routes/foerdermittel/match.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/profile",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/foerdermittel/match.ts",
+      "line": 41,
+      "summary": "Upsert own foerdermittel_profile",
+      "routeFile": "worker/src/routes/foerdermittel/match.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/match",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/match.ts",
+      "line": 110,
+      "summary": "Run rule + AI matching (top 50 saved)",
+      "routeFile": "worker/src/routes/foerdermittel/match.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/matches",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/match.ts",
+      "line": 259,
+      "summary": "List own matches enriched with program data",
+      "routeFile": "worker/src/routes/foerdermittel/match.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/cases/:id/chat",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/foerdermittel/chat.ts",
+      "line": 20,
+      "summary": "Case-scoped AI chat (loads program + steps)",
+      "routeFile": "worker/src/routes/foerdermittel/chat.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/chat",
+      "auth": "jwt-any",
+      "validation": "zod",
+      "file": "worker/src/routes/foerdermittel/chat.ts",
+      "line": 152,
+      "summary": "General AI chat with optional case context",
+      "routeFile": "worker/src/routes/foerdermittel/chat.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/chat/:id",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/chat.ts",
+      "line": 261,
+      "summary": "Get conversation by id (owner only)",
+      "routeFile": "worker/src/routes/foerdermittel/chat.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/cases",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/cases.ts",
+      "line": 21,
+      "summary": "Create case + AI-generated or fallback funnel; copies steps",
+      "routeFile": "worker/src/routes/foerdermittel/cases.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/cases",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/cases.ts",
+      "line": 365,
+      "summary": "List own cases enriched with program + step counts",
+      "routeFile": "worker/src/routes/foerdermittel/cases.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "GET",
+      "path": "/api/foerdermittel/cases/:id",
+      "auth": "jwt-any",
+      "validation": "none",
+      "file": "worker/src/routes/foerdermittel/cases.ts",
+      "line": 411,
+      "summary": "Get case + steps + program (owner only)",
+      "routeFile": "worker/src/routes/foerdermittel/cases.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/foerdermittel/cases/:caseId/steps/:stepId",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/cases.ts",
+      "line": 450,
+      "summary": "Update step status; auto-advance phase when all required done",
+      "routeFile": "worker/src/routes/foerdermittel/cases.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/foerdermittel/cases/:caseId/dokumente",
+      "auth": "jwt-any",
+      "validation": "manual",
+      "file": "worker/src/routes/foerdermittel/cases.ts",
+      "line": 530,
+      "summary": "Multipart upload (10 MB) to R2 + DB metadata",
+      "routeFile": "worker/src/routes/foerdermittel/cases.ts",
+      "mountPath": "/api/foerdermittel",
+      "worker": "fund24 (api.fund24.io)",
+      "called_by": []
+    }
+  ],
+  "findings": {
+    "worker": [
+      {
+        "severity": "high",
+        "summary": "/api/check/* wizard is fully unauthenticated yet writes to BAFA_DB.foerdermittel_profile, uploads to R2 and consumes Workers AI on every request — abuse-vulnerable",
+        "file": "worker/src/routes/check.ts",
+        "line": 54,
+        "evidence": "check.post('/', ...) — no requireAuth; only KV-session-id (caller-supplied) gates subsequent steps. Profile rows persist with user_id='check-{sessionId}'."
+      },
+      {
+        "severity": "high",
+        "summary": "/api/checks/* proxy forwards anything (including body + Authorization header) to a separate Worker without any local auth or rate-limit on top of the global one",
+        "file": "worker/src/routes/checks.ts",
+        "line": 33,
+        "evidence": "forward() copies request to https://foerdermittel-check-api.froeba-kevin.workers.dev with browser-supplied headers; no token check on the Worker boundary"
+      },
+      {
+        "severity": "high",
+        "summary": "/api/admin/check-foerdermittel performs outbound HEAD requests to URLs read from foerderprogramme.url with only an 8s timeout — admin-triggered SSRF surface, mass-fan-out (50 per call)",
+        "file": "worker/src/routes/admin.ts",
+        "line": 261,
+        "evidence": "Promise.all over 50 fetch(p.url, {method: 'HEAD', redirect: 'follow'}) with no host allowlist; redirect=follow lets attackers hop to internal addresses if any malicious url ever lands in the table"
+      },
+      {
+        "severity": "medium",
+        "summary": "/api/reports/preview/:id and /api/reports/download/:token return raw HTML from generated content without explicit XSS sanitization — content is AI-generated",
+        "file": "worker/src/routes/reports.ts",
+        "line": 204,
+        "evidence": "new Response(generateReportPreview(...), { 'Content-Type': 'text/html' }) — relies on report-html service to escape; no Content-Security-Policy header set on this response"
+      },
+      {
+        "severity": "medium",
+        "summary": "Stripe webhook returns 200 with {received: true, error: '...'} on amount-mismatch and missing-payment cases — Stripe will not retry, log entry only in DB",
+        "file": "worker/src/routes/payments.ts",
+        "line": 104,
+        "evidence": "lines 100-114 return c.json({received:true, error:...}) instead of 4xx; Stripe treats this as accepted"
+      },
+      {
+        "severity": "medium",
+        "summary": "/api/auth/refresh has no per-IP/per-user rate limit (only the global one); refresh-token rotation is the primary credential-recovery path",
+        "file": "worker/src/routes/auth.ts",
+        "line": 241,
+        "evidence": "POST /refresh has no loginRateLimit-style guard"
+      },
+      {
+        "severity": "medium",
+        "summary": "/api/me/* uses sub-app .fetch() dispatch which re-enters the foerdermittel/unternehmen sub-app but bypasses the trailing-slash redirect + global pre-mount middleware that already ran on the outer request — works today but is fragile if middleware order changes",
+        "file": "worker/src/routes/me.ts",
+        "line": 14,
+        "evidence": "forward() builds a new Request(targetUrl, c.req.raw) and calls foerdermittel.fetch(...) directly"
+      },
+      {
+        "severity": "medium",
+        "summary": "/api/admin/users PATCH allows updating email without re-verifying — admin can silently take over accounts; no audit log shows old vs new email",
+        "file": "worker/src/routes/admin.ts",
+        "line": 164,
+        "evidence": "allowed list contains 'email'; updateProfile writes directly; audit log just records 'profile update {id}: email'"
+      },
+      {
+        "severity": "medium",
+        "summary": "/api/foerdermittel/cases (POST) auto-creates a foerdermittel_profile from unternehmen with no rate-limit and triggers Workers-AI funnel generation (3000 max_tokens) per program — costly per-call",
+        "file": "worker/src/routes/foerdermittel/cases.ts",
+        "line": 130,
+        "evidence": "ai.run('@cf/meta/llama-3.1-8b-instruct-fp8', { max_tokens: 3000 }) on first case creation per program; only the global rate-limit guards"
+      },
+      {
+        "severity": "medium",
+        "summary": "/api/foerdermittel/match runs LLM scoring in batches of 10 with no per-user concurrency cap; can exhaust Workers AI quota if hammered",
+        "file": "worker/src/routes/foerdermittel/match.ts",
+        "line": 170,
+        "evidence": "for-loop over chunks of 10 with ai.run(...) max_tokens=2000; only guarded by globalRateLimit"
+      },
+      {
+        "severity": "medium",
+        "summary": "/api/admin/news DELETE is hard-delete — no soft-delete or audit log of the deletion",
+        "file": "worker/src/routes/news.ts",
+        "line": 204,
+        "evidence": "DELETE FROM news_articles WHERE id = ?; no writeAuditLog call"
+      },
+      {
+        "severity": "low",
+        "summary": "PATCH /api/admin/provisionen/:id uses dynamic `${k} = ?` SQL, but keys come from zod-parsed object keys (safe). Still, pattern is duplicated across admin/tracker/reports — central helper would reduce drift risk",
+        "file": "worker/src/routes/admin.ts",
+        "line": 71,
+        "evidence": "for (const [k, v] of Object.entries(d)) sets.push(`${k} = ?`)"
+      },
+      {
+        "severity": "low",
+        "summary": "Multiple endpoints leak DB-shape error strings in non-production (onError returns err.message) — fine, but verify ENVIRONMENT is set in dev preview deployments to avoid leaking stack info",
+        "file": "worker/src/index.ts",
+        "line": 200,
+        "evidence": "error: c.env.ENVIRONMENT === 'production' ? 'Interner Serverfehler' : err.message"
+      },
+      {
+        "severity": "low",
+        "summary": "/api/verify-payment is unauthenticated — only correlates by sessionId/paymentId. Anyone with a leaked stripe session id could observe payment status (low-impact, no PII beyond reportTitle)",
+        "file": "worker/src/routes/verify-payment.ts",
+        "line": 12,
+        "evidence": "verifyPayment.post('/verify-payment', async (c) => ...) — no requireAuth"
+      },
+      {
+        "severity": "low",
+        "summary": "/api/oa/* exposes operational/health metrics publicly (KV-cached CP/VA reports). Likely intentional, but worth confirming nothing-sensitive in those reports",
+        "file": "worker/src/routes/oa.ts",
+        "line": 11,
+        "evidence": "no requireAuth on any oa.* handler"
+      },
+      {
+        "severity": "low",
+        "summary": "GAP-001 cert-approve loop registers two routes via shared closure ([approve|reject]) on a single `for ... of` — callable, but Hono line numbers all map to admin.ts:446. Re-check unit tests cover both paths",
+        "file": "worker/src/routes/admin.ts",
+        "line": 446,
+        "evidence": "for (const [action, next] of [['approve','approved'],['reject','rejected']] as const) { admin.post(`/bafa-cert/:userId/${action}`, ...) }"
+      },
+      {
+        "severity": "low",
+        "summary": "`scrapeCompanyFromUrl` (called from /api/check) fetches a user-supplied URL. Currently no documented allowlist; SSRF-relevant for an unauthenticated endpoint",
+        "file": "worker/src/routes/check.ts",
+        "line": 78,
+        "evidence": "if (body.url) { const scraped = await scrapeCompanyFromUrl(body.url); }"
+      },
+      {
+        "severity": "low",
+        "summary": "Role-check in /api/admin/users/:id/role only allows 'user'|'admin' — system has 'berater' and 'unternehmen' roles too. Promoting/demoting between those is not exposed (could be intentional)",
+        "file": "worker/src/routes/admin.ts",
+        "line": 195,
+        "evidence": "if (!['user','admin'].includes(role)) return ..."
+      },
+      {
+        "severity": "low",
+        "summary": "Several endpoints use `as any` / `as unknown as AiRunner` to cast the Workers-AI binding; safe today but masks future Workers-AI typed breakage (check.ts and inside services)",
+        "file": "worker/src/routes/check.ts",
+        "line": 16,
+        "evidence": "type AiRunner = { run(model: string, options: Record<string, unknown>): Promise<any> }; (await (ai as unknown as AiRunner).run(...))"
+      },
+      {
+        "severity": "low",
+        "summary": "/api/antraege/:id PATCH and other endpoints email owners on phase change with executionCtx.waitUntil — failures swallowed silently; consider failure metric",
+        "file": "worker/src/routes/antraege.ts",
+        "line": 253,
+        "evidence": "c.executionCtx.waitUntil(sendAntragStatusChangedEmail(...))"
+      }
+    ],
+    "frontend": [
+      {
+        "severity": "critical",
+        "summary": "getProgramm() calls /api/foerderprogramme/:id but worker exposes /api/foerdermittel/katalog/:id — every /programme/[id] deep link 404s live (confirmed in 01_pages.json: flags BROKEN-all-ids-return-404).",
+        "file": "lib/api/fund24.ts",
+        "line": 36,
+        "evidence": "return apiCall<Foerderprogramm>(API.FUND24, `/api/foerderprogramme/${id}`)  // should be /api/foerdermittel/katalog/${id} — see app/(public)/programme/[id]/opengraph-image.tsx:15 which uses the correct path"
+      },
+      {
+        "severity": "high",
+        "summary": "getProgramme() list also targets /api/foerderprogramme which is not the worker's current listing route (worker uses /api/foerdermittel/katalog, matching sitemap.ts:30 and OG image). High suspicion /programme listing calls a route that does not exist.",
+        "file": "lib/api/fund24.ts",
+        "line": 32,
+        "evidence": "return apiCall<ProgrammeResponse>(API.FUND24, `/api/foerderprogramme${qs ? `?${qs}` : ''}`)"
+      },
+      {
+        "severity": "high",
+        "summary": "app/sitemap.ts:34 reads `data.results` but the katalog worker returns `{success, data, pagination}` — sitemap will always be empty in prod (known issue, still flagged).",
+        "file": "app/sitemap.ts",
+        "line": 34,
+        "evidence": "const data = (await res.json()) as { results?: KatalogItem[]; total?: number }  // actual worker response uses data: […]"
+      },
+      {
+        "severity": "high",
+        "summary": "lib/api/check.ts contains massive legacy surface (news, admin, tracker, favoriten, abwicklung, dashboard) pointing at API.CHECK (NEXT_PUBLIC_CHECK_API_URL) that is almost entirely shadowed by fund24.ts on API.FUND24. Candidates for either deletion or accidental use of the wrong worker (e.g. getDashboard, getNachrichten, sendeNachricht still used by pages).",
+        "file": "lib/api/check.ts",
+        "line": 113,
+        "evidence": "getDashboard → apiCall(API.CHECK, `/api/dashboard/${rolle}`, …) called from /dashboard/unternehmen & /dashboard/berater. CHECK base may point to legacy worker / stale URL."
+      },
+      {
+        "severity": "high",
+        "summary": "getNachrichten + sendeNachricht still target API.CHECK at /api/netzwerk/nachrichten — used by /dashboard/berater/nachrichten. If CHECK points to foerdermittel-check-api (precheck) worker this route almost certainly does not exist; nachrichten page may be non-functional.",
+        "file": "lib/api/check.ts",
+        "line": 121,
+        "evidence": "apiCall(API.CHECK, `/api/netzwerk/nachrichten?anfrageId=${anfrageId}`, undefined, token)"
+      },
+      {
+        "severity": "medium",
+        "summary": "app/sitemap.ts:52 reads `data.profiles` from /api/netzwerk/berater; the app-side wrapper (check.ts:getBeraterListe) types the response as { berater: BeraterProfil[] }. Shape between sitemap and wrapper is inconsistent — one (or both) is wrong.",
+        "file": "app/sitemap.ts",
+        "line": 52,
+        "evidence": "return (data.profiles ?? []).map((b) => b.id)  // but wrapper expects {berater: […]}"
+      },
+      {
+        "severity": "medium",
+        "summary": "createAntrag wrapper normalizes three different response shapes ({data:{caseId}}, {case:{id}}, {id}) — indicates historical API drift that is silently hidden; any change in worker response breaks the fallback.",
+        "file": "lib/api/fund24.ts",
+        "line": 230,
+        "evidence": "return { id: r.data?.caseId ?? r.case?.id ?? r.id ?? '' }"
+      },
+      {
+        "severity": "medium",
+        "summary": "Many exports in lib/api/* are never imported by any page/component (dead surface): getStats, verifyEmail, deleteDokument, deleteAdminNews, listExpertise, listDienstleistungen, getUnternehmen, createTrackerVorgang, deleteTrackerVorgang, addFavorit (fund24.ts). Reduces clarity and grows attack surface; all still go over production Bearer tokens if invoked.",
+        "file": "lib/api/fund24.ts",
+        "line": 6,
+        "evidence": "getStats (@6), verifyEmail (auth.ts@103), deleteDokument (@378), deleteAdminNews (@459), listExpertise (berater.ts@123), listDienstleistungen (berater.ts@204), getUnternehmen (unternehmen.ts@57), createTrackerVorgang (@488), deleteTrackerVorgang (@513), addFavorit (@57)"
+      },
+      {
+        "severity": "medium",
+        "summary": "updateAnfrage wrapper silently coerces any unrecognized status to 'abgelehnt' to keep compatibility with legacy AnfrageStatus union — can result in reject actions happening on user's behalf if UI passes an unexpected status string.",
+        "file": "lib/api/check.ts",
+        "line": 100,
+        "evidence": "const mapped: 'angenommen' | 'abgelehnt' = status === 'angenommen' ? 'angenommen' : 'abgelehnt'"
+      },
+      {
+        "severity": "medium",
+        "summary": "All authenticated fund24.ts helpers resolve the token via useAuth.getState().token at call time and silently pass null on SSR (typeof window === 'undefined' branch). If any of these helpers is ever invoked from a server component/generateMetadata it will issue an unauthenticated request and produce either a 401 or an anonymous response.",
+        "file": "lib/api/fund24.ts",
+        "line": 46,
+        "evidence": "function token(): string | null { if (typeof window === 'undefined') return null; return useAuth.getState().token }"
+      },
+      {
+        "severity": "medium",
+        "summary": "updateAdminProvision wrapper widens status to plain string so 'invalid values get a 400 from the worker' — i.e. the UI relies on the worker for enum validation rather than enforcing client-side. Increases likelihood of unguarded state transitions shipping to admin UI.",
+        "file": "lib/api/fund24.ts",
+        "line": 585,
+        "evidence": "// Widened to string so the UI can pass its own ProvisionStatus type; invalid values get a 400 from the worker."
+      },
+      {
+        "severity": "low",
+        "summary": "Duplicate getTracker/updateTrackerPhase/getNews/getNewsArtikel/getAdminDashboard/getAdminUsers/getAdminProvisionen/getAdminNews/createAdminNews/updateAdminNews/getProvisionVertraege/uploadAbwicklungDokument live in both check.ts and fund24.ts with different auth bases. Name collisions could produce subtle bugs if an import is ever re-pointed.",
+        "file": "lib/api/check.ts",
+        "line": 134,
+        "evidence": "getTracker (check.ts@134 on API.CHECK) vs getTracker (fund24.ts@482 on API.FUND24) — both named the same, exported from different files."
+      },
+      {
+        "severity": "low",
+        "summary": "auth.ts:logout manually clears a document.cookie named 'fund24-auth' but the real HttpOnly cookie set by /api/session is 'fund24-token'. Client-side cookie clear is a no-op on the wrong name (plus HttpOnly cookies cannot be cleared from JS anyway — they require the POST/DELETE to /api/session, which logout doesn't call).",
+        "file": "lib/api/auth.ts",
+        "line": 125,
+        "evidence": "document.cookie = 'fund24-auth=; path=/; max-age=0'"
+      },
+      {
+        "severity": "low",
+        "summary": "precheck.ts endpoints target API.CHECK (NEXT_PUBLIC_CHECK_API_URL) — worth verifying the precheck worker is still deployed at the same env var that the legacy check endpoints use. If the env var was repurposed, every precheck call fails.",
+        "file": "lib/api/precheck.ts",
+        "line": 7,
+        "evidence": "return apiCall(API.CHECK, '/api/precheck/analyse', …)"
+      },
+      {
+        "severity": "low",
+        "summary": "app/antraege/[id]/page.tsx is the only place that mutates Antrag dokumente; per 01_pages.json the route is marked AUTH-LEAK-missing-from-PROTECTED_PREFIXES — an unauthenticated user could still trigger the wrappers (Bearer=null) which will hit the worker anyway and likely return 401s, but no client-side guard blocks this first.",
+        "file": "app/antraege/[id]/page.tsx",
+        "line": 1,
+        "evidence": "Page imports getAntrag/updateAntragStatus/uploadAntragDokument etc. via fund24.ts; Route is flagged AUTH-LEAK in docs/analysis/full-audit/01_pages.json"
+      }
+    ]
+  },
+  "realDead_frontend_calls": [
+    {
+      "endpoint": "GET /api/stats",
+      "callSite": "lib/api/fund24.ts:getStats@6",
+      "authHeader": "no",
+      "usedBy": [],
+      "notes": "unused export — no page imports it",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/filter-options",
+      "callSite": "lib/api/fund24.ts:getFilterOptions@10",
+      "authHeader": "no",
+      "usedBy": [
+        "/programme"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/me/favoriten/:programmId",
+      "callSite": "lib/api/fund24.ts:addFavorit@57",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but no page calls addFavorit (favorites page only lists/removes). Legacy lib/api/check.ts addFavorit is different (numeric id).",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "DELETE /api/me/favoriten/:programmId",
+      "callSite": "lib/api/fund24.ts:removeFavorit@60",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen/favoriten"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/me/notifications/:id/read",
+      "callSite": "lib/api/fund24.ts:markNotificationRead@79",
+      "authHeader": "yes",
+      "usedBy": [
+        "components/shared/NotificationsBell.tsx"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/me/notifications/read-all",
+      "callSite": "lib/api/fund24.ts:markAllNotificationsRead@82",
+      "authHeader": "yes",
+      "usedBy": [
+        "components/shared/NotificationsBell.tsx"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/berichte/:id",
+      "callSite": "lib/api/fund24.ts:getBericht@107",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/berichte",
+      "callSite": "lib/api/fund24.ts:listBerichte@111",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/berichte",
+      "callSite": "lib/api/fund24.ts:createBericht@115",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/berichte/:id",
+      "callSite": "lib/api/fund24.ts:updateBericht@121",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/berichte/:id/finalize",
+      "callSite": "lib/api/fund24.ts:finalizeBericht@124",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/berater/me/kunden",
+      "callSite": "lib/api/fund24.ts:listBeraterKunden@373",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "DELETE /api/dokumente/:id",
+      "callSite": "lib/api/fund24.ts:deleteDokument@378",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but no page calls it",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/checks/:sessionId",
+      "callSite": "lib/api/check.ts:getCheck@22",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/analyse",
+        "/foerdercheck/[sessionId]/chat",
+        "/foerdercheck/[sessionId]/ergebnisse"
+      ],
+      "notes": "hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/checks/:sessionId/chat",
+      "callSite": "lib/api/check.ts:chatNachricht@28",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/chat"
+      ],
+      "notes": "hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/checks/:sessionId/docs",
+      "callSite": "lib/api/check.ts:dokumenteHochladen@37",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/dokumente"
+      ],
+      "notes": "multipart/form-data, hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/checks/:sessionId/schwarm",
+      "callSite": "lib/api/check.ts:schwarmStarten@49",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/dokumente"
+      ],
+      "notes": "hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/checks/:sessionId/matching",
+      "callSite": "lib/api/check.ts:getMatching@55",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/ergebnisse"
+      ],
+      "notes": "hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/netzwerk/nachrichten?anfrageId=...",
+      "callSite": "lib/api/check.ts:getNachrichten@121",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/nachrichten"
+      ],
+      "notes": "hits API.CHECK (legacy worker) — suspect: may not exist on current worker.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/tracker (CHECK base)",
+      "callSite": "lib/api/check.ts:getTracker@134",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Pages import getTracker from lib/api/fund24.ts — this CHECK variant is shadowed/unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/tracker/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateTrackerPhase@138",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed by fund24.ts version.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "DELETE /api/favoriten/:programmId",
+      "callSite": "lib/api/check.ts:removeFavorit@158",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Legacy shadow, unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/news (CHECK base)",
+      "callSite": "lib/api/check.ts:getNews@164",
+      "authHeader": "no",
+      "usedBy": [],
+      "notes": "Shadowed by fund24.ts getNews — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/news/:slug (CHECK base)",
+      "callSite": "lib/api/check.ts:getNewsArtikel@169",
+      "authHeader": "no",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/berater/provision-vertraege (CHECK base)",
+      "callSite": "lib/api/check.ts:getProvisionVertraege@197",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Duplicate of fund24.ts getProvisionVertraege. Abwicklung page imports the fund24.ts version — this one is unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/berater/abwicklung/upload (CHECK base)",
+      "callSite": "lib/api/check.ts:uploadAbwicklungDokument@201",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Duplicate/unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/admin/dashboard (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminDashboard@216",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed by fund24.ts — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/admin/users (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminUsers@220",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/admin/users/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateAdminUser@224",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/admin/provisionen (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminProvisionen@235",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/admin/provisionen/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateAdminProvision@239",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/admin/news (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminNews@250",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/admin/news (CHECK base)",
+      "callSite": "lib/api/check.ts:createAdminNews@254",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/admin/news/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateAdminNews@263",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/precheck/analyse",
+      "callSite": "lib/api/precheck.ts:analysiereWebsite@6",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck"
+      ],
+      "notes": "hits API.CHECK — public precheck worker.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/precheck/:sessionId/fragen",
+      "callSite": "lib/api/precheck.ts:ladeFragen@13",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/profil"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/precheck/:sessionId/antwort",
+      "callSite": "lib/api/precheck.ts:sendeAntwort@17",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/chat"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/precheck/:sessionId/scoring",
+      "callSite": "lib/api/precheck.ts:fuehreScoring@26",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/chat"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/precheck/:sessionId/status",
+      "callSite": "lib/api/precheck.ts:ladeStatus@30",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/analyse"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/precheck/bericht",
+      "callSite": "lib/api/precheck.ts:fordereBerichtAn@34",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/bericht"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    }
+  ]
+}
