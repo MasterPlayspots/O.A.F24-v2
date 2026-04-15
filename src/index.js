@@ -9,6 +9,9 @@
 
 // Erlaubte Origins für CORS (Produktion + Entwicklung)
 const ALLOWED_ORIGINS = [
+  "https://fund24.io",
+  "https://www.fund24.io",
+  "https://fund24.vercel.app",
   "https://zfbf.info",
   "https://www.zfbf.info",
   "https://zfbf-frontend.vercel.app",
@@ -4177,7 +4180,9 @@ async function pruefeKombinierbarkeit(request, env) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const path = url.pathname;
+    let path = url.pathname;
+    if (path.startsWith("/check/")) path = path.substring(6) || "/";
+    else if (path === "/check") path = "/";
     const method = request.method;
 
     // CORS preflight — dynamisch pro Origin
