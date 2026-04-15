@@ -52,10 +52,12 @@ Siehe `.env.example`. In **Vercel** müssen folgende Variablen für die Producti
 
 ## Documentation
 
+- **[`docs/AUDIT.md`](docs/AUDIT.md)** — **Consolidated audit dossier** (Original audit + Gap Analysis + Fix Log + Post-Phase-2 Re-Audit + Ecosystem Map). Start here for the full-stack overview.
 - [`docs/API.md`](docs/API.md) — Auto-generierte API-Referenz (143 Endpoints, 23 Groups). CI blockiert Merges, wenn diese Datei out-of-sync ist.
 - [`docs/MIGRATIONS.md`](docs/MIGRATIONS.md) — D1-Migrationen + Rollback-Konventionen.
 - [`docs/FIX_LOG.md`](docs/FIX_LOG.md) — Chronologisches Log der Audit-Findings und deren Behebung.
 - [`docs/BACKEND_WIRING_MAP.md`](docs/BACKEND_WIRING_MAP.md) — Frontend↔Worker Verbindungs-Matrix.
+- [`docs/analysis/`](docs/analysis/) — Source files that `AUDIT.md` aggregates (raw metrics, feature matrix CSV, ER-Diagramme per DB).
 - `ECOSYSTEM.md` — *Deprecated*. Historischer Architektur-Snapshot; API-Details siehe `docs/API.md`.
 
 ## Auth-Flow
