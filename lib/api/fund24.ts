@@ -211,6 +211,19 @@ export async function listMeineAntraege(): Promise<Antrag[]> {
   return apiCall<Antrag[]>(API.FUND24, '/api/me/antraege', undefined, token())
 }
 
+export async function updateAntragStatus(
+  id: string,
+  status: Antrag['status'],
+  extra?: { foerdersumme_beantragt?: number; foerdersumme_bewilligt?: number }
+) {
+  return apiCall<{ success: boolean; status: Antrag['status'] }>(
+    API.FUND24,
+    `/api/antraege/${id}`,
+    { method: 'PATCH', body: JSON.stringify({ status, ...extra }) },
+    token()
+  )
+}
+
 export async function createAntrag(body: { programm_id: string; beschreibung?: string }): Promise<{ id: string }> {
   // Worker (foerdermittel/cases) returns {success, data:{caseId}}.
   // Wrapper normalizes to {id} for the existing frontend caller.

@@ -14,6 +14,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import type { Bindings, Variables } from "../types";
 import { requireAuth } from "../middleware/auth";
+import { sendAntragStatusChangedEmail } from "../services/email";
 
 const antraege = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -157,6 +158,112 @@ antraege.get("/:id", requireAuth, async (c) => {
     created_at: ctx.row.created_at,
     updated_at: ctx.row.updated_at,
   });
+});
+
+// ============================================================
+// PATCH /api/antraege/:id — status transitions (owner-only)
+// Maps the user-facing status (entwurf|eingereicht|bewilligt|abgelehnt)
+// to the underlying foerdermittel_cases (phase, status) pair so the
+// deriveStatus() read-path returns the same label.
+// ============================================================
+
+type FrontendWriteStatus = "entwurf" | "eingereicht" | "bewilligt" | "abgelehnt";
+
+const patchSchema = z.object({
+  status: z.enum(["entwurf", "eingereicht", "bewilligt", "abgelehnt"]),
+  foerdersumme_beantragt: z.number().min(0).optional(),
+  foerdersumme_bewilligt: z.number().min(0).optional(),
+});
+
+function writeStatusToDbPair(status: FrontendWriteStatus): { phase: string; status: string } {
+  switch (status) {
+    case "eingereicht":
+      return { phase: "submission", status: "active" };
+    case "bewilligt":
+      return { phase: "follow_up", status: "completed" };
+    case "abgelehnt":
+      return { phase: "submission", status: "rejected" };
+    case "entwurf":
+    default:
+      return { phase: "application_draft", status: "active" };
+  }
+}
+
+antraege.patch("/:id", requireAuth, async (c) => {
+  const user = c.get("user");
+  const id = c.req.param("id");
+
+  const ctx = await loadCaseWithOwner(c.env.BAFA_DB, id);
+  if (!ctx) return c.json({ success: false, error: "Antrag nicht gefunden" }, 404);
+  if (user.id !== ctx.owner.user_id)
+    return c.json({ success: false, error: "Nur Antrag-Owner darf den Status ändern" }, 403);
+
+  const parsed = patchSchema.safeParse(await c.req.json());
+  if (!parsed.success) {
+    return c.json(
+      { success: false, error: "Validierungsfehler", details: parsed.error.issues.map((e) => e.message) },
+      400
+    );
+  }
+  const body = parsed.data;
+  const before = deriveStatus(ctx.row.phase, ctx.row.status);
+  const dbPair = writeStatusToDbPair(body.status);
+
+  // Patch phase_data blob with any new Fördersummen values.
+  let phaseData: Record<string, unknown> = {};
+  if (ctx.row.phase_data) {
+    try {
+      phaseData = JSON.parse(ctx.row.phase_data) as Record<string, unknown>;
+    } catch {
+      phaseData = {};
+    }
+  }
+  if (body.foerdersumme_beantragt !== undefined) {
+    phaseData.foerdersumme_beantragt = body.foerdersumme_beantragt;
+  }
+  if (body.foerdersumme_bewilligt !== undefined) {
+    phaseData.foerdersumme_bewilligt = body.foerdersumme_bewilligt;
+  }
+
+  await c.env.BAFA_DB
+    .prepare(
+      `UPDATE foerdermittel_cases
+          SET phase = ?, status = ?, phase_data = ?, updated_at = datetime('now')
+        WHERE id = ?`
+    )
+    .bind(dbPair.phase, dbPair.status, JSON.stringify(phaseData), id)
+    .run();
+
+  // Fire email only on real transitions to a notifiable status.
+  if (
+    c.env.RESEND_API_KEY &&
+    body.status !== before &&
+    (body.status === "eingereicht" || body.status === "bewilligt" || body.status === "abgelehnt")
+  ) {
+    const ownerContact = await c.env.DB
+      .prepare("SELECT email, first_name AS firstName FROM users WHERE id = ?")
+      .bind(ctx.owner.user_id)
+      .first<{ email: string; firstName: string }>();
+    const programm = await c.env.FOERDER_DB
+      .prepare("SELECT titel FROM foerderprogramme WHERE id = ?")
+      .bind(ctx.row.programm_id)
+      .first<{ titel: string }>()
+      .catch(() => null);
+    if (ownerContact?.email) {
+      c.executionCtx.waitUntil(
+        sendAntragStatusChangedEmail(
+          c.env.RESEND_API_KEY,
+          ownerContact.email,
+          ownerContact.firstName || "",
+          programm?.titel || "dein Programm",
+          body.status,
+          id
+        )
+      );
+    }
+  }
+
+  return c.json({ success: true, status: body.status });
 });
 
 // ============================================================

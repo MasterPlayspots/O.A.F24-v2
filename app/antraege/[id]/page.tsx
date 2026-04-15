@@ -8,6 +8,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/store/authStore';
 import {
   getAntrag,
+  updateAntragStatus,
   listAntragDokumente,
   uploadAntragDokument,
   deleteAntragDokument,
@@ -103,6 +104,22 @@ export default function AntragDetailPage() {
     return () => { cancelled = true; };
   }, [id, token]);
 
+  const [statusUpdating, setStatusUpdating] = useState(false);
+
+  const handleStatusChange = async (next: Antrag['status']) => {
+    if (!antrag || next === antrag.status) return;
+    setStatusUpdating(true);
+    setFehler('');
+    try {
+      await updateAntragStatus(id, next);
+      setAntrag({ ...antrag, status: next });
+    } catch (e) {
+      setFehler(e instanceof Error ? e.message : 'Status konnte nicht geändert werden.');
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
+
   const handleInvite = async (data: { berater_id: string; rolle: 'editor' | 'viewer' | 'reviewer' }) => {
     await grantAntragZugriff(id, data);
     await reloadACL();
@@ -134,8 +151,23 @@ export default function AntragDetailPage() {
             <h1 className="font-display font-bold text-5xl tracking-[-0.02em] leading-none truncate">
               {antrag?.programm_name ?? 'Antrag-Detail'}
             </h1>
-            <div className="mt-5 flex items-center gap-4">
+            <div className="mt-5 flex items-center gap-4 flex-wrap">
               <span className={`px-3 py-1 rounded-md text-xs font-medium ${ss.bg} ${ss.fg}`}>{ss.label}</span>
+              {antrag && (
+                <select
+                  value={antrag.status}
+                  onChange={(e) => handleStatusChange(e.target.value as Antrag['status'])}
+                  disabled={statusUpdating}
+                  className="bg-architect-surface-low/40 text-white text-xs font-body px-3 py-1.5 rounded-md
+                             outline-none focus:ring-1 focus:ring-architect-primary-light disabled:opacity-50"
+                  aria-label="Status ändern"
+                >
+                  <option value="entwurf">Entwurf</option>
+                  <option value="eingereicht">Eingereicht</option>
+                  <option value="bewilligt">Bewilligt</option>
+                  <option value="abgelehnt">Abgelehnt</option>
+                </select>
+              )}
               <span className="text-xs text-white/40 font-mono truncate">{id}</span>
             </div>
           </div>
