@@ -46,7 +46,11 @@ id = "test-cache-id"
 binding = "WEBHOOK_EVENTS"
 id = "test-webhook-events-id"
 
-# R2 Bucket
+# R2 Buckets
 [[r2_buckets]]
 binding = "REPORTS"
 bucket_name = "bafa-reports-test"
+
+[[r2_buckets]]
+binding = "BAFA_CERTS"
+bucket_name = "fund24-bafa-certs-test"

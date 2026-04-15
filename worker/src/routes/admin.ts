@@ -479,4 +479,35 @@ for (const [action, next] of [
   });
 }
 
+// GAP-002: admin downloads the most recent uploaded BAFA cert for review.
+// The R2 key pattern is `{userId}/{ts}-{filename}`; we pick the newest one.
+admin.get("/bafa-cert/:userId/download", async (c) => {
+  const userId = c.req.param("userId");
+  if (!userId || userId.length > 64) {
+    return c.json({ success: false, error: "Ungültige User-ID" }, 400);
+  }
+
+  const listing = await c.env.BAFA_CERTS.list({ prefix: `${userId}/` });
+  if (!listing.objects.length) {
+    return c.json({ success: false, error: "Kein Zertifikat vorhanden" }, 404);
+  }
+
+  // objects come sorted by key ascending; the timestamp prefix in our
+  // key makes the last element the most recent upload.
+  const latest = listing.objects[listing.objects.length - 1];
+  const obj = await c.env.BAFA_CERTS.get(latest.key);
+  if (!obj) {
+    return c.json({ success: false, error: "Zertifikat nicht abrufbar" }, 404);
+  }
+
+  const filename = latest.key.split("/").pop() ?? "bafa-cert.pdf";
+  return new Response(obj.body, {
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "private, no-store",
+    },
+  });
+});
+
 export { admin };

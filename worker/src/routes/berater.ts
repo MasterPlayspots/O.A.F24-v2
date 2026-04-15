@@ -652,4 +652,127 @@ berater.post("/abwicklung/upload", requireAuth, requireRole("berater"), async (c
   }, 201);
 });
 
+// ============================================================
+// BAFA Cert Upload (GAP-002)
+//
+// Berater reicht BAFA-Zertifikat als PDF ≤ 5 MB ein. Wir speichern
+// nach R2 unter `{userId}/{ts}-{sanitized-filename}` und setzen
+// users.bafa_cert_status='pending'. Admin prüft anschließend in der
+// Cert-Queue (GAP-001).
+// ============================================================
+
+const MAX_CERT_BYTES = 5 * 1024 * 1024;
+const CERT_CONTENT_TYPE = "application/pdf";
+const BAFA_BERATER_NR_PATTERN = /^[A-Za-z0-9\s./-]{3,64}$/;
+
+function sanitizeFilename(name: string): string {
+  return name.replace(/[^A-Za-z0-9._-]+/g, "_").slice(0, 120);
+}
+
+berater.post("/bafa-cert", requireAuth, requireRole("berater"), async (c) => {
+  const user = c.get("user");
+  const contentType = c.req.header("Content-Type") || "";
+  if (!contentType.toLowerCase().includes("multipart/form-data")) {
+    return c.json(
+      { success: false, error: "multipart/form-data erwartet" },
+      400,
+    );
+  }
+
+  const form = await c.req.formData();
+  const file = form.get("file");
+  const bafaBeraterNrRaw = form.get("bafa_berater_nr");
+
+  if (!(file instanceof File)) {
+    return c.json({ success: false, error: "Feld 'file' fehlt" }, 400);
+  }
+  if (typeof bafaBeraterNrRaw !== "string" || !BAFA_BERATER_NR_PATTERN.test(bafaBeraterNrRaw.trim())) {
+    return c.json(
+      {
+        success: false,
+        error: "Feld 'bafa_berater_nr' fehlt oder hat ungültiges Format",
+      },
+      400,
+    );
+  }
+  const bafaBeraterNr = bafaBeraterNrRaw.trim();
+
+  if (file.size === 0) {
+    return c.json({ success: false, error: "Datei ist leer" }, 400);
+  }
+  if (file.size > MAX_CERT_BYTES) {
+    return c.json(
+      { success: false, error: "Datei zu groß (max. 5 MB)" },
+      400,
+    );
+  }
+  if (file.type && file.type !== CERT_CONTENT_TYPE) {
+    return c.json(
+      { success: false, error: "Nur PDF erlaubt (application/pdf)" },
+      400,
+    );
+  }
+
+  const timestamp = Date.now();
+  const safeName = sanitizeFilename(file.name || "cert.pdf");
+  const r2Key = `${user.id}/${timestamp}-${safeName}`;
+
+  await c.env.BAFA_CERTS.put(r2Key, file.stream(), {
+    httpMetadata: { contentType: CERT_CONTENT_TYPE },
+    customMetadata: {
+      user_id: user.id,
+      bafa_berater_nr: bafaBeraterNr,
+      uploaded_at: new Date().toISOString(),
+    },
+  });
+
+  const uploadedAt = new Date().toISOString();
+  await c.env.DB
+    .prepare(
+      `UPDATE users
+          SET bafa_cert_status = 'pending',
+              bafa_cert_uploaded_at = ?,
+              bafa_berater_nr = ?,
+              updated_at = datetime('now')
+        WHERE id = ?
+          AND deleted_at IS NULL`,
+    )
+    .bind(uploadedAt, bafaBeraterNr, user.id)
+    .run();
+
+  return c.json({
+    success: true,
+    status: "pending" as const,
+    uploaded_at: uploadedAt,
+    bafa_berater_nr: bafaBeraterNr,
+  });
+});
+
+berater.get("/bafa-cert/status", requireAuth, requireRole("berater"), async (c) => {
+  const user = c.get("user");
+  const row = await c.env.DB
+    .prepare(
+      `SELECT bafa_cert_status, bafa_cert_uploaded_at, bafa_berater_nr
+         FROM users
+        WHERE id = ? AND deleted_at IS NULL`,
+    )
+    .bind(user.id)
+    .first<{
+      bafa_cert_status: string | null;
+      bafa_cert_uploaded_at: string | null;
+      bafa_berater_nr: string | null;
+    }>();
+
+  return c.json({
+    success: true,
+    status: (row?.bafa_cert_status ?? "none") as
+      | "none"
+      | "pending"
+      | "approved"
+      | "rejected",
+    uploaded_at: row?.bafa_cert_uploaded_at ?? null,
+    bafa_berater_nr: row?.bafa_berater_nr ?? null,
+  });
+});
+
 export { berater };

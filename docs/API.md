@@ -9,10 +9,10 @@ _Last generated: 2026-04-15_
 
 | Group | Endpoints |
 |---|---:|
-| `admin` | 15 |
+| `admin` | 16 |
 | `antraege` | 8 |
 | `auth` | 11 |
-| `berater` | 11 |
+| `berater` | 13 |
 | `beratungen` | 3 |
 | `branchen` | 2 |
 | `check` | 5 |
@@ -33,14 +33,15 @@ _Last generated: 2026-04-15_
 | `verify-payment` | 1 |
 | `vorlagen` | 3 |
 
-**Total:** 143 endpoints across 23 groups
+**Total:** 146 endpoints across 23 groups
 
-## admin (15)
+## admin (16)
 
 | Method | Path | Auth | Source |
 |---|---|---|---|
 | `GET` | `/audit-logs` | requireAuth (blanket) | [`admin.ts:135`](../worker/src/routes/admin.ts#L135) |
 | `POST` | `/audit-logs/cleanup` | requireAuth (blanket) | [`admin.ts:149`](../worker/src/routes/admin.ts#L149) |
+| `GET` | `/bafa-cert/:userId/download` | requireAuth (blanket) | [`admin.ts:484`](../worker/src/routes/admin.ts#L484) |
 | `GET` | `/bafa-cert/pending` | requireAuth (blanket) | [`admin.ts:427`](../worker/src/routes/admin.ts#L427) |
 | `GET` | `/check-foerdermittel` | requireAuth (blanket) | [`admin.ts:261`](../worker/src/routes/admin.ts#L261) |
 | `GET` | `/dashboard` | requireAuth (blanket) | [`admin.ts:103`](../worker/src/routes/admin.ts#L103) |
@@ -84,7 +85,7 @@ _Last generated: 2026-04-15_
 | `POST` | `/verify-code` | - | [`auth.ts:289`](../worker/src/routes/auth.ts#L289) |
 | `POST` | `/verify-email` | - | [`auth.ts:279`](../worker/src/routes/auth.ts#L279) |
 
-## berater (11)
+## berater (13)
 
 | Method | Path | Auth | Source |
 |---|---|---|---|
@@ -92,6 +93,8 @@ _Last generated: 2026-04-15_
 | `POST` | `/abwicklung/upload` | requireAuth | [`berater.ts:629`](../worker/src/routes/berater.ts#L629) |
 | `GET` | `/anfragen` | requireAuth | [`berater.ts:393`](../worker/src/routes/berater.ts#L393) |
 | `PATCH` | `/anfragen/:id` | requireAuth | [`berater.ts:414`](../worker/src/routes/berater.ts#L414) |
+| `POST` | `/bafa-cert` | requireAuth | [`berater.ts:672`](../worker/src/routes/berater.ts#L672) |
+| `GET` | `/bafa-cert/status` | requireAuth | [`berater.ts:751`](../worker/src/routes/berater.ts#L751) |
 | `GET` | `/dienstleistungen` | requireAuth | [`berater.ts:316`](../worker/src/routes/berater.ts#L316) |
 | `POST` | `/dienstleistungen` | requireAuth | [`berater.ts:331`](../worker/src/routes/berater.ts#L331) |
 | `GET` | `/expertise` | requireAuth | [`berater.ts:238`](../worker/src/routes/berater.ts#L238) |
