@@ -33,6 +33,7 @@ export async function generateReportSection(
   for (let attempt = 0; attempt < 2; attempt++) {
     const startTime = Date.now();
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- CF AiModels literal-union doesn't include this model name
       const res = (await ai.run(model as any, {
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
@@ -40,7 +41,7 @@ export async function generateReportSection(
         ],
         max_tokens: 1200,
         temperature: 0.7,
-      })) as any;
+      })) as { response?: string };
 
       const duration = Date.now() - startTime;
 
@@ -104,6 +105,7 @@ export async function generateReportSectionStream(
   const startTime = Date.now();
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- CF AiModels literal-union doesn't include this model name
     const stream = await ai.run(model as any, {
       messages: [
         { role: "system", content: SYSTEM_PROMPT },

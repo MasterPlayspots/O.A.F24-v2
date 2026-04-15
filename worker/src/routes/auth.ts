@@ -542,7 +542,7 @@ auth.post("/reset-password", async (c) => {
       {
         success: false,
         error: "Validierungsfehler",
-        details: parsed.error.issues.map((e: any) => e.message),
+        details: parsed.error.issues.map((e) => e.message),
       },
       400
     );

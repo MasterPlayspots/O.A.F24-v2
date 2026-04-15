@@ -119,11 +119,11 @@ _Last generated: 2026-04-15_
 
 | Method | Path | Auth | Source |
 |---|---|---|---|
-| `POST` | `/` | - | [`check.ts:41`](../worker/src/routes/check.ts#L41) |
-| `POST` | `/:sessionId/analyze` | - | [`check.ts:315`](../worker/src/routes/check.ts#L315) |
-| `POST` | `/:sessionId/chat` | - | [`check.ts:209`](../worker/src/routes/check.ts#L209) |
-| `POST` | `/:sessionId/docs` | - | [`check.ts:258`](../worker/src/routes/check.ts#L258) |
-| `GET` | `/:sessionId/plan` | - | [`check.ts:405`](../worker/src/routes/check.ts#L405) |
+| `POST` | `/` | - | [`check.ts:54`](../worker/src/routes/check.ts#L54) |
+| `POST` | `/:sessionId/analyze` | - | [`check.ts:329`](../worker/src/routes/check.ts#L329) |
+| `POST` | `/:sessionId/chat` | - | [`check.ts:222`](../worker/src/routes/check.ts#L222) |
+| `POST` | `/:sessionId/docs` | - | [`check.ts:272`](../worker/src/routes/check.ts#L272) |
+| `GET` | `/:sessionId/plan` | - | [`check.ts:420`](../worker/src/routes/check.ts#L420) |
 
 ## checks (2)
 

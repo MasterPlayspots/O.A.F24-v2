@@ -1,4 +1,7 @@
 // Stripe Payment Service
+import { z } from 'zod'
+
+const CheckoutSessionResponse = z.object({ id: z.string(), url: z.string() })
 
 export async function createCheckoutSession(secretKey: string, params: {
   reportId: string; userId: string; amount: number; productName: string;
@@ -25,6 +28,5 @@ export async function createCheckoutSession(secretKey: string, params: {
     body: body.toString(),
   })
   if (!res.ok) throw new Error(`Stripe error: ${await res.text()}`)
-  const session = await res.json() as any
-  return { id: session.id, url: session.url }
+  return CheckoutSessionResponse.parse(await res.json())
 }

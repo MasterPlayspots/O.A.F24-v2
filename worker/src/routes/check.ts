@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { Toucan } from "toucan-js";
-import type { Bindings, Variables } from "../types";
+import type { Bindings, Variables, FoerdermittelProfileRow } from "../types";
 import {
   performMatching,
   saveMatches,
@@ -9,6 +9,19 @@ import {
   getProgramById,
 } from "../services/foerdermittel";
 import { scrapeCompanyFromUrl } from "../services/scraper";
+
+// Workers-AI `run()` uses a union of known model names — `@cf/meta/llama-3.1-8b-instruct`
+// isn't in the shipped AiModels map, so we keep the cast localized to one helper.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- CF AiModels literal-union doesn't include this model
+type AiRunner = { run(model: string, options: Record<string, unknown>): Promise<any> };
+async function runLlama(
+  ai: Ai,
+  options: Record<string, unknown>,
+): Promise<{ response?: string }> {
+  return (await (ai as unknown as AiRunner).run("@cf/meta/llama-3.1-8b-instruct", options)) as {
+    response?: string;
+  };
+}
 
 /**
  * /check routes — Wizard-based Fördermittel-Check flow.
@@ -140,7 +153,7 @@ check.post("/", async (c) => {
   // Generate greeting via AI
   let begruessung: string;
   try {
-    const result = (await (c.env.AI as any).run("@cf/meta/llama-3.1-8b-instruct", {
+    const result = await runLlama(c.env.AI, {
       messages: [
         {
           role: "user",
@@ -156,7 +169,7 @@ Antworte auf Deutsch, freundlich und professionell. Verwende Markdown für Forma
         },
       ],
       max_tokens: 500,
-    })) as { response?: string };
+    });
 
     begruessung =
       result.response ||
@@ -216,16 +229,17 @@ check.post("/:sessionId/chat", async (c) => {
   if (!body.nachricht) return c.json({ success: false, error: "Nachricht erforderlich" }, 400);
 
   // Load the profile
-  const profile = await c.env.BAFA_DB.prepare("SELECT * FROM foerdermittel_profile WHERE id = ?")
+  const profile = await c.env.BAFA_DB
+    .prepare("SELECT * FROM foerdermittel_profile WHERE id = ?")
     .bind(session.profileId)
-    .first();
+    .first<FoerdermittelProfileRow>();
 
   if (!profile) return c.json({ success: false, error: "Profil nicht gefunden" }, 404);
 
   // Use processChat from service layer
   const result = await processChat(
     body.nachricht,
-    profile as any,
+    profile,
     undefined,
     session.conversationId || undefined,
     "matchmaking",
@@ -281,7 +295,7 @@ check.post("/:sessionId/docs", async (c) => {
     const textContent = await file.text();
     const truncated = textContent.slice(0, 3000);
 
-    const result = (await (c.env.AI as any).run("@cf/meta/llama-3.1-8b-instruct", {
+    const result = await runLlama(c.env.AI, {
       messages: [
         {
           role: "user",
@@ -292,7 +306,7 @@ ${truncated}`,
         },
       ],
       max_tokens: 500,
-    })) as { response?: string };
+    });
 
     if (result.response) {
       const jsonMatch = result.response.match(/\{[\s\S]*\}/);
@@ -319,21 +333,22 @@ check.post("/:sessionId/analyze", async (c) => {
     return c.json({ success: false, error: "Session nicht gefunden oder abgelaufen" }, 404);
 
   // Load profile
-  const profile = await c.env.BAFA_DB.prepare("SELECT * FROM foerdermittel_profile WHERE id = ?")
+  const profile = await c.env.BAFA_DB
+    .prepare("SELECT * FROM foerdermittel_profile WHERE id = ?")
     .bind(session.profileId)
-    .first();
+    .first<FoerdermittelProfileRow>();
   if (!profile) return c.json({ success: false, error: "Profil nicht gefunden" }, 404);
 
   // Run AI matching
   const scoredMatches = await performMatching(
-    profile as any,
+    profile,
     c.env.BAFA_DB,
     c.env.FOERDER_DB,
     c.env.AI
   );
 
   // Save matches
-  await saveMatches(profile as any, scoredMatches, c.env.BAFA_DB);
+  await saveMatches(profile, scoredMatches, c.env.BAFA_DB);
 
   // Build rich results for the frontend
   const topMatches = scoredMatches.slice(0, 10);
@@ -362,7 +377,7 @@ check.post("/:sessionId/analyze", async (c) => {
   // Generate summary
   let zusammenfassung: string;
   try {
-    const result = (await (c.env.AI as any).run("@cf/meta/llama-3.1-8b-instruct", {
+    const result = await runLlama(c.env.AI, {
       messages: [
         {
           role: "user",
@@ -379,7 +394,7 @@ Nenne die Anzahl, die Top-Programme und eine grobe Einschätzung der Gesamtförd
         },
       ],
       max_tokens: 300,
-    })) as { response?: string };
+    });
 
     zusammenfassung =
       result.response ||
@@ -429,7 +444,7 @@ check.get("/:sessionId/plan", async (c) => {
     }> = [];
 
     try {
-      const result = (await (c.env.AI as any).run("@cf/meta/llama-3.1-8b-instruct", {
+      const result = await runLlama(c.env.AI, {
         messages: [
           {
             role: "user",
@@ -442,7 +457,7 @@ Format: [{"schritt": 1, "aktion": "...", "beschreibung": "...", "dokument_typ": 
           },
         ],
         max_tokens: 800,
-      })) as { response?: string };
+      });
 
       if (result.response) {
         const jsonMatch = result.response.match(/\[[\s\S]*\]/);
