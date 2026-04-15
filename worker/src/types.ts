@@ -9,6 +9,7 @@ export type Bindings = {
   BAFA_DB: D1Database;
   BAFA_CONTENT: D1Database;
   FOERDER_DB: D1Database;
+  CHECK_DB: D1Database;
 
   SESSIONS: KVNamespace;
   RATE_LIMIT: KVNamespace;

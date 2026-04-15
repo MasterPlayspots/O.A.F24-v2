@@ -1,5 +1,6 @@
 // Admin Routes - Audit Logs, Users, Stats
 import { Hono } from "hono";
+import { z } from "zod";
 import type { Bindings, Variables } from "../types";
 import { AUDIT_EVENTS } from "../types";
 import { requireAuth, requireRole } from "../middleware/auth";
@@ -10,6 +11,116 @@ import * as OrderRepo from "../repositories/order.repository";
 
 const admin = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 admin.use("/*", requireAuth, requireRole("admin"));
+
+// ============================================================
+// Provisionen — list + update (admin-only)
+// Table: bafa_antraege.provisionen
+// ============================================================
+
+interface ProvisionRow {
+  id: string;
+  berater_profile_id: string;
+  typ: string;
+  referenz_typ: string;
+  referenz_id: string;
+  unternehmen_user_id: string | null;
+  foerderbereich: string | null;
+  betrag_basis: number | null;
+  provisions_satz: number;
+  provisions_betrag: number;
+  status: string;
+  faellig_am: string | null;
+  bezahlt_am: string | null;
+  storniert_am: string | null;
+  notiz: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+admin.get("/provisionen", async (c) => {
+  const result = await c.env.BAFA_DB
+    .prepare(
+      `SELECT * FROM provisionen
+         ORDER BY created_at DESC
+         LIMIT 500`
+    )
+    .all<ProvisionRow>();
+  return c.json({ success: true, provisionen: result.results ?? [] });
+});
+
+const provisionUpdateSchema = z.object({
+  status: z.enum(["offen", "in_pruefung", "pending", "bezahlt", "storniert"]).optional(),
+  notiz: z.string().max(1000).optional().nullable(),
+  faellig_am: z.string().optional().nullable(),
+  bezahlt_am: z.string().optional().nullable(),
+});
+
+admin.patch("/provisionen/:id", async (c) => {
+  const id = c.req.param("id");
+  const parsed = provisionUpdateSchema.safeParse(await c.req.json());
+  if (!parsed.success) {
+    return c.json(
+      { success: false, error: "Validierungsfehler", details: parsed.error.issues.map((e) => e.message) },
+      400
+    );
+  }
+  const d = parsed.data;
+  const sets: string[] = [];
+  const vals: unknown[] = [];
+  for (const [k, v] of Object.entries(d)) {
+    if (v === undefined) continue;
+    sets.push(`${k} = ?`);
+    vals.push(v);
+  }
+  if (d.status === "storniert") {
+    sets.push("storniert_am = datetime('now')");
+  } else if (d.status === "bezahlt") {
+    sets.push("bezahlt_am = datetime('now')");
+  }
+  if (sets.length === 0) return c.json({ success: false, error: "Keine Änderungen" }, 400);
+  sets.push("updated_at = datetime('now')");
+  vals.push(id);
+
+  const res = await c.env.BAFA_DB
+    .prepare(`UPDATE provisionen SET ${sets.join(", ")} WHERE id = ?`)
+    .bind(...vals)
+    .run();
+  if (!res.meta.changes) return c.json({ success: false, error: "Provision nicht gefunden" }, 404);
+  return c.json({ success: true });
+});
+
+// GET /dashboard — 4-KPI-Aggregation für /admin/page.tsx.
+// Flat shape: {success, userAnzahl, checksHeute, offeneAnfragen, pendingProvisionen}
+admin.get("/dashboard", async (c) => {
+  const [usersRow, anfragenRow, checksRow, provRow] = await Promise.all([
+    c.env.DB
+      .prepare("SELECT COUNT(*) AS n FROM users WHERE deleted_at IS NULL")
+      .first<{ n: number }>()
+      .catch(() => null),
+    c.env.BAFA_DB
+      .prepare("SELECT COUNT(*) AS n FROM netzwerk_anfragen WHERE status = 'offen'")
+      .first<{ n: number }>()
+      .catch(() => null),
+    c.env.CHECK_DB
+      .prepare("SELECT COUNT(*) AS n FROM check_sessions WHERE date(created_at) = date('now')")
+      .first<{ n: number }>()
+      .catch(() => null),
+    c.env.BAFA_DB
+      .prepare(
+        `SELECT COUNT(*) AS n FROM provisionen WHERE status IN ('offen','in_pruefung','pending')`
+      )
+      .first<{ n: number }>()
+      .catch(() => null),
+  ]);
+
+  return c.json({
+    success: true,
+    userAnzahl: Number(usersRow?.n ?? 0),
+    checksHeute: Number(checksRow?.n ?? 0),
+    offeneAnfragen: Number(anfragenRow?.n ?? 0),
+    pendingProvisionen: Number(provRow?.n ?? 0),
+  });
+});
 
 // GET /audit-logs
 admin.get("/audit-logs", async (c) => {

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/store/authStore';
 import { useVerifiedGuard } from '@/lib/hooks/useVerifiedGuard';
 import { useMount } from '@/lib/hooks/useMount';
-import { getTracker, updateTrackerPhase } from '@/lib/api/check';
+import { getTracker, updateTrackerPhase } from '@/lib/api/fund24';
 import { TrackerVorgang, TrackerPhase } from '@/lib/types';
 import { FehlerBox } from '@/components/shared/FehlerBox';
 import { LeererZustand } from '@/components/shared/LeererZustand';
@@ -40,7 +40,7 @@ export default function BeraterTrackerPage() {
     const loadData = async () => {
       try {
         setFehler('');
-        const { vorgaenge } = await getTracker(token);
+        const { vorgaenge } = await getTracker();
         setItems(vorgaenge || []);
       } catch (error) {
         setFehler(error instanceof Error ? error.message : 'Fehler beim Laden des Trackers');
@@ -69,7 +69,7 @@ export default function BeraterTrackerPage() {
 
     try {
       if (!token) throw new Error('Kein Token');
-      await updateTrackerPhase(draggableId, newPhase, token);
+      await updateTrackerPhase(draggableId, newPhase);
     } catch (error) {
       setFehler(error instanceof Error ? error.message : 'Fehler beim Aktualisieren');
       setOptimistic((prev) => {
@@ -78,7 +78,7 @@ export default function BeraterTrackerPage() {
         return copy;
       });
       if (token) {
-        const { vorgaenge } = await getTracker(token);
+        const { vorgaenge } = await getTracker();
         setItems(vorgaenge || []);
       }
     }

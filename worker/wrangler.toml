@@ -38,6 +38,11 @@ binding = "FOERDER_DB"
 database_name = "foerderprogramme"
 database_id = "b95adb7b-ed86-441b-841e-4cd3a9a15135"
 
+[[d1_databases]]
+binding = "CHECK_DB"
+database_name = "foerdermittel-checks"
+database_id = "0b2479a3-13eb-45bc-8c71-105208ed71ad"
+
 # KV Namespaces
 [[kv_namespaces]]
 binding = "SESSIONS"

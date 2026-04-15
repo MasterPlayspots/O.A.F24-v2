@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/store/authStore'
-import { getAdminProvisionen, updateAdminProvision } from '@/lib/api/check'
+import { getAdminProvisionen, updateAdminProvision } from '@/lib/api/fund24'
 import {
   Table,
   TableBody,
@@ -56,7 +56,7 @@ export default function AdminProvisionenPage() {
     const fetchProvisionen = async () => {
       try {
         if (!token) throw new Error('Kein Token')
-        const data = await getAdminProvisionen(token)
+        const data = await getAdminProvisionen()
         setProvisionen(data.provisionen)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Fehler beim Laden')
@@ -80,7 +80,7 @@ export default function AdminProvisionenPage() {
     try {
       setUpdatingId(id)
       if (!token) throw new Error('Kein Token')
-      await updateAdminProvision(id, { status: newStatus }, token)
+      await updateAdminProvision(id, { status: newStatus })
       setProvisionen(
         provisionen.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
       )
@@ -107,11 +107,7 @@ export default function AdminProvisionenPage() {
 
       const provisionBetrag = betrag * provision.provisionsSatz
 
-      await updateAdminProvision(
-        id,
-        { bewilligteSummeEur: betrag },
-        token
-      )
+      await updateAdminProvision(id, { notiz: `bewilligt: ${betrag} EUR` })
 
       setProvisionen(
         provisionen.map((p) =>

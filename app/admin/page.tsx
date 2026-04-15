@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/store/authStore'
-import { getAdminDashboard } from '@/lib/api/check'
-import { listPendingCerts, approveCert, rejectCert, type CertPending } from '@/lib/api/fund24'
+import { getAdminDashboard, listPendingCerts, approveCert, rejectCert, type CertPending } from '@/lib/api/fund24'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { LadeSpinner } from '@/components/shared/LadeSpinner'
@@ -52,7 +51,7 @@ export default function AdminPage() {
         if (!token) {
           throw new Error('Kein Token vorhanden')
         }
-        const data = await getAdminDashboard(token)
+        const data = await getAdminDashboard()
         setDashboard(data)
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Fehler beim Laden'

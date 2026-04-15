@@ -54,7 +54,10 @@
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('success:', d.get\\('success'\\), '| zones:', [z.get\\('name'\\) for z in d.get\\('result',[]\\)]\\)\")",
       "Bash(git reset:*)",
       "Bash(git restore:*)",
-      "Bash(python3 -c ':*)"
+      "Bash(python3 -c ':*)",
+      "Bash(curl -s https://fund24.io/)",
+      "Bash(curl -s -o /dev/null -w \"/programme/1/opengraph-image: %{http_code} %{content_type}\\\\n\" \"https://fund24.io/programme/1/opengraph-image\")",
+      "Bash(curl -s \"https://fund24.io/sitemap.xml\")"
     ],
     "additionalDirectories": [
       "/Users/our.ark./Desktop/02_AUTOMATISIERUNG/O.A.F24",

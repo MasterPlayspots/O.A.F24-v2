@@ -413,8 +413,68 @@ export interface AuditLog {
   user_agent?: string | null
   created_at: string
 }
+// ---------- Tracker ----------
+import type { TrackerVorgang, TrackerPhase, AdminDashboard, Nutzer, Provision } from '../types'
+
+export async function getTracker(): Promise<{ vorgaenge: TrackerVorgang[] }> {
+  return apiCall<{ vorgaenge: TrackerVorgang[] }>(
+    API.FUND24, '/api/tracker', undefined, token()
+  )
+}
+
+export async function createTrackerVorgang(body: {
+  titel: string
+  beschreibung?: string
+  programm_name?: string
+  foerdersumme?: number
+  naechste_frist?: string
+  prioritaet?: 'niedrig' | 'normal' | 'hoch' | 'dringend'
+}): Promise<{ id: string }> {
+  return apiCall<{ id: string }>(
+    API.FUND24,
+    '/api/tracker',
+    { method: 'POST', body: JSON.stringify(body) },
+    token()
+  )
+}
+
+export async function updateTrackerPhase(id: string, phase: TrackerPhase) {
+  return apiCall(
+    API.FUND24,
+    `/api/tracker/${id}`,
+    { method: 'PATCH', body: JSON.stringify({ phase }) },
+    token()
+  )
+}
+
+export async function deleteTrackerVorgang(id: string) {
+  return apiCall(
+    API.FUND24,
+    `/api/tracker/${id}`,
+    { method: 'DELETE' },
+    token()
+  )
+}
+
+// ---------- Admin: Dashboard ----------
+
+export async function getAdminDashboard(): Promise<AdminDashboard> {
+  const r = await apiCall<{
+    success: boolean
+    userAnzahl: number
+    checksHeute: number
+    offeneAnfragen: number
+    pendingProvisionen: number
+  }>(API.FUND24, '/api/admin/dashboard', undefined, token())
+  return {
+    userAnzahl: r.userAnzahl,
+    checksHeute: r.checksHeute,
+    offeneAnfragen: r.offeneAnfragen,
+    pendingProvisionen: r.pendingProvisionen,
+  }
+}
+
 // ---------- Admin: Users ----------
-import type { Nutzer } from '../types'
 
 export async function getAdminUsers(params?: { page?: number; limit?: number }) {
   const qs = new URLSearchParams()
@@ -445,6 +505,33 @@ export async function updateAdminUser(
 
 export async function deleteAdminUser(id: string) {
   return apiCall(API.FUND24, `/api/admin/users/${id}`, { method: 'DELETE' }, token())
+}
+
+// ---------- Admin: Provisionen ----------
+export async function getAdminProvisionen(): Promise<{ provisionen: Provision[] }> {
+  return apiCall<{ provisionen: Provision[] }>(
+    API.FUND24, '/api/admin/provisionen', undefined, token()
+  )
+}
+
+export async function updateAdminProvision(
+  id: string,
+  daten: {
+    // Backend enum: 'offen'|'in_pruefung'|'pending'|'bezahlt'|'storniert'.
+    // Widened to string so the UI can pass its own ProvisionStatus type;
+    // invalid values get a 400 from the worker.
+    status?: string
+    notiz?: string | null
+    faellig_am?: string | null
+    bezahlt_am?: string | null
+  }
+) {
+  return apiCall(
+    API.FUND24,
+    `/api/admin/provisionen/${id}`,
+    { method: 'PATCH', body: JSON.stringify(daten) },
+    token()
+  )
 }
 
 export async function listAuditLogs(filter?: { user_id?: string; action?: string; limit?: number; offset?: number }) {
