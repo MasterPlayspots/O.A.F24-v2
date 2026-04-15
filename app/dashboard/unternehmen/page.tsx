@@ -93,7 +93,7 @@ export default function UnternehmenDashboardPage() {
             <p className="text-white/60">Übersicht Ihrer Fördercheck-Aktivitäten</p>
           </div>
           <Button asChild size="lg" className="bg-architect-primary hover:bg-architect-primary-container text-white">
-            <Link href="/foerdercheck">+ Neuen Check starten</Link>
+            <Link href="/foerder-schnellcheck">+ Neuen Fördercheck starten</Link>
           </Button>
         </div>
 
@@ -226,15 +226,18 @@ export default function UnternehmenDashboardPage() {
               <FileText className="w-12 h-12 text-white/40 mx-auto mb-4" />
               <p className="text-white/60 mb-4">Noch keine Checks durchgeführt</p>
               <Button asChild className="bg-architect-primary hover:bg-architect-primary-container text-white">
-                <Link href="/foerdercheck">Starten Sie Ihren ersten Check</Link>
+                <Link href="/foerder-schnellcheck">Starten Sie Ihren ersten Fördercheck</Link>
               </Button>
             </div>
           )}
         </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8">
           <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
-            <Link href="/dashboard/unternehmen/anfragen">Meine Anfragen ansehen</Link>
+            <Link href="/dashboard/unternehmen/antraege">Meine Anträge</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
+            <Link href="/dashboard/unternehmen/anfragen">Meine Anfragen</Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
             <Link href="/dashboard/unternehmen/favoriten">Meine Favoriten</Link>

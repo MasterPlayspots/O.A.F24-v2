@@ -89,8 +89,9 @@ export default function FavoritenPage() {
 
         {favoriten.length === 0 ? (
           <LeererZustand
-            titel="Keine Favoriten"
-            beschreibung="Fügen Sie Förderprogramme hinzu, um sie hier zu speichern"
+            titel="Noch keine Favoriten"
+            beschreibung="Entdecke passende Förderprogramme und speichere sie hier für später."
+            cta={{ text: 'Programme entdecken', href: '/programme' }}
           />
         ) : (
           <div className="grid gap-4">

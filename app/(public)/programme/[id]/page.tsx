@@ -135,7 +135,7 @@ export default async function ProgrammDetailPage({
                   className="w-full bg-architect-primary hover:bg-architect-primary-container text-white"
                   size="lg"
                 >
-                  Zum Schnellcheck
+                  Zum Fördercheck
                 </Button>
               </Link>
             </div>

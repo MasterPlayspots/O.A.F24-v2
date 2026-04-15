@@ -32,7 +32,8 @@
       "Read(//Users/our.ark./O.A.F24-v2/**)",
       "Bash(python3 -c \"import json,sys; print\\('zfbf-db.users:', json.load\\(sys.stdin\\)[0]['results'][0]['n'], 'rows'\\)\" npx wrangler d1 execute bafa_antraege --remote --json --command \"SELECT name FROM sqlite_master WHERE type='table' AND name='users'\")",
       "Bash(python3 -c \"import json,sys; print\\('bafa_antraege.users exists:', bool\\(json.load\\(sys.stdin\\)[0]['results']\\)\\)\")",
-      "Read(//Users/our.ark./**)"
+      "Read(//Users/our.ark./**)",
+      "Bash(awk -F: '{print $3}')"
     ],
     "additionalDirectories": [
       "/Users/our.ark./Desktop/02_AUTOMATISIERUNG/O.A.F24",

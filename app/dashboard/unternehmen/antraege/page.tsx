@@ -87,7 +87,7 @@ export default function MeineAntraegePage() {
             <h2 className="font-display text-xl font-semibold text-white mb-2">Noch keine Anträge</h2>
             <p className="text-sm text-white/60 mb-6">Stelle deinen ersten Förder-Antrag.</p>
             <Button onClick={() => setModalOpen(true)} className="bg-architect-primary hover:bg-architect-primary-container text-white">
-              <Plus className="w-4 h-4 mr-2" /> Antrag erstellen
+              <Plus className="w-4 h-4 mr-2" /> Antrag stellen
             </Button>
           </Card>
         ) : (

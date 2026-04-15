@@ -112,8 +112,9 @@ export default function UnternehmenAnfragenPage() {
 
         {anfragen.length === 0 ? (
           <LeererZustand
-            titel="Keine Anfragen"
-            beschreibung="Sie haben noch keine Anfragen an Berater gesendet"
+            titel="Noch keine Anfragen"
+            beschreibung="Finde einen passenden Berater und schick eine erste Anfrage."
+            cta={{ text: 'Berater entdecken', href: '/berater' }}
           />
         ) : (
           <Card className="bg-architect-surface/60 border-0 text-white overflow-hidden">

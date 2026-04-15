@@ -57,7 +57,7 @@ export default function FoerderSchnellcheckPage() {
       {/* Header */}
       <div className="text-center space-y-3">
         <h1 className="font-display text-3xl sm:text-4xl font-bold text-white">
-          Förder-Schnellcheck
+          Fördercheck
         </h1>
         <p className="text-lg text-white/70">
           Finden Sie passende Förderprogramme in weniger als 5 Minuten — kostenlos und unverbindlich.
