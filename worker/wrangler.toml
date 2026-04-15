@@ -73,12 +73,11 @@ enabled = true
 [triggers]
 crons = ["0 2 * * *", "30 2 * * *", "0 3 * * 1"]
 
-# Worker Routes (Zone fund24.io = 809ef77b10e4c17bf959cfe7aadf9e28)
-# Mirrors the route created via Cloudflare API on 2026-04-08 so the
-# repo stays the source of truth and future deploys don't drift.
-[[routes]]
-pattern = "api.fund24.io/api/*"
-zone_id = "809ef77b10e4c17bf959cfe7aadf9e28"
+# Worker Routes managed manually via Cloudflare Dashboard.
+# (Auto-sync from wrangler.toml requires Zone.Workers Routes permission
+# on the deploy token, which current CI token doesn't cover. Route
+# `api.fund24.io/api/*` was created via Cloudflare API on 2026-04-08
+# and stays active across deploys.)
 
 # Secrets (set via: wrangler secret put <NAME>)
 # JWT_SECRET
