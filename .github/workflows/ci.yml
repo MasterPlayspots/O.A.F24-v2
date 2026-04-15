@@ -6,14 +6,17 @@ on:
   pull_request:
     branches: [main]
 
+# F-014: actions pinned to commit SHA (with version comment) to defend
+# against supply-chain tag-swap attacks. Bump by replacing both the SHA
+# and the trailing comment together.
 jobs:
   build:
     name: Lint · Typecheck · Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -37,3 +40,24 @@ jobs:
           NEXT_PUBLIC_ZFBF_API_URL: https://example.workers.dev
           JWT_SECRET: ci-dummy-secret-not-used-in-production
         run: npm run build
+
+  test:
+    name: Worker Tests (vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: worker/package-lock.json
+
+      - name: Install worker deps
+        run: npm ci
+
+      - name: Worker tests (vitest)
+        run: npm test

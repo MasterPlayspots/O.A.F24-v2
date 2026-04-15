@@ -1,5 +1,9 @@
 name: Deploy Workers
 
+# F-014: actions pinned to commit SHA (with version comment) to defend
+# against supply-chain tag-swap attacks. Bump by replacing both the SHA
+# and the trailing comment together.
+#
 # Runs on every push to main. Uses path filters so worker/ changes deploy
 # only the main API worker, and worker-check/ changes deploy only the
 # check worker. The Vercel deploy for the frontend is handled by the
@@ -28,9 +32,9 @@ jobs:
       worker: ${{ steps.filter.outputs.worker }}
       worker_check: ${{ steps.filter.outputs.worker_check }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
       - id: filter
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590  # v3
         with:
           filters: |
             worker:
@@ -51,9 +55,9 @@ jobs:
       run:
         working-directory: worker
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -66,7 +70,7 @@ jobs:
         run: npm run build
 
       - name: Deploy via Wrangler
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65  # v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: d7bdc9212bc6f429a5f2eb82853a9e83
@@ -84,14 +88,14 @@ jobs:
       run:
         working-directory: worker-check
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: '20'
 
       - name: Deploy via Wrangler
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65  # v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: d7bdc9212bc6f429a5f2eb82853a9e83
