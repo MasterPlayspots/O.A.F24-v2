@@ -6,6 +6,11 @@ import { Hono } from "hono";
 import { z } from "zod";
 import type { Bindings, Variables } from "../types";
 import { requireAuth, requireRole } from "../middleware/auth";
+import {
+  sendAnfrageReceivedEmail,
+  sendAnfrageAcceptedEmail,
+  sendAnfrageRejectedEmail,
+} from "../services/email";
 
 const berater = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -103,6 +108,18 @@ async function getOwnBeraterId(
     .bind(userId)
     .first<{ id: string }>();
   return row?.id ?? null;
+}
+
+// User-facing name + email lookup for email notifications. Users are in
+// zfbf-db (c.env.DB), not in BAFA_DB — explicit cross-DB fetch.
+async function getUserContact(
+  db: D1Database,
+  userId: string
+): Promise<{ email: string; firstName: string; lastName: string } | null> {
+  return db
+    .prepare("SELECT email, first_name AS firstName, last_name AS lastName FROM users WHERE id = ?")
+    .bind(userId)
+    .first<{ email: string; firstName: string; lastName: string }>();
 }
 
 // ============================================================
@@ -455,6 +472,28 @@ berater.patch("/anfragen/:id", requireAuth, requireRole("berater"), async (c) =>
     .bind(anfrageId)
     .first<Record<string, unknown>>();
 
+  // Notify the requester about the outcome.
+  if (c.env.RESEND_API_KEY) {
+    const [requesterContact, beraterProfile] = await Promise.all([
+      getUserContact(c.env.DB, anfrage.von_user_id as string),
+      c.env.BAFA_DB
+        .prepare("SELECT display_name FROM berater_profiles WHERE id = ?")
+        .bind(beraterId)
+        .first<{ display_name: string }>(),
+    ]);
+    if (requesterContact?.email && beraterProfile?.display_name) {
+      const sender = parsed.data.status === "angenommen" ? sendAnfrageAcceptedEmail : sendAnfrageRejectedEmail;
+      c.executionCtx.waitUntil(
+        sender(
+          c.env.RESEND_API_KEY,
+          requesterContact.email,
+          requesterContact.firstName || "",
+          beraterProfile.display_name
+        )
+      );
+    }
+  }
+
   return c.json({ success: true, anfrage: updated, beratung });
 });
 
@@ -503,6 +542,33 @@ berater.post("/:id/anfrage", requireAuth, async (c) => {
     )
     .bind(user.id, beraterId, d.typ, d.nachricht ?? null)
     .first<Record<string, unknown>>();
+
+  // Notify berater via email (fire-and-forget — don't fail the request).
+  if (c.env.RESEND_API_KEY) {
+    const profileOwner = await c.env.BAFA_DB
+      .prepare(
+        `SELECT bp.user_id, bp.display_name
+           FROM berater_profiles bp WHERE bp.id = ?`
+      )
+      .bind(beraterId)
+      .first<{ user_id: string; display_name: string }>();
+    if (profileOwner) {
+      const beraterContact = await getUserContact(c.env.DB, profileOwner.user_id);
+      if (beraterContact?.email) {
+        const absenderName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email;
+        c.executionCtx.waitUntil(
+          sendAnfrageReceivedEmail(
+            c.env.RESEND_API_KEY,
+            beraterContact.email,
+            profileOwner.display_name,
+            absenderName,
+            d.typ,
+            d.nachricht ?? null
+          )
+        );
+      }
+    }
+  }
 
   return c.json({ success: true, anfrage: insert }, 201);
 });
