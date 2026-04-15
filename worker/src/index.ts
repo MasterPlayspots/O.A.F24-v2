@@ -1,4 +1,4 @@
-// fund24 API — Modular Hono Worker (deployed via GitHub Actions)
+// fund24 API — Hono Worker
 import { Hono } from "hono";
 import { Toucan } from "toucan-js";
 import type { Bindings, Variables } from "./types";
