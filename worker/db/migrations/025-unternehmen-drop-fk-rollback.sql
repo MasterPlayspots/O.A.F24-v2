@@ -1,0 +1,8 @@
+-- 025-unternehmen-drop-fk-rollback.sql · NOT REVERSIBLE
+--
+-- Same situation as 024: the original FK on unternehmen.user_id pointed
+-- at bafa_antraege.users (empty local shadow). Re-adding would block
+-- every production row since it can't see the real users in zfbf-db.
+--
+-- To recover, restore the unternehmen table from an R2 backup taken
+-- before migration 025 was applied.

@@ -1,7 +1,21 @@
 # FUND24 — Vollständiges Ökosystem End-to-End
+
+> **⚠️ DEPRECATED (2026-04-15)** — Die autoritative API-Referenz ist jetzt
+> [`docs/API.md`](./docs/API.md) (auto-generiert aus `worker/src/routes/`).
+> Der Datenbank-Workflow + Rollback-Konventionen stehen in
+> [`docs/MIGRATIONS.md`](./docs/MIGRATIONS.md).
+>
+> Dieses Dokument bleibt als historischer Architektur-Snapshot erhalten, die
+> Endpoint-Listen sind aber **potentiell falsch**:
+> - `/api/bafa`, `/api/forum/*`, `/api/auth/webauthn/*`, `/api/auth/magic-link/*`
+>   wurden in Phase C entfernt (Commit `18e4a54`).
+> - `/api/antraege/*`, `/api/me/dashboard`, `/api/news/*`, `/api/tracker/*`,
+>   `/api/berater/provision-vertraege`, `/api/oa/*`, Onboarding-Cron wurden
+>   hinzugefügt und sind hier **nicht** aufgeführt.
+
 Stand: 2026-04-08 · Worker `bafa-creator-ai-worker` v45e66295 · Frontend `O.A.F24-v2` @ `b57387a`
 
-Dieses Dokument beschreibt das komplette fund24-Ökosystem von der untersten Cloudflare-Ressource bis zur höchsten Frontend-Page in beide Richtungen. Es ist die einzig autoritative Referenz und ersetzt alle vorigen Trace-Dokumente.
+Dieses Dokument beschreibt das komplette fund24-Ökosystem von der untersten Cloudflare-Ressource bis zur höchsten Frontend-Page in beide Richtungen.
 
 ---
 

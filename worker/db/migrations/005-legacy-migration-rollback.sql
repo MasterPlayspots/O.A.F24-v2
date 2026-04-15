@@ -1,0 +1,6 @@
+-- 005-legacy-migration-rollback.sql · NOT REVERSIBLE
+--
+-- This migration is foundational — rolling it back would put the database
+-- in a state that no subsequent feature or migration can cope with. To
+-- recover from a bad deploy, restore from an R2 `backups/<date>/` dump
+-- (written nightly by performBackup() in worker/src/services/backup.ts).
