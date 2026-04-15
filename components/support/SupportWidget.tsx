@@ -4,6 +4,16 @@ import { useState } from 'react'
 import { MessageCircle, Phone, Mail, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+// Configurable at build-time via Vercel env.
+// Set NEXT_PUBLIC_SUPPORT_PHONE / NEXT_PUBLIC_SUPPORT_EMAIL / NEXT_PUBLIC_SUPPORT_HOURS
+// to override the defaults below. Defaults are the current public values.
+const SUPPORT_PHONE_DISPLAY = process.env.NEXT_PUBLIC_SUPPORT_PHONE ?? '+49 151 29617192'
+const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'support@fund24.io'
+const SUPPORT_HOURS = process.env.NEXT_PUBLIC_SUPPORT_HOURS ?? 'Mo–Fr 9–17 Uhr'
+
+// tel: href needs to be digits only (no spaces), so strip everything except +0-9.
+const telHref = `tel:${SUPPORT_PHONE_DISPLAY.replace(/[^+\d]/g, '')}`
+
 export function SupportWidget() {
   const [open, setOpen] = useState(false)
 
@@ -18,22 +28,22 @@ export function SupportWidget() {
             </button>
           </div>
           <div className="space-y-3">
-            <a href="tel:+4915129617192" className="flex items-center gap-3 rounded-lg p-2 text-sm hover:bg-muted">
+            <a href={telHref} className="flex items-center gap-3 rounded-lg p-2 text-sm hover:bg-muted">
               <Phone size={16} className="text-primary" />
               <div>
                 <p className="font-medium">Telefon</p>
-                <p className="text-xs text-muted-foreground">+49 1512 9617192</p>
+                <p className="text-xs text-muted-foreground">{SUPPORT_PHONE_DISPLAY}</p>
               </div>
             </a>
-            <a href="mailto:support@fund24.io" className="flex items-center gap-3 rounded-lg p-2 text-sm hover:bg-muted">
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="flex items-center gap-3 rounded-lg p-2 text-sm hover:bg-muted">
               <Mail size={16} className="text-primary" />
               <div>
                 <p className="font-medium">E-Mail</p>
-                <p className="text-xs text-muted-foreground">support@fund24.io</p>
+                <p className="text-xs text-muted-foreground">{SUPPORT_EMAIL}</p>
               </div>
             </a>
             <p className="text-xs text-muted-foreground">
-              Mo–Fr 9–17 Uhr
+              {SUPPORT_HOURS}
             </p>
           </div>
         </div>
