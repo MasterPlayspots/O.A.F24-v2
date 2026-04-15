@@ -60,10 +60,15 @@ id = "2edc5ca82a3d4e609b156a8f719c44ba"
 binding = "WEBHOOK_EVENTS"
 id = "3ed392e35d6142e9a5330a056b6f60f3"
 
-# R2 Bucket
+# R2 Buckets
 [[r2_buckets]]
 binding = "REPORTS"
 bucket_name = "bafa-reports"
+
+# BAFA-Zertifikate (Berater upload, GAP-002)
+[[r2_buckets]]
+binding = "BAFA_CERTS"
+bucket_name = "fund24-bafa-certs"
 
 # AI Binding
 [ai]

@@ -210,3 +210,55 @@ export async function listDienstleistungen(): Promise<DienstleistungEntry[]> {
   )
   return r.dienstleistungen ?? []
 }
+
+// ============================================================
+// BAFA-Zertifikat Upload (GAP-002)
+// ============================================================
+
+export type BafaCertStatus = 'none' | 'pending' | 'approved' | 'rejected'
+
+export interface BafaCertStatusResponse {
+  status: BafaCertStatus
+  uploaded_at: string | null
+  bafa_berater_nr: string | null
+}
+
+export interface BafaCertUploadResponse {
+  status: 'pending'
+  uploaded_at: string
+  bafa_berater_nr: string
+}
+
+export async function getBafaCertStatus(): Promise<BafaCertStatusResponse> {
+  const r = await apiCall<{ success: boolean } & BafaCertStatusResponse>(
+    API.FUND24,
+    '/api/berater/bafa-cert/status',
+    undefined,
+    token(),
+  )
+  return {
+    status: r.status,
+    uploaded_at: r.uploaded_at,
+    bafa_berater_nr: r.bafa_berater_nr,
+  }
+}
+
+export async function uploadBafaCert(
+  file: File,
+  bafaBeraterNr: string,
+): Promise<BafaCertUploadResponse> {
+  const form = new FormData()
+  form.append('file', file)
+  form.append('bafa_berater_nr', bafaBeraterNr)
+  const r = await apiCall<{ success: boolean } & BafaCertUploadResponse>(
+    API.FUND24,
+    '/api/berater/bafa-cert',
+    { method: 'POST', body: form },
+    token(),
+  )
+  return {
+    status: r.status,
+    uploaded_at: r.uploaded_at,
+    bafa_berater_nr: r.bafa_berater_nr,
+  }
+}

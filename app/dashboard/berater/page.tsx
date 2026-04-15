@@ -297,6 +297,9 @@ export default function BeraterDashboardPage() {
           <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
             <Link href="/dashboard/berater/abwicklung">Provisionen</Link>
           </Button>
+          <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white md:col-span-4">
+            <Link href="/dashboard/berater/bafa-cert">BAFA-Zertifikat</Link>
+          </Button>
         </div>
       </div>
     </div>

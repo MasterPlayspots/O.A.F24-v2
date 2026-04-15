@@ -404,7 +404,7 @@ Legend: ✅ FIXED · ⚠️ PARTIAL · ❌ STILL_OPEN · 🔁 REGRESSED
 | F-001 | Sentry DSGVO | HIGH | ✅ | `sendDefaultPii: false` + `beforeSend: sentryBeforeSend` + `tracesSampleRate: 0.1` in all 3 configs; `lib/sentry/scrubber.ts` present |
 | F-002 | Hono CVE 4.12.8→4.12.14 | HIGH | ✅ | `worker/package.json`: `"hono": "^4.12.14"` |
 | F-003 | Admin Cert-Queue broken | HIGH | ✅ | `curl /api/admin/bafa-cert/pending → 401` (auth-gated, route exists) |
-| F-004 | Berater BAFA-Zert Feature | HIGH | ❌ | `curl /api/berater/bafa-cert/status → 404` — explicitly deferred to post-launch (GAP-002) |
+| F-004 | Berater BAFA-Zert Feature | HIGH | ✅ | GAP-002 shipped post-re-audit. Prod `POST /api/berater/bafa-cert` + `GET /api/berater/bafa-cert/status` live (401 auth-gated). R2 `fund24-bafa-certs` bound. UI at `app/dashboard/berater/bafa-cert/page.tsx`. |
 | F-005 | ECOSYSTEM.md stale | HIGH | ✅ | `ECOSYSTEM.md:3` carries deprecation banner + stale-endpoint callouts |
 | F-006 | 12× console.* in prod FE | MED | ✅ | `grep -r console\. app/ lib/ components/` → **0** hits |
 | F-007 | `as any` × 48 | MED | ✅ | Non-test any's: **6** (from 21). ESLint rule `no-explicit-any: warn` active. All 6 remaining have `eslint-disable-next-line` + reason. |
@@ -423,14 +423,15 @@ Legend: ✅ FIXED · ⚠️ PARTIAL · ❌ STILL_OPEN · 🔁 REGRESSED
 | ID | Feature | Audit-Status | Now | Evidence |
 |---|---|---|:---:|---|
 | GAP-001 | Admin Cert-Queue | BROKEN | ✅ | Prod `GET /api/admin/bafa-cert/pending → 401` |
-| GAP-002 | Berater BAFA-Zert Upload | MISSING | ❌ | Prod `GET /api/berater/bafa-cert/status → 404` — post-launch |
+| GAP-002 | Berater BAFA-Zert Upload | MISSING | ✅ | Shipped post-re-audit: `POST /api/berater/bafa-cert` multipart (PDF ≤ 5 MB), `GET /api/berater/bafa-cert/status`, `GET /api/admin/bafa-cert/:userId/download`. R2 bucket `fund24-bafa-certs` bound as `BAFA_CERTS`. UI + 12 vitest cases. |
 | GAP-003 | ECOSYSTEM.md Refresh | STALE-DOC | ✅ | Deprecation banner |
 | GAP-004 | Worker Tests in CI | MISSING | ✅ | `Worker Tests (vitest)` job live |
 | GAP-005 | R2 Bucket Cleanup | STALE-INFRA | ✅ | Buckets deleted in PR #19 |
 | GAP-006 | `.env.example` | MISSING | ✅ | File exists |
 | GAP-007 | API Reference | MISSING | ✅ | `docs/API.md` auto-generated |
 
-**Totals:** 22 fixed · 2 still_open (deferred feature + user-action) · 0 regressed
+**Totals (original):** 22 fixed · 2 still_open (deferred feature + user-action) · 0 regressed
+**Totals (post-GAP-002 ship):** 23 fixed · 1 still_open (Impressum/Legal/Seeds/Phone user-actions grouped) · 0 regressed
 
 ## IV.2 Dimensions Delta
 
@@ -882,7 +883,7 @@ Legend: ✅ LIVE · 🔒 AUTH-GATED (expected 401) · ❌ BROKEN · ⚠️ polis
 | 44 | Berichte (Editor) | `app/dashboard/berater/berichte/[id]/page.tsx` | `reports.ts` |
 | 45 | Berater Profil (edit) | `app/dashboard/berater/profil/page.tsx` | `berater.ts` |
 | 46 | Berater Tracker | `app/dashboard/berater/tracker/page.tsx` | `tracker.ts` |
-| **47** | **BAFA-Zert upload** | **MISSING** (GAP-002) | **MISSING** | **404 ❌** |
+| **47** | **BAFA-Zert upload** | `app/dashboard/berater/bafa-cert/page.tsx` | `berater.ts POST /api/berater/bafa-cert` + `GET /api/berater/bafa-cert/status` | **401 ✅** |
 
 ### V.3.F Admin dashboard (all 🔒 401)
 
@@ -921,10 +922,10 @@ Legend: ✅ LIVE · 🔒 AUTH-GATED (expected 401) · ❌ BROKEN · ⚠️ polis
 | Auth | 7 | 7 | — | — |
 | Onboarding | 4 | — | 4 | — |
 | Unternehmen | 8 | — | 8 | — |
-| Berater | 11 | — | 10 | **1** (GAP-002) |
+| Berater | 11 | — | 11 | 0 (GAP-002 shipped) |
 | Admin | 7 | — | 7 | — |
 | Shared | 7 | 6 | — | 1 ⚠️ |
-| **Total** | **61** | **26** | **33** | **1 broken + 4 user-action** |
+| **Total** | **61** | **26** | **34** | **0 broken + 4 user-action** (GAP-002 shipped) |
 
 ## V.4 Data Model
 

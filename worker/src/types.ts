@@ -17,6 +17,7 @@ export type Bindings = {
   WEBHOOK_EVENTS: KVNamespace;
 
   REPORTS: R2Bucket;
+  BAFA_CERTS: R2Bucket;
 
   AI: Ai;
 
