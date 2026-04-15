@@ -1,0 +1,172 @@
+{
+  "generatedAt": "2026-04-15T20:30:00.000Z",
+  "branch": "audit/phase-1-frontend-inventory",
+  "liveHost": "https://fund24.io",
+  "apiHost": "https://api.fund24.io",
+  "summary": {
+    "totalPages": 58,
+    "publicPages": 26,
+    "protectedPages": 29,
+    "errorBoundaries": 3,
+    "liveChecked": 55,
+    "status2xx": 25,
+    "status3xx": 27,
+    "status4xxExpected": 1,
+    "status4xxRedFlag": 1,
+    "authLeaks": 1,
+    "pagesWithPageLevelMetadata": 3,
+    "pagesInheritingRootMetadata": 55
+  },
+  "pages": [
+    { "route": "/", "file": "app/(public)/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "fund24 – Fördermittel einfach finden", "hasMetadata": false, "docFile": "pages/index.md" },
+    { "route": "/agb", "file": "app/(public)/agb/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/agb.md", "flags": ["pending-legal-review", "typos-in-body"] },
+    { "route": "/aktuelles", "file": "app/(public)/aktuelles/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/aktuelles.md", "flags": ["coming-soon-banner", "no-page-metadata"] },
+    { "route": "/aktuelles/[slug]", "file": "app/(public)/aktuelles/[slug]/page.tsx", "persona": "public", "protected": false, "liveStatus": "N/A (0 articles seeded)", "title": "dynamic via generateMetadata", "hasMetadata": true, "docFile": "pages/aktuelles-slug.md", "flags": ["coming-soon-banner"] },
+    { "route": "/berater", "file": "app/(public)/berater/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/berater.md", "flags": ["coming-soon-banner"] },
+    { "route": "/berater/[id]", "file": "app/(public)/berater/[id]/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/berater-id.md", "flags": ["coming-soon-banner", "native-alert-instead-of-toaster"] },
+    { "route": "/datenschutz", "file": "app/(public)/datenschutz/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/datenschutz.md", "flags": ["pending-legal-review", "jurisdiction-mismatch-berlin-vs-bavaria"] },
+    { "route": "/foerder-schnellcheck", "file": "app/(public)/foerder-schnellcheck/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "KI-Fördercheck | fund24 (from layout)", "hasMetadata": true, "docFile": "pages/foerder-schnellcheck.md", "flags": ["denglisch-typos", "program-count-inconsistency"] },
+    { "route": "/foerder-schnellcheck/profil", "file": "app/(public)/foerder-schnellcheck/profil/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "(from layout)", "hasMetadata": false, "docFile": "pages/foerder-schnellcheck-profil.md" },
+    { "route": "/foerder-schnellcheck/chat", "file": "app/(public)/foerder-schnellcheck/chat/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "(from layout)", "hasMetadata": false, "docFile": "pages/foerder-schnellcheck-chat.md", "flags": ["missing-h1-a11y", "router-push-during-render"] },
+    { "route": "/foerder-schnellcheck/analyse", "file": "app/(public)/foerder-schnellcheck/analyse/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "(from layout)", "hasMetadata": false, "docFile": "pages/foerder-schnellcheck-analyse.md" },
+    { "route": "/foerder-schnellcheck/ergebnis", "file": "app/(public)/foerder-schnellcheck/ergebnis/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "(from layout)", "hasMetadata": false, "docFile": "pages/foerder-schnellcheck-ergebnis.md", "flags": ["router-push-during-render"] },
+    { "route": "/foerder-schnellcheck/bericht", "file": "app/(public)/foerder-schnellcheck/bericht/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "(from layout)", "hasMetadata": false, "docFile": "pages/foerder-schnellcheck-bericht.md", "flags": ["dsgvo-consent-bundled-with-newsletter", "missing-link-to-datenschutz"] },
+    { "route": "/impressum", "file": "app/(public)/impressum/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "Impressum | fund24", "hasMetadata": true, "docFile": "pages/impressum.md", "flags": ["placeholder-hrb-wird-nachgereicht", "TMG-heading-superseded-by-DDG"] },
+    { "route": "/login", "file": "app/(auth)/login/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/login.md" },
+    { "route": "/passwort-reset", "file": "app/(public)/passwort-reset/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/passwort-reset.md", "flags": ["wrong-route-group-should-be-auth", "regex-differs-from-registrieren"] },
+    { "route": "/passwort-vergessen", "file": "app/(auth)/passwort-vergessen/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/passwort-vergessen.md" },
+    { "route": "/preise", "file": "app/(public)/preise/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/preise.md" },
+    { "route": "/programme", "file": "app/(public)/programme/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "Förderprogramme | fund24", "hasMetadata": true, "docFile": "pages/programme.md", "flags": ["program-count-mismatch-2500-vs-3400", "design-drift-raw-select"] },
+    { "route": "/programme/[id]", "file": "app/(public)/programme/[id]/page.tsx", "persona": "public", "protected": false, "liveStatus": 404, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/programme-id.md", "flags": ["BROKEN-all-ids-return-404", "wrong-api-endpoint", "number-cast-nan-risk"] },
+    { "route": "/registrieren", "file": "app/(auth)/registrieren/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/registrieren.md", "flags": ["password-regex-stricter-than-reset"] },
+    { "route": "/support", "file": "app/(public)/support/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/support.md", "flags": ["email-inconsistency-info-vs-support"] },
+    { "route": "/verifizieren", "file": "app/(auth)/verifizieren/page.tsx", "persona": "public", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/verifizieren.md" },
+
+    { "route": "/foerdercheck", "file": "app/foerdercheck/page.tsx", "persona": "unternehmen", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/foerdercheck.md", "flags": ["light-theme-drift"] },
+    { "route": "/foerdercheck/[sessionId]/chat", "file": "app/foerdercheck/[sessionId]/chat/page.tsx", "persona": "unternehmen", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/foerdercheck-sessionId-chat.md", "flags": ["light-theme-drift"] },
+    { "route": "/foerdercheck/[sessionId]/analyse", "file": "app/foerdercheck/[sessionId]/analyse/page.tsx", "persona": "unternehmen", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/foerdercheck-sessionId-analyse.md", "flags": ["light-theme-drift", "typo-later-auf-die-ergebnisse-prüfen"] },
+    { "route": "/foerdercheck/[sessionId]/ergebnisse", "file": "app/foerdercheck/[sessionId]/ergebnisse/page.tsx", "persona": "unternehmen", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/foerdercheck-sessionId-ergebnisse.md", "flags": ["light-theme-drift", "pdf-download-not-implemented-alert", "typo-förderbereichcen"] },
+    { "route": "/foerdercheck/[sessionId]/dokumente", "file": "app/foerdercheck/[sessionId]/dokumente/page.tsx", "persona": "unternehmen", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/foerdercheck-sessionId-dokumente.md", "flags": ["light-theme-drift"] },
+
+    { "route": "/onboarding/unternehmen", "file": "app/onboarding/unternehmen/page.tsx", "persona": "unternehmen", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/onboarding-unternehmen.md", "flags": ["branche-taxonomy-mismatch-with-berater-onboarding", "no-step-indicator"] },
+    { "route": "/onboarding/profil", "file": "app/onboarding/profil/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/onboarding-profil.md", "flags": ["branche-taxonomy-mismatch", "client-only-role-guard"] },
+    { "route": "/onboarding/expertise", "file": "app/onboarding/expertise/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/onboarding-expertise.md", "flags": ["no-partial-failure-recovery"] },
+    { "route": "/onboarding/dienstleistungen", "file": "app/onboarding/dienstleistungen/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/onboarding-dienstleistungen.md", "flags": ["no-preis-range-validation", "no-partial-failure-recovery"] },
+
+    { "route": "/dashboard/unternehmen", "file": "app/dashboard/unternehmen/page.tsx", "persona": "unternehmen", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-unternehmen.md", "flags": ["dead-link-dashboard-checks-id"] },
+    { "route": "/dashboard/unternehmen/anfragen", "file": "app/dashboard/unternehmen/anfragen/page.tsx", "persona": "unternehmen", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-unternehmen-anfragen.md", "flags": ["coming-soon-banner", "grammar-aller-ihre"] },
+    { "route": "/dashboard/unternehmen/antraege", "file": "app/dashboard/unternehmen/antraege/page.tsx", "persona": "unternehmen", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-unternehmen-antraege.md" },
+    { "route": "/dashboard/unternehmen/favoriten", "file": "app/dashboard/unternehmen/favoriten/page.tsx", "persona": "unternehmen", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-unternehmen-favoriten.md", "flags": ["coming-soon-banner"] },
+    { "route": "/dashboard/unternehmen/tracker", "file": "app/dashboard/unternehmen/tracker/page.tsx", "persona": "unternehmen", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-unternehmen-tracker.md", "flags": ["coming-soon-banner"] },
+
+    { "route": "/dashboard/berater", "file": "app/dashboard/berater/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-berater.md", "flags": ["coming-soon-banner-subtree", "data-model-mismatch-anfrage-nachricht"] },
+    { "route": "/dashboard/berater/anfragen", "file": "app/dashboard/berater/anfragen/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-berater-anfragen.md", "flags": ["coming-soon-banner"] },
+    { "route": "/dashboard/berater/beratungen", "file": "app/dashboard/berater/beratungen/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-berater-beratungen.md", "flags": ["coming-soon-banner"] },
+    { "route": "/dashboard/berater/beratungen/[id]", "file": "app/dashboard/berater/beratungen/[id]/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-berater-beratungen-id.md", "flags": ["coming-soon-banner"] },
+    { "route": "/dashboard/berater/berichte", "file": "app/dashboard/berater/berichte/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-berater-berichte.md", "flags": ["coming-soon-banner"] },
+    { "route": "/dashboard/berater/berichte/[id]", "file": "app/dashboard/berater/berichte/[id]/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-berater-berichte-id.md", "flags": ["coming-soon-banner", "id-equals-new-is-create-mode"] },
+    { "route": "/dashboard/berater/abwicklung", "file": "app/dashboard/berater/abwicklung/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-berater-abwicklung.md", "flags": ["coming-soon-banner"] },
+    { "route": "/dashboard/berater/nachrichten", "file": "app/dashboard/berater/nachrichten/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-berater-nachrichten.md", "flags": ["coming-soon-banner"] },
+    { "route": "/dashboard/berater/profil", "file": "app/dashboard/berater/profil/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-berater-profil.md", "flags": ["coming-soon-banner", "silent-data-loss-spezialisierungen-websiteurl"] },
+    { "route": "/dashboard/berater/tracker", "file": "app/dashboard/berater/tracker/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-berater-tracker.md", "flags": ["coming-soon-banner"] },
+    { "route": "/dashboard/berater/vorlagen", "file": "app/dashboard/berater/vorlagen/page.tsx", "persona": "berater", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/dashboard-berater-vorlagen.md", "flags": ["coming-soon-banner", "native-confirm"] },
+
+    { "route": "/admin", "file": "app/admin/page.tsx", "persona": "admin", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/admin.md", "flags": ["coming-soon-banner-subtree"] },
+    { "route": "/admin/aktuelles", "file": "app/admin/aktuelles/page.tsx", "persona": "admin", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/admin-aktuelles.md", "flags": ["coming-soon-banner"] },
+    { "route": "/admin/audit-logs", "file": "app/admin/audit-logs/page.tsx", "persona": "admin", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/admin-audit-logs.md", "flags": ["coming-soon-banner"] },
+    { "route": "/admin/email-outbox", "file": "app/admin/email-outbox/page.tsx", "persona": "admin", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/admin-email-outbox.md", "flags": ["coming-soon-banner"] },
+    { "route": "/admin/provisionen", "file": "app/admin/provisionen/page.tsx", "persona": "admin", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/admin-provisionen.md", "flags": ["coming-soon-banner", "hardcoded-9.99-pct", "structured-value-in-free-text-notiz"] },
+    { "route": "/admin/users", "file": "app/admin/users/page.tsx", "persona": "admin", "protected": true, "liveStatus": "307→/login", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/admin-users.md", "flags": ["coming-soon-banner", "native-confirm"] },
+
+    { "route": "/antraege/[id]", "file": "app/antraege/[id]/page.tsx", "persona": "any-authenticated", "protected": false, "liveStatus": 200, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/antraege-id.md", "flags": ["AUTH-LEAK-missing-from-PROTECTED_PREFIXES", "client-side-guard-only"] },
+
+    { "route": "app/error.tsx", "file": "app/error.tsx", "persona": "all", "protected": false, "liveStatus": "N/A (runtime error boundary)", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/_error.md" },
+    { "route": "app/not-found.tsx", "file": "app/not-found.tsx", "persona": "all", "protected": false, "liveStatus": 404, "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/_not-found.md" },
+    { "route": "app/global-error.tsx", "file": "app/global-error.tsx", "persona": "all", "protected": false, "liveStatus": "N/A", "title": "— (inherits root)", "hasMetadata": false, "docFile": "pages/_global-error.md", "flags": ["no-reset-handler", "no-sentry-tagging-convention"] }
+  ],
+  "assets": {
+    "publicDirectory": "absent",
+    "appColocatedAssets": [
+      { "path": "app/favicon.ico", "sizeBytes": 25931 },
+      { "path": "app/globals.css", "sizeBytes": 4882 },
+      { "path": "app/opengraph-image.tsx", "kind": "Satori-generated OG image (root default)", "lines": 99 },
+      { "path": "app/(public)/berater/[id]/opengraph-image.tsx", "kind": "Satori-generated OG image (per berater)", "lines": 107 },
+      { "path": "app/(public)/programme/[id]/opengraph-image.tsx", "kind": "Satori-generated OG image (per programme) — unreachable while /programme/[id] is 404", "lines": 93 }
+    ],
+    "fonts": [
+      { "family": "Geist", "source": "next/font/google", "cssVar": "--font-geist-sans" },
+      { "family": "Geist Mono", "source": "next/font/google", "cssVar": "--font-geist-mono" },
+      { "family": "Manrope", "source": "next/font/google", "cssVar": "--font-manrope" },
+      { "family": "Inter", "source": "next/font/google", "cssVar": "--font-inter" }
+    ],
+    "nextImageUsage": { "count": 0, "note": "No component imports next/image. No images.remotePatterns in next.config.ts." },
+    "externalLinksInCode": [
+      "https://vercel.com/legal/privacy (in /datenschutz)",
+      "https://www.cloudflare.com/de-de/privacypolicy/ (in /datenschutz)",
+      "https://ec.europa.eu/consumers/odr (in /impressum)",
+      "https://schema.org (JSON-LD, root layout)"
+    ]
+  },
+  "seo": {
+    "robotsTxt": {
+      "liveStatus": 200,
+      "allow": ["/"],
+      "disallow": ["/api/", "/admin/", "/dashboard/", "/onboarding/", "/antraege/", "/foerdercheck/", "/verifizieren", "/passwort-reset"],
+      "host": "https://fund24.io",
+      "sitemap": "https://fund24.io/sitemap.xml"
+    },
+    "sitemapXml": {
+      "liveStatus": 200,
+      "urlCount": 28,
+      "composition": { "staticRoutes": 12, "programmeRoutes": 0, "beraterRoutes": 16 },
+      "knownBug": "fetchProgrammIds() in app/sitemap.ts:25 reads `data.results` but the API returns `{ success, data, pagination }` → 0 programme URLs in every sitemap render"
+    },
+    "rootMetadata": {
+      "source": "app/layout.tsx",
+      "metadataBase": "https://fund24.io",
+      "title": "fund24 – Fördermittel einfach finden",
+      "description": "Kostenloser KI-Fördercheck für Unternehmen. 3.400+ aktive Förderprogramme. Berater-Matching. Antrag, Bericht und Abwicklung an einem Ort.",
+      "openGraph": { "siteName": "fund24", "type": "website", "locale": "de_DE" },
+      "twitter": { "card": "summary_large_image" },
+      "robots": { "index": true, "follow": true },
+      "jsonLd": "Organization schema injected via <script type=\"application/ld+json\">"
+    },
+    "hreflang": "none (single-locale de_DE)",
+    "canonicals": "none per-page (only metadataBase set at root)"
+  },
+  "redFlags": {
+    "high": [
+      { "id": "H-P1-01", "route": "/programme/[id]", "summary": "All IDs return 404 — getProgramm() calls non-existent endpoint /api/foerderprogramme/:id; correct path is /api/foerdermittel/katalog/:id.", "fix": "lib/api/fund24.ts:36 — update URL" },
+      { "id": "H-P1-02", "route": "/antraege/[id]", "summary": "Served 200 without authentication; missing from middleware PROTECTED_PREFIXES. Only a post-hydration client-side guard.", "fix": "middleware.ts:23 — add '/antraege'" },
+      { "id": "H-P1-03", "route": "sitemap.xml", "summary": "0 programme URLs emitted because fetchProgrammIds() reads wrong response field.", "fix": "app/sitemap.ts:25-43 — map from data.data not data.results" },
+      { "id": "H-P1-04", "route": "/dashboard/berater/profil", "summary": "Silent data loss: form captures spezialisierungen + websiteUrl but the update payload omits them.", "fix": "page.tsx onSubmit — include fields" },
+      { "id": "H-P1-05", "route": "/dashboard/unternehmen", "summary": "Dead link: 'Ansehen' → /dashboard/checks/[id] — route does not exist in app/.", "fix": "Redirect to /foerdercheck/[sessionId]/ergebnisse or create the route" }
+    ],
+    "medium": [
+      { "id": "M-P1-01", "route": "/foerder-schnellcheck/bericht", "summary": "Single checkbox bundles Datenschutz-Consent and newsletter opt-in → DSGVO issue; no link to /datenschutz." },
+      { "id": "M-P1-02", "route": "/foerder-schnellcheck/chat", "summary": "No <h1> on page; uses <h2> for active question. A11y + single-h1 convention." },
+      { "id": "M-P1-03", "route": "/berater/[id]", "summary": "Uses native browser alert() on success despite sonner Toaster being configured." },
+      { "id": "M-P1-04", "route": "dashboard/* + admin/* + /aktuelles", "summary": "ComingSoonBanner wraps entire subtrees even for functioning pages (berater dashboard, admin provisionen, aktuelles) — UX friction." },
+      { "id": "M-P1-05", "route": "/onboarding/{unternehmen,profil}", "summary": "Branche taxonomy mismatch — 11 entries with amp-suffix vs 10 short-form entries. Matching logic will never line up." },
+      { "id": "M-P1-06", "route": "various", "summary": "Native alert()/confirm() on /vorlagen, /admin/users, /berater/[id] vs sonner Toaster + custom dialogs elsewhere." },
+      { "id": "M-P1-07", "route": "/foerder-schnellcheck/{chat,ergebnis}", "summary": "router.push() called during render, not in useEffect — hydration warnings." },
+      { "id": "M-P1-08", "route": "/admin/provisionen", "summary": "Hardcoded '9,99%' in column header despite per-row provisionsSatz; edit writes structured 'bewilligt: X EUR' into free-text notiz field." },
+      { "id": "M-P1-09", "route": "/onboarding/{expertise,dienstleistungen}", "summary": "Partial-failure risk: sequential for-await loop persists entry 1-2, silently drops 4-5 if 3 fails." },
+      { "id": "M-P1-10", "route": "/foerdercheck/*", "summary": "Light-theme gradient styling leaks into authenticated wizard while rest of app uses the dark 'Institutional Architect' theme." }
+    ],
+    "low": [
+      { "id": "L-P1-01", "summary": "0 per-page metadata on 55 of 58 pages — only root metadata + /programme + /impressum + /foerder-schnellcheck layout declare any. All social-share previews use the generic fund24 title/description." },
+      { "id": "L-P1-02", "summary": "Program-count inconsistency: root metadata says '3.400+', /programme metadata says '2.500+'." },
+      { "id": "L-P1-03", "summary": "Typos and Denglisch across public + authenticated pages: 'Konteniverwaltung', 'behhalten', 'behaften', 'Zahlte Provisionen', 'Förderbereichcen', 'aller Ihre Anfragen', 'matched' (should be 'matcht'), 'Was passiert nächster?', 'Newsletters'." },
+      { "id": "L-P1-04", "route": "/passwort-reset", "summary": "Lives in (public) route group instead of (auth); re-implements chrome inconsistent with the 4 other auth pages." },
+      { "id": "L-P1-05", "route": "/datenschutz", "summary": "Names Berlin data-protection authority, but company is in Kronach (Bavaria, IHK Oberfranken Bayreuth)." },
+      { "id": "L-P1-06", "route": "/impressum", "summary": "Heading still 'Angaben gemäß § 5 Telemediengesetz (TMG)' though law was superseded by DDG." },
+      { "id": "L-P1-07", "route": "/agb, /datenschutz, /impressum", "summary": "'Letzte Aktualisierung: new Date().toLocaleDateString()' — always shows today, no real audit trail." },
+      { "id": "L-P1-08", "route": "/support vs SupportWidget", "summary": "Support email inconsistency — info@fund24.io on /support, support@fund24.io in SupportWidget." },
+      { "id": "L-P1-09", "route": "/agb, /datenschutz", "summary": "TODO banners at bottom: 'zu Demonstrationszwecken erstellt — bitte anwaltlich überarbeiten'." },
+      { "id": "L-P1-10", "route": "/registrieren vs /passwort-reset", "summary": "Password regex mismatch — registrieren requires [!@#$%^&*], reset allows a broader set, so reset allows weaker-rule passwords." },
+      { "id": "L-P1-11", "route": "app/global-error.tsx", "summary": "No reset() wired up; Sentry tagging convention missing (inconsistent with app/error.tsx and /passwort-reset)." },
+      { "id": "L-P1-12", "route": "/programme vs /berater", "summary": "Design-system drift: /berater uses components/ui/select, /programme uses raw <select>." }
+    ]
+  }
+}
