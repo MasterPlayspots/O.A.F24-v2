@@ -36,7 +36,10 @@
       "Bash(awk -F: '{print $3}')",
       "Bash(curl -s \"https://fund24.io/foerder-schnellcheck\")",
       "Bash(curl -s \"https://fund24.io/\")",
-      "Bash(ls worker/src/services/email*)"
+      "Bash(ls worker/src/services/email*)",
+      "Bash(curl -s -o /dev/null -w \"W2 admin/dashboard: %{http_code}\\\\n\" \"https://foerdermittel-check-api.froeba-kevin.workers.dev/api/admin/dashboard\")",
+      "Bash(curl -s -o /dev/null -w \"W2 admin/dashboard with token: %{http_code}\\\\n\" \"https://foerdermittel-check-api.froeba-kevin.workers.dev/api/admin/dashboard\" -H \"Authorization: Bearer invalid\")",
+      "Bash(curl -s \"https://foerdermittel-check-api.froeba-kevin.workers.dev/api/admin/dashboard\")"
     ],
     "additionalDirectories": [
       "/Users/our.ark./Desktop/02_AUTOMATISIERUNG/O.A.F24",

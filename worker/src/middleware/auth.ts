@@ -22,12 +22,12 @@ export const requireAuth: MiddlewareHandler<{ Bindings: Bindings; Variables: Var
     const jwt = payload as unknown as JwtPayload;
 
     const user = await c.env.DB.prepare(
-      "SELECT id, email, role, first_name, last_name FROM users WHERE id = ?"
+      "SELECT id, email, role, first_name, last_name, deleted_at FROM users WHERE id = ?"
     )
       .bind(jwt.userId)
-      .first<{ id: string; email: string; role: string; first_name: string; last_name: string }>();
+      .first<{ id: string; email: string; role: string; first_name: string; last_name: string; deleted_at: string | null }>();
 
-    if (!user) {
+    if (!user || user.deleted_at) {
       return c.json({ success: false, error: "Benutzer nicht gefunden" }, 401);
     }
 

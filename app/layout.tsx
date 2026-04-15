@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieBanner } from "@/components/cookie-banner/CookieBanner";
+import { ConsentGatedAnalytics } from "@/components/analytics/ConsentGatedAnalytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -119,6 +120,7 @@ export default function RootLayout({
         <Providers>{children}</Providers>
         <Toaster />
         <CookieBanner />
+        <ConsentGatedAnalytics />
       </body>
     </html>
   );
