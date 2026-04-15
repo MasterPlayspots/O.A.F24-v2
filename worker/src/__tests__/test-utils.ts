@@ -157,6 +157,31 @@ export async function setupFundingTables(bafaDb: D1Database) {
     `CREATE TABLE IF NOT EXISTS foerdermittel_dokumente (id TEXT PRIMARY KEY, case_id TEXT NOT NULL, step_id TEXT, dokument_typ TEXT NOT NULL, dateiname TEXT NOT NULL, dateityp TEXT NOT NULL, dateigroesse INTEGER NOT NULL, r2_key TEXT NOT NULL, status TEXT DEFAULT 'uploaded', ai_extraktion TEXT, uploaded_at TEXT DEFAULT (datetime('now')))`,
     `CREATE TABLE IF NOT EXISTS foerdermittel_conversations (id TEXT PRIMARY KEY, case_id TEXT, profile_id TEXT NOT NULL, context TEXT NOT NULL, messages TEXT NOT NULL DEFAULT '[]', created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')))`,
     `CREATE TABLE IF NOT EXISTS foerdermittel_benachrichtigungen (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, case_id TEXT, typ TEXT NOT NULL, titel TEXT NOT NULL, nachricht TEXT, gelesen INTEGER DEFAULT 0, email_gesendet INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now')))`,
+    // Sprint-19+: POST /cases now reads from unternehmen (migration 025).
+    `CREATE TABLE IF NOT EXISTS unternehmen (id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))), user_id TEXT NOT NULL, firmenname TEXT NOT NULL, rechtsform TEXT, ort TEXT, bundesland TEXT, branche TEXT, mitarbeiter_anzahl INTEGER, jahresumsatz REAL, gruendungsjahr INTEGER, deleted_at TEXT, created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')), UNIQUE(user_id))`,
   ];
   await bafaDb.batch(statements.map((sql) => bafaDb.prepare(sql)));
+}
+
+/** Insert a minimal unternehmen row (required by POST /api/foerdermittel/cases). */
+export async function createTestUnternehmen(
+  bafaDb: D1Database,
+  userId: string,
+  opts: { firmenname?: string; branche?: string; bundesland?: string } = {}
+) {
+  await bafaDb
+    .prepare(
+      `INSERT INTO unternehmen (user_id, firmenname, branche, bundesland, rechtsform, mitarbeiter_anzahl, jahresumsatz)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    )
+    .bind(
+      userId,
+      opts.firmenname ?? "Test GmbH",
+      opts.branche ?? "IT/Tech",
+      opts.bundesland ?? "Bayern",
+      "GmbH",
+      10,
+      500000
+    )
+    .run();
 }

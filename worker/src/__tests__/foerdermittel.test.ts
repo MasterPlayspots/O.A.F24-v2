@@ -8,6 +8,7 @@ import {
   setupFundingTables,
   createTestUser,
   createTestToken,
+  createTestUnternehmen,
 } from "./test-utils";
 
 beforeAll(async () => {
@@ -199,16 +200,10 @@ describe("Foerdermittel Cases", () => {
       const userId = await createTestUser(env.DB, { email: "fm-case@example.com" });
       const token = await createTestToken(userId, "fm-case@example.com");
 
-      // Create profile first
-      await SELF.fetch("https://api.test/api/foerdermittel/profile", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          Origin: "https://zfbf.info",
-        },
-        body: JSON.stringify({ company_name: "Case Test GmbH" }),
-      });
+      // Sprint-19+: POST /cases reads from unternehmen (migration 025),
+      // not from the legacy foerdermittel_profile. Seed both so the handler
+      // finds the unternehmen row and upserts the profile from it.
+      await createTestUnternehmen(env.BAFA_DB, userId, { firmenname: "Case Test GmbH" });
 
       // Create case for program 1
       const res = await SELF.fetch("https://api.test/api/foerdermittel/cases", {
@@ -238,7 +233,8 @@ describe("Foerdermittel Cases", () => {
       expect(caseBody.data.phase).toBe("eligibility_check");
     });
 
-    it("requires a profile", async () => {
+    it("requires an unternehmen profile", async () => {
+      // No unternehmen row seeded — handler should 400 with the onboarding hint.
       const userId = await createTestUser(env.DB, { email: "fm-case-noprofile@example.com" });
       const token = await createTestToken(userId, "fm-case-noprofile@example.com");
 
@@ -260,16 +256,7 @@ describe("Foerdermittel Cases", () => {
       const userId = await createTestUser(env.DB, { email: "fm-case-list@example.com" });
       const token = await createTestToken(userId, "fm-case-list@example.com");
 
-      // Create profile + case
-      await SELF.fetch("https://api.test/api/foerdermittel/profile", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          Origin: "https://zfbf.info",
-        },
-        body: JSON.stringify({ company_name: "List Test GmbH" }),
-      });
+      await createTestUnternehmen(env.BAFA_DB, userId, { firmenname: "List Test GmbH" });
       await SELF.fetch("https://api.test/api/foerdermittel/cases", {
         method: "POST",
         headers: {
