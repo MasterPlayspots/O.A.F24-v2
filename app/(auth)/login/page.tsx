@@ -11,6 +11,7 @@ import { useAuth } from '@/lib/store/authStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from 'sonner'
 
 const schema = z.object({
   email: z.string().email('Bitte eine gültige E-Mail eingeben'),
@@ -42,6 +43,7 @@ function LoginForm() {
     try {
       const res = await apiLogin(data.email, data.password)
       login(res.token, res.user)
+      toast.success(`Willkommen zurück, ${res.user.firstName ?? 'du'}.`)
       if (redirect) {
         router.push(redirect)
       } else if (res.user.role === 'admin') {
@@ -52,7 +54,9 @@ function LoginForm() {
         router.push('/dashboard/unternehmen')
       }
     } catch {
-      setFehler('E-Mail oder Passwort falsch.')
+      const msg = 'E-Mail oder Passwort falsch.'
+      setFehler(msg)
+      toast.error(msg)
     } finally {
       setIsSubmitting(false)
     }

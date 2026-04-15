@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { register as apiRegister } from '@/lib/api/auth'
 import { useAuth } from '@/lib/store/authStore'
 import { ApiError } from '@/lib/api/client'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -106,10 +107,12 @@ function RegisterForm() {
         privacyAccepted: data.datenschutz,
       })
       if ('requiresVerification' in res) {
+        toast.success('Bestätigungscode gesendet. Prüfe dein E-Mail-Postfach.')
         const next = beraterParam ? `&next=/berater/${beraterParam}` : ''
         router.push(`/verifizieren?email=${encodeURIComponent(data.email)}&role=${rolle}${next}`)
       } else {
         login(res.token, res.user)
+        toast.success('Konto erstellt. Willkommen bei fund24.')
         if (beraterParam) {
           router.push(`/berater/${beraterParam}`)
         } else {
@@ -118,9 +121,13 @@ function RegisterForm() {
       }
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
-        setServerFehler('Diese E-Mail ist bereits registriert.')
+        const msg = 'Diese E-Mail ist bereits registriert.'
+        setServerFehler(msg)
+        toast.error(msg)
       } else {
-        setServerFehler('Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.')
+        const msg = 'Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.'
+        setServerFehler(msg)
+        toast.error(msg)
       }
     } finally {
       setIsSubmitting(false)

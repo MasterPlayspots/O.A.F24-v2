@@ -26,9 +26,45 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "fund24 – Fördermittel einfach finden",
+  metadataBase: new URL("https://fund24.io"),
+  title: {
+    default: "fund24 – Fördermittel einfach finden",
+    template: "%s | fund24",
+  },
   description:
-    "Kostenloser KI-Fördercheck für Unternehmen. 2.500+ Programme. Berater-Matching.",
+    "Kostenloser KI-Fördercheck für Unternehmen. 3.400+ aktive Förderprogramme. Berater-Matching. Antrag, Bericht und Abwicklung an einem Ort.",
+  applicationName: "fund24",
+  keywords: [
+    "Fördermittel", "Förderprogramme", "Fördercheck", "Zuschüsse",
+    "BAFA", "KfW", "Unternehmen", "Förderberater", "Mittelstand", "KMU",
+  ],
+  authors: [{ name: "fund24" }],
+  creator: "Fröba Sales Solutions UG",
+  openGraph: {
+    type: "website",
+    locale: "de_DE",
+    url: "https://fund24.io",
+    siteName: "fund24",
+    title: "fund24 – Fördermittel einfach finden",
+    description:
+      "Kostenloser KI-Fördercheck. 3.400+ aktive Förderprogramme. Berater-Matching. Von Antrag bis Abwicklung auf einer Plattform.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "fund24 – Fördermittel einfach finden",
+    description:
+      "Kostenloser KI-Fördercheck für Unternehmen. Programme, Berater, Anträge, Berichte — alles an einem Ort.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export const viewport: Viewport = {
@@ -44,6 +80,39 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
+      <head>
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "fund24",
+              legalName: "Fröba Sales Solutions UG (haftungsbeschränkt)",
+              url: "https://fund24.io",
+              logo: "https://fund24.io/icon.png",
+              description:
+                "Plattform für Fördermittel: KI-Fördercheck, 3.400+ Programme, Berater-Matching, Antragstellung und Abwicklung.",
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: "Johann-Nikolaus-Zitter Str. 31",
+                postalCode: "96317",
+                addressLocality: "Kronach",
+                addressCountry: "DE",
+              },
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "customer support",
+                email: "info@fund24.io",
+                telephone: "+49-151-29617192",
+                availableLanguage: ["de"],
+              },
+              areaServed: "DE",
+            }),
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${inter.variable} antialiased`}
       >
