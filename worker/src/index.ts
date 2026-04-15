@@ -1,4 +1,4 @@
-// ZFBF Worker - Modular Hono API
+// fund24 API — Modular Hono Worker (deployed via GitHub Actions)
 import { Hono } from "hono";
 import { Toucan } from "toucan-js";
 import type { Bindings, Variables } from "./types";
