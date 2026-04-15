@@ -1,0 +1,2660 @@
+{
+  "generatedAt": "2026-04-15T21:00:00.000Z",
+  "branch": "audit/phase-2-cta-routing",
+  "summary": {
+    "totalPages": 58,
+    "totalCTAs": 206,
+    "ctasByStatus": {
+      "live": 176,
+      "external": 8,
+      "conditional": 17,
+      "broken": 3,
+      "mock": 2
+    },
+    "orphanPages": [
+      "/passwort-reset",
+      "/antraege/[id]",
+      "/dashboard/unternehmen/tracker",
+      "/dashboard/berater/berichte",
+      "/dashboard/berater/profil",
+      "/dashboard/berater/tracker",
+      "/dashboard/berater/vorlagen",
+      "/admin/audit-logs",
+      "/admin/email-outbox"
+    ],
+    "deadLinks": [
+      {
+        "from": "/dashboard/unternehmen",
+        "target": "/dashboard/checks/{id}"
+      }
+    ],
+    "totalFindings": 29,
+    "orphanNote": "Reached Phase-2 extraction only via code-scan of page files + Footer/Navbar/list components. Orphans here mean: no incoming link from any scanned component. They may still be reachable via email, direct URL, or un-scanned UI (e.g. admin sub-nav)."
+  },
+  "pages": [
+    {
+      "route": "/",
+      "file": "app/(public)/page.tsx",
+      "ctas": [
+        {
+          "label": "Fördercheck starten",
+          "target": "/foerder-schnellcheck",
+          "type": "navigation",
+          "status": "live",
+          "line": 41,
+          "issue": null
+        },
+        {
+          "label": "Alle Programme ansehen",
+          "target": "/programme",
+          "type": "navigation",
+          "status": "live",
+          "line": 52,
+          "issue": null
+        },
+        {
+          "label": "Katalog öffnen",
+          "target": "/programme",
+          "type": "navigation",
+          "status": "live",
+          "line": 126,
+          "issue": null
+        },
+        {
+          "label": "Check starten",
+          "target": "/foerder-schnellcheck",
+          "type": "navigation",
+          "status": "live",
+          "line": 126,
+          "issue": null
+        },
+        {
+          "label": "Berater finden",
+          "target": "/berater",
+          "type": "navigation",
+          "status": "live",
+          "line": 126,
+          "issue": null
+        },
+        {
+          "label": "Als Berater registrieren",
+          "target": "/registrieren?rolle=berater",
+          "type": "navigation",
+          "status": "live",
+          "line": 234,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/foerder-schnellcheck",
+        "/programme",
+        "/berater",
+        "/registrieren?rolle=berater"
+      ],
+      "incoming_links": [
+        "/admin",
+        "/admin/aktuelles",
+        "/admin/audit-logs",
+        "/admin/email-outbox",
+        "/admin/provisionen",
+        "/admin/users",
+        "/dashboard/berater/profil",
+        "/foerder-schnellcheck",
+        "/foerder-schnellcheck/analyse",
+        "/foerder-schnellcheck/bericht",
+        "/foerder-schnellcheck/chat",
+        "/foerder-schnellcheck/ergebnis",
+        "/foerder-schnellcheck/profil",
+        "app/error.tsx",
+        "app/global-error.tsx",
+        "app/not-found.tsx"
+      ]
+    },
+    {
+      "route": "/agb",
+      "file": "app/(public)/agb/page.tsx",
+      "ctas": [
+        {
+          "label": "Preisseite",
+          "target": "/preise",
+          "type": "navigation",
+          "status": "live",
+          "line": 80,
+          "issue": null
+        },
+        {
+          "label": "Datenschutzerklärung",
+          "target": "/datenschutz",
+          "type": "navigation",
+          "status": "live",
+          "line": 115,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/preise",
+        "/datenschutz"
+      ],
+      "incoming_links": [
+        "/registrieren",
+        "components/layout/Footer.tsx"
+      ]
+    },
+    {
+      "route": "/datenschutz",
+      "file": "app/(public)/datenschutz/page.tsx",
+      "ctas": [
+        {
+          "label": "vercel.com/legal/privacy",
+          "target": "https://vercel.com/legal/privacy",
+          "type": "navigation",
+          "status": "external",
+          "line": 193,
+          "issue": null
+        },
+        {
+          "label": "cloudflare.com/de-de/privacypolicy",
+          "target": "https://www.cloudflare.com/de-de/privacypolicy/",
+          "type": "navigation",
+          "status": "external",
+          "line": 206,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [],
+      "incoming_links": [
+        "/agb",
+        "/impressum",
+        "/registrieren",
+        "components/layout/Footer.tsx"
+      ]
+    },
+    {
+      "route": "/impressum",
+      "file": "app/(public)/impressum/page.tsx",
+      "ctas": [
+        {
+          "label": "Datenschutzerklärung",
+          "target": "/datenschutz",
+          "type": "navigation",
+          "status": "live",
+          "line": 125,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/datenschutz"
+      ],
+      "incoming_links": [
+        "components/layout/Footer.tsx"
+      ]
+    },
+    {
+      "route": "/preise",
+      "file": "app/(public)/preise/page.tsx",
+      "ctas": [
+        {
+          "label": "Kostenlos starten",
+          "target": "/registrieren?rolle=unternehmen",
+          "type": "navigation",
+          "status": "live",
+          "line": 104,
+          "issue": null
+        },
+        {
+          "label": "Als Berater registrieren",
+          "target": "/registrieren?rolle=berater",
+          "type": "navigation",
+          "status": "live",
+          "line": 104,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/registrieren?rolle=unternehmen",
+        "/registrieren?rolle=berater"
+      ],
+      "incoming_links": [
+        "/agb",
+        "components/layout/Footer.tsx",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/support",
+      "file": "app/(public)/support/page.tsx",
+      "ctas": [
+        {
+          "label": "info@fund24.io (Abwicklung)",
+          "target": "mailto:info@fund24.io",
+          "type": "navigation",
+          "status": "external",
+          "line": 31,
+          "issue": null
+        },
+        {
+          "label": "info@fund24.io (Technik)",
+          "target": "mailto:info@fund24.io",
+          "type": "navigation",
+          "status": "external",
+          "line": 31,
+          "issue": null
+        },
+        {
+          "label": "+49 151 29617192",
+          "target": "tel:+4915129617192",
+          "type": "navigation",
+          "status": "external",
+          "line": 31,
+          "issue": null
+        },
+        {
+          "label": "info@fund24.io (Notfall)",
+          "target": "mailto:info@fund24.io",
+          "type": "navigation",
+          "status": "external",
+          "line": 55,
+          "issue": null
+        },
+        {
+          "label": "E-Mail schreiben",
+          "target": "mailto:info@fund24.io",
+          "type": "navigation",
+          "status": "external",
+          "line": 89,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [],
+      "incoming_links": [
+        "components/layout/Footer.tsx"
+      ]
+    },
+    {
+      "route": "/aktuelles",
+      "file": "app/(public)/aktuelles/page.tsx",
+      "ctas": [
+        {
+          "label": "Kategorie-Filter (Buttons)",
+          "target": "setSelectedCategory",
+          "type": "button",
+          "status": "live",
+          "line": 54,
+          "issue": null
+        },
+        {
+          "label": "Artikel-Karte → Detailseite",
+          "target": "/aktuelles/[slug]",
+          "type": "navigation",
+          "status": "live",
+          "line": 94,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/aktuelles/[slug]"
+      ],
+      "incoming_links": [
+        "/aktuelles/[slug]",
+        "components/layout/Footer.tsx",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/aktuelles/[slug]",
+      "file": "app/(public)/aktuelles/[slug]/page.tsx",
+      "ctas": [
+        {
+          "label": "← Zurück zu Aktuelles",
+          "target": "/aktuelles",
+          "type": "navigation",
+          "status": "live",
+          "line": 64,
+          "issue": null
+        },
+        {
+          "label": "Fördercheck starten",
+          "target": "/foerdercheck",
+          "type": "navigation",
+          "status": "live",
+          "line": 135,
+          "issue": "CTA verlinkt auf /foerdercheck, landing page + rest of site nutzt /foerder-schnellcheck — Inkonsistenz"
+        },
+        {
+          "label": "Zurück zur Übersicht →",
+          "target": "/aktuelles",
+          "type": "navigation",
+          "status": "live",
+          "line": 146,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/aktuelles",
+        "/foerdercheck"
+      ],
+      "incoming_links": [
+        "/aktuelles",
+        "app/(public)/aktuelles/page.tsx"
+      ]
+    },
+    {
+      "route": "/login",
+      "file": "app/(auth)/login/page.tsx",
+      "ctas": [
+        {
+          "label": "Passwort vergessen?",
+          "target": "/passwort-vergessen",
+          "type": "navigation",
+          "status": "live",
+          "line": 88,
+          "issue": null
+        },
+        {
+          "label": "Anmelden (Form submit)",
+          "target": "apiLogin → /api/auth/login",
+          "type": "form",
+          "status": "live",
+          "line": 78,
+          "issue": null
+        },
+        {
+          "label": "Registrieren",
+          "target": "/registrieren",
+          "type": "navigation",
+          "status": "live",
+          "line": 103,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/passwort-vergessen",
+        "/registrieren",
+        "/admin",
+        "/dashboard/berater",
+        "/dashboard/unternehmen"
+      ],
+      "incoming_links": [
+        "/admin/audit-logs",
+        "/admin/email-outbox",
+        "/antraege/[id]",
+        "/dashboard/berater/beratungen",
+        "/dashboard/berater/beratungen/[id]",
+        "/dashboard/berater/berichte",
+        "/dashboard/berater/berichte/[id]",
+        "/dashboard/berater/vorlagen",
+        "/dashboard/unternehmen/antraege",
+        "/onboarding/dienstleistungen",
+        "/onboarding/expertise",
+        "/onboarding/profil",
+        "/onboarding/unternehmen",
+        "/passwort-reset",
+        "/passwort-vergessen",
+        "/registrieren",
+        "/verifizieren",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/registrieren",
+      "file": "app/(auth)/registrieren/page.tsx",
+      "ctas": [
+        {
+          "label": "Als Unternehmen (Rollenwahl)",
+          "target": "setRolle('unternehmen')",
+          "type": "button",
+          "status": "live",
+          "line": 72,
+          "issue": null
+        },
+        {
+          "label": "Als Berater (Rollenwahl)",
+          "target": "setRolle('berater')",
+          "type": "button",
+          "status": "live",
+          "line": 78,
+          "issue": null
+        },
+        {
+          "label": "Einloggen (pre-Rolle)",
+          "target": "/login",
+          "type": "navigation",
+          "status": "live",
+          "line": 88,
+          "issue": null
+        },
+        {
+          "label": "Rolle ändern",
+          "target": "setRolle(null)",
+          "type": "button",
+          "status": "live",
+          "line": 144,
+          "issue": null
+        },
+        {
+          "label": "Einloggen? (nach 409)",
+          "target": "/login",
+          "type": "navigation",
+          "status": "conditional",
+          "line": 155,
+          "issue": null
+        },
+        {
+          "label": "Datenschutzerklärung",
+          "target": "/datenschutz",
+          "type": "navigation",
+          "status": "live",
+          "line": 213,
+          "issue": null
+        },
+        {
+          "label": "AGB",
+          "target": "/agb",
+          "type": "navigation",
+          "status": "live",
+          "line": 217,
+          "issue": null
+        },
+        {
+          "label": "Registrieren (Form submit)",
+          "target": "apiRegister → /api/auth/register",
+          "type": "form",
+          "status": "live",
+          "line": 162,
+          "issue": null
+        },
+        {
+          "label": "Einloggen (footer)",
+          "target": "/login",
+          "type": "navigation",
+          "status": "live",
+          "line": 233,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/login",
+        "/datenschutz",
+        "/agb",
+        "/verifizieren",
+        "/berater/[slug]"
+      ],
+      "incoming_links": [
+        "/",
+        "/berater/[id]",
+        "/login",
+        "/preise",
+        "components/layout/Footer.tsx",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/verifizieren",
+      "file": "app/(auth)/verifizieren/page.tsx",
+      "ctas": [
+        {
+          "label": "Verifizieren (Form submit)",
+          "target": "verifyCode → /api/auth/verify",
+          "type": "form",
+          "status": "live",
+          "line": 99,
+          "issue": null
+        },
+        {
+          "label": "Code erneut senden",
+          "target": "resendVerification → /api/auth/resend",
+          "type": "button",
+          "status": "live",
+          "line": 125,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/login",
+        "/onboarding/profil",
+        "/onboarding/unternehmen",
+        "/admin"
+      ],
+      "incoming_links": [
+        "/registrieren"
+      ]
+    },
+    {
+      "route": "/passwort-vergessen",
+      "file": "app/(auth)/passwort-vergessen/page.tsx",
+      "ctas": [
+        {
+          "label": "Link senden (Form submit)",
+          "target": "forgotPassword → /api/auth/forgot",
+          "type": "form",
+          "status": "live",
+          "line": 67,
+          "issue": null
+        },
+        {
+          "label": "Zurück zum Login (Success)",
+          "target": "/login",
+          "type": "navigation",
+          "status": "conditional",
+          "line": 51,
+          "issue": null
+        },
+        {
+          "label": "Zurück zum Login (Footer)",
+          "target": "/login",
+          "type": "navigation",
+          "status": "live",
+          "line": 80,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/login"
+      ],
+      "incoming_links": [
+        "/login",
+        "/passwort-reset"
+      ]
+    },
+    {
+      "route": "/passwort-reset",
+      "file": "app/(public)/passwort-reset/page.tsx",
+      "ctas": [
+        {
+          "label": "Neuen Link anfordern (no token)",
+          "target": "/passwort-vergessen",
+          "type": "navigation",
+          "status": "conditional",
+          "line": 56,
+          "issue": null
+        },
+        {
+          "label": "Zurück zur Anmeldung (no token)",
+          "target": "/login",
+          "type": "navigation",
+          "status": "conditional",
+          "line": 59,
+          "issue": null
+        },
+        {
+          "label": "Zur Anmeldung (Success)",
+          "target": "/login",
+          "type": "navigation",
+          "status": "conditional",
+          "line": 109,
+          "issue": null
+        },
+        {
+          "label": "Passwort aktualisieren (Form submit)",
+          "target": "resetPassword → /api/auth/reset",
+          "type": "form",
+          "status": "live",
+          "line": 139,
+          "issue": null
+        },
+        {
+          "label": "Passwort erneut anfordern",
+          "target": "/passwort-vergessen",
+          "type": "navigation",
+          "status": "live",
+          "line": 188,
+          "issue": null
+        },
+        {
+          "label": "Zurück zur Anmeldung",
+          "target": "/login",
+          "type": "navigation",
+          "status": "live",
+          "line": 191,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/passwort-vergessen",
+        "/login"
+      ],
+      "incoming_links": []
+    },
+    {
+      "route": "app/error.tsx",
+      "file": "app/error.tsx",
+      "ctas": [
+        {
+          "label": "Erneut versuchen",
+          "target": "reset()",
+          "type": "button",
+          "status": "live",
+          "line": 37,
+          "issue": null
+        },
+        {
+          "label": "Zur Startseite",
+          "target": "/",
+          "type": "navigation",
+          "status": "live",
+          "line": 45,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/"
+      ],
+      "incoming_links": []
+    },
+    {
+      "route": "app/not-found.tsx",
+      "file": "app/not-found.tsx",
+      "ctas": [
+        {
+          "label": "Zur Startseite",
+          "target": "/",
+          "type": "navigation",
+          "status": "live",
+          "line": 14,
+          "issue": null
+        },
+        {
+          "label": "Förderprogramme ansehen",
+          "target": "/programme",
+          "type": "navigation",
+          "status": "live",
+          "line": 22,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/",
+        "/programme"
+      ],
+      "incoming_links": []
+    },
+    {
+      "route": "app/global-error.tsx",
+      "file": "app/global-error.tsx",
+      "ctas": [
+        {
+          "label": "Neu laden",
+          "target": "/",
+          "type": "navigation",
+          "status": "live",
+          "line": 32,
+          "issue": "Verwendet native <a href='/'> statt next/link (bewusste Entscheidung in global-error, akzeptabel)"
+        }
+      ],
+      "outgoing_links": [
+        "/"
+      ],
+      "incoming_links": []
+    },
+    {
+      "route": "/berater",
+      "file": "app/(public)/berater/page.tsx",
+      "ctas": [
+        {
+          "label": "Bundesland Select (filter)",
+          "target": "client-side filter state",
+          "type": "form-control",
+          "status": "live",
+          "line": 123,
+          "issue": null
+        },
+        {
+          "label": "Spezialisierung Select (filter)",
+          "target": "client-side filter state",
+          "type": "form-control",
+          "status": "live",
+          "line": 141,
+          "issue": null
+        },
+        {
+          "label": "BeraterKarte (card link, rendered per berater)",
+          "target": "/berater/{id}",
+          "type": "navigation",
+          "status": "live",
+          "line": 201,
+          "issue": "Rendered via BeraterKarte child — Link wraps entire card (BeraterKarte.tsx:52)"
+        },
+        {
+          "label": "Zurück (layout header)",
+          "target": "/",
+          "type": "navigation",
+          "status": "live",
+          "line": 0,
+          "issue": "Not in page.tsx — rendered by layout wrapper? Actually berater/layout.tsx only wraps ComingSoonBanner; no back-link. Recorded as N/A."
+        }
+      ],
+      "outgoing_links": [
+        "/berater/{id}"
+      ],
+      "incoming_links": [
+        "/",
+        "/berater/[id]",
+        "/dashboard/unternehmen/anfragen",
+        "components/layout/Footer.tsx",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/berater/[id]",
+      "file": "app/(public)/berater/[id]/page.tsx",
+      "ctas": [
+        {
+          "label": "Zurück zur Beraterliste (error state)",
+          "target": "/berater",
+          "type": "navigation",
+          "status": "live",
+          "line": 187,
+          "issue": null
+        },
+        {
+          "label": "Zurück zur Beraterliste (main)",
+          "target": "/berater",
+          "type": "navigation",
+          "status": "live",
+          "line": 224,
+          "issue": null
+        },
+        {
+          "label": "Anfrage senden",
+          "target": "handleAnfrageClick — unauth: router.push /registrieren?rolle=unternehmen&berater={id}; auth (unternehmen): opens Dialog; auth (berater): no-op",
+          "type": "button",
+          "status": "conditional",
+          "line": 387,
+          "issue": "Berater role branch is silent no-op (line 95-97) — button visible but hidden by outer check; still ambiguous UX if it renders"
+        },
+        {
+          "label": "Abbrechen (dialog)",
+          "target": "setShowAnfrageDialog(false)",
+          "type": "modal",
+          "status": "live",
+          "line": 428,
+          "issue": null
+        },
+        {
+          "label": "Senden (anfrage dialog)",
+          "target": "sendeAnfrage() POST — then alert('Ihre Anfrage wurde erfolgreich gesendet!')",
+          "type": "button",
+          "status": "live",
+          "line": 436,
+          "issue": "Success uses native alert() instead of Toaster — UX inconsistency"
+        }
+      ],
+      "outgoing_links": [
+        "/berater",
+        "/registrieren"
+      ],
+      "incoming_links": [
+        "components/berater/BeraterKarte.tsx"
+      ]
+    },
+    {
+      "route": "/programme",
+      "file": "app/(public)/programme/page.tsx",
+      "ctas": [
+        {
+          "label": "Bundesland <select>",
+          "target": "client-side filter state",
+          "type": "form-control",
+          "status": "live",
+          "line": 103,
+          "issue": "Native <select> in ProgrammListe (inconsistent with shadcn Select used in /berater)"
+        },
+        {
+          "label": "Förderart <select>",
+          "target": "client-side filter state",
+          "type": "form-control",
+          "status": "live",
+          "line": 126,
+          "issue": null
+        },
+        {
+          "label": "Förderbereich <select>",
+          "target": "client-side filter state",
+          "type": "form-control",
+          "status": "live",
+          "line": 149,
+          "issue": null
+        },
+        {
+          "label": "Suche <input>",
+          "target": "client-side filter state",
+          "type": "form-control",
+          "status": "live",
+          "line": 172,
+          "issue": null
+        },
+        {
+          "label": "Filter zurücksetzen",
+          "target": "handleReset()",
+          "type": "button",
+          "status": "live",
+          "line": 188,
+          "issue": null
+        },
+        {
+          "label": "Mehr laden",
+          "target": "setOffset(prev => prev + limit)",
+          "type": "button",
+          "status": "live",
+          "line": 241,
+          "issue": null
+        },
+        {
+          "label": "ProgrammKarte (card link)",
+          "target": "/programme/{id}",
+          "type": "navigation",
+          "status": "broken",
+          "line": 232,
+          "issue": "Links into known-dead page /programme/[id] (H-P1-01 — getProgramm 404s for all IDs)"
+        }
+      ],
+      "outgoing_links": [
+        "/programme/{id}"
+      ],
+      "incoming_links": [
+        "/",
+        "/dashboard/unternehmen/favoriten",
+        "/programme/[id]",
+        "app/not-found.tsx",
+        "components/layout/Footer.tsx",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/programme/[id]",
+      "file": "app/(public)/programme/[id]/page.tsx",
+      "ctas": [
+        {
+          "label": "Zurück zu Förderungen",
+          "target": "/programme",
+          "type": "navigation",
+          "status": "conditional",
+          "line": 40,
+          "issue": "Never renders — page 404s before render (H-P1-01: getProgramm fetches /api/foerderprogramme/{id} which returns 404)"
+        },
+        {
+          "label": "Zum Fördercheck",
+          "target": "/foerder-schnellcheck?programm={id}",
+          "type": "navigation",
+          "status": "conditional",
+          "line": 133,
+          "issue": "Never renders — page 404s before this renders (H-P1-01). Additionally: /foerder-schnellcheck does NOT read the ?programm=... query param (see /foerder-schnellcheck/page.tsx) — dead query param"
+        }
+      ],
+      "outgoing_links": [
+        "/programme",
+        "/foerder-schnellcheck"
+      ],
+      "incoming_links": [
+        "components/programme/ProgrammListe.tsx"
+      ]
+    },
+    {
+      "route": "/foerder-schnellcheck",
+      "file": "app/(public)/foerder-schnellcheck/page.tsx",
+      "ctas": [
+        {
+          "label": "Zurück (layout)",
+          "target": "/",
+          "type": "navigation",
+          "status": "live",
+          "line": 20,
+          "issue": "Rendered by foerder-schnellcheck/layout.tsx line 20"
+        },
+        {
+          "label": "URL form submit",
+          "target": "onSubmit -> analysiereWebsite(url) -> router.push('/foerder-schnellcheck/analyse')",
+          "type": "form",
+          "status": "live",
+          "line": 80,
+          "issue": "No DSGVO/consent checkbox on URL-analysis entry — bericht has DSGVO checkbox but URL-scraping analysis has no consent"
+        },
+        {
+          "label": "Analyse starten",
+          "target": "form submit trigger (same as form)",
+          "type": "button",
+          "status": "live",
+          "line": 101,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/",
+        "/foerder-schnellcheck/analyse"
+      ],
+      "incoming_links": [
+        "/",
+        "/dashboard/unternehmen",
+        "/foerder-schnellcheck/analyse",
+        "/foerder-schnellcheck/bericht",
+        "/foerder-schnellcheck/chat",
+        "/foerder-schnellcheck/ergebnis",
+        "/foerder-schnellcheck/profil",
+        "/programme/[id]",
+        "components/layout/Footer.tsx"
+      ]
+    },
+    {
+      "route": "/foerder-schnellcheck/profil",
+      "file": "app/(public)/foerder-schnellcheck/profil/page.tsx",
+      "ctas": [
+        {
+          "label": "Zurück (layout)",
+          "target": "/",
+          "type": "navigation",
+          "status": "live",
+          "line": 0,
+          "issue": "From layout.tsx"
+        },
+        {
+          "label": "Redirect guard (useEffect)",
+          "target": "router.push('/foerder-schnellcheck') when missing sessionId or wrong phase",
+          "type": "redirect",
+          "status": "live",
+          "line": 22,
+          "issue": null
+        },
+        {
+          "label": "Umfrage starten",
+          "target": "handleWeiter -> ladeFragen() -> router.push('/foerder-schnellcheck/chat')",
+          "type": "button",
+          "status": "live",
+          "line": 145,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/",
+        "/foerder-schnellcheck",
+        "/foerder-schnellcheck/chat"
+      ],
+      "incoming_links": [
+        "/foerder-schnellcheck/analyse"
+      ]
+    },
+    {
+      "route": "/foerder-schnellcheck/chat",
+      "file": "app/(public)/foerder-schnellcheck/chat/page.tsx",
+      "ctas": [
+        {
+          "label": "Zurück (layout)",
+          "target": "/",
+          "type": "navigation",
+          "status": "live",
+          "line": 0,
+          "issue": "From layout.tsx"
+        },
+        {
+          "label": "Redirect guard (during render)",
+          "target": "router.push('/foerder-schnellcheck')",
+          "type": "redirect",
+          "status": "live",
+          "line": 25,
+          "issue": "router.push() called during render (line 26) — not in useEffect. React anti-pattern that can cause warnings/infinite loops"
+        },
+        {
+          "label": "Ja (ja_nein answer)",
+          "target": "setSelectedAnswer('ja')",
+          "type": "button",
+          "status": "live",
+          "line": 144,
+          "issue": null
+        },
+        {
+          "label": "Nein (ja_nein answer)",
+          "target": "setSelectedAnswer('nein')",
+          "type": "button",
+          "status": "live",
+          "line": 152,
+          "issue": null
+        },
+        {
+          "label": "RadioGroup (auswahl answer)",
+          "target": "setSelectedAnswer(option)",
+          "type": "form-control",
+          "status": "live",
+          "line": 164,
+          "issue": null
+        },
+        {
+          "label": "Text Input (text answer)",
+          "target": "setTextAnswer",
+          "type": "form-control",
+          "status": "live",
+          "line": 179,
+          "issue": null
+        },
+        {
+          "label": "Number Input (zahl answer)",
+          "target": "setNumberAnswer",
+          "type": "form-control",
+          "status": "live",
+          "line": 189,
+          "issue": null
+        },
+        {
+          "label": "Weiter / Analyse abschließen",
+          "target": "handleSubmit -> sendeAntwort -> next question OR fuehreScoring -> router.push('/foerder-schnellcheck/ergebnis')",
+          "type": "button",
+          "status": "live",
+          "line": 203,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/",
+        "/foerder-schnellcheck",
+        "/foerder-schnellcheck/ergebnis"
+      ],
+      "incoming_links": [
+        "/foerder-schnellcheck/profil"
+      ]
+    },
+    {
+      "route": "/foerder-schnellcheck/analyse",
+      "file": "app/(public)/foerder-schnellcheck/analyse/page.tsx",
+      "ctas": [
+        {
+          "label": "Zurück (layout)",
+          "target": "/",
+          "type": "navigation",
+          "status": "live",
+          "line": 0,
+          "issue": "From layout.tsx"
+        },
+        {
+          "label": "Redirect guard (useEffect)",
+          "target": "router.push('/foerder-schnellcheck') | router.push('/foerder-schnellcheck/profil')",
+          "type": "redirect",
+          "status": "live",
+          "line": 27,
+          "issue": null
+        },
+        {
+          "label": "Polling-driven redirect",
+          "target": "ladeStatus -> router.push('/foerder-schnellcheck/profil') when status === profil_ready",
+          "type": "redirect",
+          "status": "live",
+          "line": 50,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/",
+        "/foerder-schnellcheck",
+        "/foerder-schnellcheck/profil"
+      ],
+      "incoming_links": [
+        "/foerder-schnellcheck"
+      ]
+    },
+    {
+      "route": "/foerder-schnellcheck/ergebnis",
+      "file": "app/(public)/foerder-schnellcheck/ergebnis/page.tsx",
+      "ctas": [
+        {
+          "label": "Zurück (layout)",
+          "target": "/",
+          "type": "navigation",
+          "status": "live",
+          "line": 0,
+          "issue": "From layout.tsx"
+        },
+        {
+          "label": "Redirect guard (during render)",
+          "target": "router.push('/foerder-schnellcheck')",
+          "type": "redirect",
+          "status": "live",
+          "line": 17,
+          "issue": "router.push() called during render (line 17) — anti-pattern; should be in useEffect"
+        },
+        {
+          "label": "Detaillierte Report anfordern",
+          "target": "handleBericht -> setPhase('email_formular') -> router.push('/foerder-schnellcheck/bericht')",
+          "type": "button",
+          "status": "live",
+          "line": 145,
+          "issue": null
+        }
+      ],
+      "outgoing_links": [
+        "/",
+        "/foerder-schnellcheck",
+        "/foerder-schnellcheck/bericht"
+      ],
+      "incoming_links": [
+        "/foerder-schnellcheck/chat"
+      ]
+    },
+    {
+      "route": "/foerder-schnellcheck/bericht",
+      "file": "app/(public)/foerder-schnellcheck/bericht/page.tsx",
+      "ctas": [
+        {
+          "label": "Zurück (layout)",
+          "target": "/",
+          "type": "navigation",
+          "status": "live",
+          "line": 0,
+          "issue": "From layout.tsx"
+        },
+        {
+          "label": "Redirect guard (during render)",
+          "target": "router.push('/foerder-schnellcheck')",
+          "type": "redirect",
+          "status": "live",
+          "line": 47,
+          "issue": "router.push() during render (line 47) — anti-pattern"
+        },
+        {
+          "label": "Email input",
+          "target": "register('email')",
+          "type": "form-control",
+          "status": "live",
+          "line": 130,
+          "issue": null
+        },
+        {
+          "label": "DSGVO checkbox (bundled)",
+          "target": "register('dsgvo')",
+          "type": "form-control",
+          "status": "live",
+          "line": 145,
+          "issue": "DSGVO consent bundles Datenschutzerklärung acceptance AND marketing ('möchte E-Mails erhalten') in ONE checkbox (line 151) — TTDSG/GDPR violation: separate consents required for processing vs. marketing communication"
+        },
+        {
+          "label": "Report anfordern (form submit)",
+          "target": "onSubmit -> fordereBerichtAn(sessionId, email, dsgvo) -> setTimeout 3s -> store.reset() + router.push('/')",
+          "type": "form",
+          "status": "live",
+          "line": 170,
+          "issue": "After success, auto-redirects to '/' after 3s — no way to cancel, and store is hard-reset which loses user data if they wanted to review ergebnis again"
+        }
+      ],
+      "outgoing_links": [
+        "/",
+        "/foerder-schnellcheck"
+      ],
+      "incoming_links": [
+        "/foerder-schnellcheck/ergebnis"
+      ]
+    },
+    {
+      "route": "/onboarding/unternehmen",
+      "file": "app/onboarding/unternehmen/page.tsx",
+      "ctas": [
+        {
+          "label": "Unternehmen speichern → Dashboard",
+          "target": "updateUnternehmen() → router.push('/dashboard/unternehmen')",
+          "type": "form",
+          "status": "live",
+          "line": 140,
+          "issue": "Submit button disabled while ladet=true"
+        },
+        {
+          "label": "Auth redirect (client-side)",
+          "target": "router.replace('/login') / router.replace('/dashboard/berater')",
+          "type": "effect",
+          "status": "conditional",
+          "line": 89,
+          "issue": "Client-side guard only (post-hydration)"
+        }
+      ],
+      "outgoing_links": [
+        "/login",
+        "/dashboard/berater",
+        "/dashboard/unternehmen"
+      ],
+      "incoming_links": [
+        "/verifizieren"
+      ]
+    },
+    {
+      "route": "/onboarding/profil",
+      "file": "app/onboarding/profil/page.tsx",
+      "ctas": [
+        {
+          "label": "Weiter zur Expertise",
+          "target": "updateBeraterProfil() → router.push('/onboarding/expertise')",
+          "type": "form",
+          "status": "live",
+          "line": 130
+        },
+        {
+          "label": "Auth redirect (client-side)",
+          "target": "router.replace('/login') / router.replace('/dashboard/unternehmen')",
+          "type": "effect",
+          "status": "conditional",
+          "line": 74,
+          "issue": "Client-side berater-role guard only"
+        }
+      ],
+      "outgoing_links": [
+        "/login",
+        "/dashboard/unternehmen",
+        "/onboarding/expertise"
+      ],
+      "incoming_links": [
+        "/dashboard/berater/profil",
+        "/verifizieren"
+      ]
+    },
+    {
+      "route": "/onboarding/expertise",
+      "file": "app/onboarding/expertise/page.tsx",
+      "ctas": [
+        {
+          "label": "Weiter zu Dienstleistungen",
+          "target": "POST /api/berater/expertise (per entry) → router.push('/onboarding/dienstleistungen')",
+          "type": "form",
+          "status": "live",
+          "line": 114,
+          "issue": "Sequential awaits in `for (const entry of data.entries) { await addExpertise(entry) }` (line 90-92) — partial-failure leaves earlier entries persisted; no rollback; onSubmit sets generic error but entries already saved server-side remain"
+        },
+        {
+          "label": "+ Eintrag hinzufügen",
+          "target": "useFieldArray.append()",
+          "type": "button",
+          "status": "live",
+          "line": 236
+        },
+        {
+          "label": "Trash (remove expertise entry)",
+          "target": "useFieldArray.remove(index)",
+          "type": "button",
+          "status": "live",
+          "line": 120
+        },
+        {
+          "label": "Auth redirect (client-side)",
+          "target": "router.replace('/login') / router.replace('/dashboard/unternehmen')",
+          "type": "effect",
+          "status": "conditional",
+          "line": 57,
+          "issue": "Client-side berater guard only"
+        }
+      ],
+      "outgoing_links": [
+        "/login",
+        "/dashboard/unternehmen",
+        "/onboarding/dienstleistungen"
+      ],
+      "incoming_links": [
+        "/onboarding/profil"
+      ]
+    },
+    {
+      "route": "/onboarding/dienstleistungen",
+      "file": "app/onboarding/dienstleistungen/page.tsx",
+      "ctas": [
+        {
+          "label": "Zum Dashboard",
+          "target": "POST /api/berater/dienstleistungen (per entry) → router.push('/dashboard/berater')",
+          "type": "form",
+          "status": "live",
+          "line": 118,
+          "issue": "Same partial-failure risk — `for (const entry of data.entries) { await addDienstleistung(entry) }` (line 94-96) without rollback"
+        },
+        {
+          "label": "+ Dienstleistung hinzufügen",
+          "target": "useFieldArray.append()",
+          "type": "button",
+          "status": "live",
+          "line": 269
+        },
+        {
+          "label": "Trash (remove dienstleistung entry)",
+          "target": "useFieldArray.remove(index)",
+          "type": "button",
+          "status": "live",
+          "line": 126
+        },
+        {
+          "label": "Auth redirect (client-side)",
+          "target": "router.replace('/login') / router.replace('/dashboard/unternehmen')",
+          "type": "effect",
+          "status": "conditional",
+          "line": 59
+        }
+      ],
+      "outgoing_links": [
+        "/login",
+        "/dashboard/unternehmen",
+        "/dashboard/berater"
+      ],
+      "incoming_links": [
+        "/onboarding/expertise"
+      ]
+    },
+    {
+      "route": "/foerdercheck",
+      "file": "app/foerdercheck/page.tsx",
+      "ctas": [
+        {
+          "label": "Weiter zum Chat →",
+          "target": "checkStarten() → router.push(`/foerdercheck/${id}/chat`)",
+          "type": "form",
+          "status": "live",
+          "line": 144
+        }
+      ],
+      "outgoing_links": [
+        "/foerdercheck/[id]/chat"
+      ],
+      "incoming_links": [
+        "/aktuelles/[slug]",
+        "/foerdercheck/[sessionId]/dokumente",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/foerdercheck/[sessionId]/chat",
+      "file": "app/foerdercheck/[sessionId]/chat/page.tsx",
+      "ctas": [
+        {
+          "label": "Send message (ArrowRight icon)",
+          "target": "chatNachricht(sessionId, message) — POST",
+          "type": "form",
+          "status": "live",
+          "line": 199
+        },
+        {
+          "label": "Enter-key submit",
+          "target": "handleSendMessage (onKeyDown)",
+          "type": "onClick",
+          "status": "live",
+          "line": 205
+        },
+        {
+          "label": "Chat überspringen →",
+          "target": "router.push(`/foerdercheck/${sessionId}/dokumente`)",
+          "type": "button",
+          "status": "live",
+          "line": 232
+        },
+        {
+          "label": "Auto-redirect on status=dokumente",
+          "target": "router.push(`/foerdercheck/${sessionId}/dokumente`)",
+          "type": "effect",
+          "status": "conditional",
+          "line": 103
+        }
+      ],
+      "outgoing_links": [
+        "/foerdercheck/[sessionId]/dokumente"
+      ],
+      "incoming_links": [
+        "app/foerdercheck/page.tsx"
+      ]
+    },
+    {
+      "route": "/foerdercheck/[sessionId]/analyse",
+      "file": "app/foerdercheck/[sessionId]/analyse/page.tsx",
+      "ctas": [
+        {
+          "label": "Zum Dashboard (timeout fallback)",
+          "target": "router.push('/dashboard/unternehmen')",
+          "type": "button",
+          "status": "conditional",
+          "line": 142,
+          "issue": "Only renders when poll timeout reached (40 × 3s = 120s)"
+        },
+        {
+          "label": "Auto-redirect on status=ergebnis",
+          "target": "router.push(`/foerdercheck/${sessionId}/ergebnisse`)",
+          "type": "effect",
+          "status": "live",
+          "line": 64
+        }
+      ],
+      "outgoing_links": [
+        "/dashboard/unternehmen",
+        "/foerdercheck/[sessionId]/ergebnisse"
+      ],
+      "incoming_links": [
+        "/foerdercheck/[sessionId]/dokumente"
+      ]
+    },
+    {
+      "route": "/foerdercheck/[sessionId]/ergebnisse",
+      "file": "app/foerdercheck/[sessionId]/ergebnisse/page.tsx",
+      "ctas": [
+        {
+          "label": "Anfrage senden (per berater)",
+          "target": "sendeAnfrage({anUserId, checkId})",
+          "type": "onClick",
+          "status": "live",
+          "line": 145,
+          "issue": "Delegated to BeraterMatchKarte onAnfrage; disables after first send via sentRequests Set"
+        },
+        {
+          "label": "Zum Dashboard",
+          "target": "router.push('/dashboard/unternehmen')",
+          "type": "button",
+          "status": "live",
+          "line": 157
+        },
+        {
+          "label": "Ergebnisse als PDF",
+          "target": "alert('PDF-Download wird in Kürze implementiert')",
+          "type": "native-dialog",
+          "status": "mock",
+          "line": 83,
+          "issue": "Known bug: PDF button is `disabled` AND alert-only stub; mock placeholder, inconsistent UX (native browser alert)"
+        }
+      ],
+      "outgoing_links": [
+        "/dashboard/unternehmen"
+      ],
+      "incoming_links": [
+        "/foerdercheck/[sessionId]/analyse"
+      ]
+    },
+    {
+      "route": "/foerdercheck/[sessionId]/dokumente",
+      "file": "app/foerdercheck/[sessionId]/dokumente/page.tsx",
+      "ctas": [
+        {
+          "label": "durchsuchen (file picker)",
+          "target": "fileInputRef.current.click()",
+          "type": "button",
+          "status": "live",
+          "line": 168
+        },
+        {
+          "label": "Drag-and-drop upload",
+          "target": "validateAndProcessFiles()",
+          "type": "onClick",
+          "status": "live",
+          "line": 86
+        },
+        {
+          "label": "Entfernen (file)",
+          "target": "removeFile(index)",
+          "type": "button",
+          "status": "live",
+          "line": 206
+        },
+        {
+          "label": "← Zurück",
+          "target": "router.push('/foerdercheck')",
+          "type": "button",
+          "status": "live",
+          "line": 248
+        },
+        {
+          "label": "Analyse starten →",
+          "target": "dokumenteHochladen() + schwarmStarten() → router.push(`/foerdercheck/${id}/analyse`)",
+          "type": "button",
+          "status": "live",
+          "line": 256
+        }
+      ],
+      "outgoing_links": [
+        "/foerdercheck",
+        "/foerdercheck/[sessionId]/analyse"
+      ],
+      "incoming_links": [
+        "/foerdercheck/[sessionId]/chat"
+      ]
+    },
+    {
+      "route": "/antraege/[id]",
+      "file": "app/antraege/[id]/page.tsx",
+      "ctas": [
+        {
+          "label": "Status ändern (select)",
+          "target": "updateAntragStatus(id, next)",
+          "type": "onClick",
+          "status": "live",
+          "line": 157
+        },
+        {
+          "label": "Berater einladen",
+          "target": "setModalOpen(true) → InviteBeraterModal",
+          "type": "modal",
+          "status": "live",
+          "line": 224
+        },
+        {
+          "label": "InviteBeraterModal: Einladen (submit)",
+          "target": "grantAntragZugriff(id, data) → reloadACL()",
+          "type": "form",
+          "status": "live",
+          "line": 60,
+          "issue": "Modal child — components/antraege/InviteBeraterModal.tsx"
+        },
+        {
+          "label": "InviteBeraterModal: Abbrechen",
+          "target": "onClose()",
+          "type": "button",
+          "status": "live",
+          "line": 101,
+          "issue": "Modal child — components/antraege/InviteBeraterModal.tsx"
+        },
+        {
+          "label": "ACLList: Entziehen",
+          "target": "revokeAntragZugriff(id, zugriffId) → reloadACL()",
+          "type": "onClick",
+          "status": "live",
+          "line": 52,
+          "issue": "Child — components/antraege/ACLList.tsx"
+        },
+        {
+          "label": "DokumenteListe: Dokument hochladen",
+          "target": "uploadAntragDokument(id, file)",
+          "type": "button",
+          "status": "live",
+          "line": 77,
+          "issue": "Child — components/antraege/DokumenteListe.tsx"
+        },
+        {
+          "label": "DokumenteListe: Löschen",
+          "target": "confirm('Dokument wirklich löschen?') + deleteAntragDokument(id, dokId)",
+          "type": "native-dialog",
+          "status": "live",
+          "line": 54,
+          "issue": "Uses native confirm() — inconsistent UX (child: DokumenteListe.tsx L54)"
+        },
+        {
+          "label": "Auth redirect (client-side)",
+          "target": "router.replace('/login')",
+          "type": "effect",
+          "status": "conditional",
+          "line": 52,
+          "issue": "H-P1-02: Only client-side auth guard — unauthenticated access briefly renders before useEffect fires; token-gated API calls are the only real defense (data fetch inside additional useEffect L84-105 also gated only by `if (!id || !token) return`)"
+        }
+      ],
+      "outgoing_links": [
+        "/login"
+      ],
+      "incoming_links": []
+    },
+    {
+      "route": "/dashboard/unternehmen",
+      "file": "app/dashboard/unternehmen/page.tsx",
+      "ctas": [
+        {
+          "label": "+ Neuen Fördercheck starten",
+          "target": "/foerder-schnellcheck",
+          "type": "navigation",
+          "status": "live",
+          "line": 96
+        },
+        {
+          "label": "Ansehen",
+          "target": "/dashboard/checks/{id}",
+          "type": "navigation",
+          "status": "broken",
+          "line": 212,
+          "issue": "Route does not exist in app/ (H-P1-05) — app/dashboard/checks/** not found"
+        },
+        {
+          "label": "Starten Sie Ihren ersten Fördercheck",
+          "target": "/foerder-schnellcheck",
+          "type": "navigation",
+          "status": "live",
+          "line": 229
+        },
+        {
+          "label": "Meine Anträge",
+          "target": "/dashboard/unternehmen/antraege",
+          "type": "navigation",
+          "status": "live",
+          "line": 237
+        },
+        {
+          "label": "Meine Anfragen",
+          "target": "/dashboard/unternehmen/anfragen",
+          "type": "navigation",
+          "status": "live",
+          "line": 240
+        },
+        {
+          "label": "Meine Favoriten",
+          "target": "/dashboard/unternehmen/favoriten",
+          "type": "navigation",
+          "status": "live",
+          "line": 243
+        }
+      ],
+      "outgoing_links": [
+        "/foerder-schnellcheck",
+        "/dashboard/checks/{id}",
+        "/dashboard/unternehmen/antraege",
+        "/dashboard/unternehmen/anfragen",
+        "/dashboard/unternehmen/favoriten"
+      ],
+      "incoming_links": [
+        "/dashboard/berater/beratungen",
+        "/dashboard/berater/beratungen/[id]",
+        "/dashboard/berater/berichte",
+        "/dashboard/berater/berichte/[id]",
+        "/dashboard/berater/vorlagen",
+        "/foerdercheck/[sessionId]/analyse",
+        "/foerdercheck/[sessionId]/ergebnisse",
+        "/login",
+        "/onboarding/dienstleistungen",
+        "/onboarding/expertise",
+        "/onboarding/profil",
+        "/onboarding/unternehmen",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/dashboard/unternehmen/anfragen",
+      "file": "app/dashboard/unternehmen/anfragen/page.tsx",
+      "ctas": [
+        {
+          "label": "Berater entdecken",
+          "target": "/berater",
+          "type": "navigation",
+          "status": "live",
+          "line": 117,
+          "issue": "empty-state CTA via LeererZustand"
+        },
+        {
+          "label": "Nachricht",
+          "target": "onClick-stub (no handler)",
+          "type": "button",
+          "status": "broken",
+          "line": 149,
+          "issue": "Button rendered for accepted anfragen but no onClick; dead UI action"
+        }
+      ],
+      "outgoing_links": [
+        "/berater"
+      ],
+      "incoming_links": [
+        "/dashboard/unternehmen"
+      ]
+    },
+    {
+      "route": "/dashboard/unternehmen/antraege",
+      "file": "app/dashboard/unternehmen/antraege/page.tsx",
+      "ctas": [
+        {
+          "label": "Neuen Antrag stellen",
+          "target": "setModalOpen(true)",
+          "type": "modal",
+          "status": "live",
+          "line": 71
+        },
+        {
+          "label": "Antrag stellen (empty state)",
+          "target": "setModalOpen(true)",
+          "type": "modal",
+          "status": "live",
+          "line": 89
+        },
+        {
+          "label": "Antrag card",
+          "target": "/antraege/{id}",
+          "type": "navigation",
+          "status": "live",
+          "line": 96
+        },
+        {
+          "label": "NeuerAntragModal submit → createAntrag",
+          "target": "/antraege/{id}",
+          "type": "form",
+          "status": "live",
+          "line": 54,
+          "issue": "handleCreate navigates to /antraege/{id} on success"
+        }
+      ],
+      "outgoing_links": [
+        "/antraege/{id}",
+        "/login",
+        "/dashboard/berater"
+      ],
+      "incoming_links": [
+        "/dashboard/unternehmen"
+      ]
+    },
+    {
+      "route": "/dashboard/unternehmen/favoriten",
+      "file": "app/dashboard/unternehmen/favoriten/page.tsx",
+      "ctas": [
+        {
+          "label": "Programme entdecken",
+          "target": "/programme",
+          "type": "navigation",
+          "status": "live",
+          "line": 94
+        },
+        {
+          "label": "Trash icon",
+          "target": "handleRemove → removeFavorit()",
+          "type": "button",
+          "status": "live",
+          "line": 112,
+          "issue": "destructive action without confirmation dialog"
+        }
+      ],
+      "outgoing_links": [
+        "/programme"
+      ],
+      "incoming_links": [
+        "/dashboard/unternehmen",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/dashboard/unternehmen/tracker",
+      "file": "app/dashboard/unternehmen/tracker/page.tsx",
+      "ctas": [
+        {
+          "label": "Drag-and-drop cards",
+          "target": "handleDragEnd → updateTrackerPhase()",
+          "type": "button",
+          "status": "live",
+          "line": 55,
+          "issue": "No separate buttons; DnD is the only interaction"
+        }
+      ],
+      "outgoing_links": [],
+      "incoming_links": []
+    },
+    {
+      "route": "/dashboard/berater",
+      "file": "app/dashboard/berater/page.tsx",
+      "ctas": [
+        {
+          "label": "Annehmen",
+          "target": "handleAccept → updateAnfrage(id, 'angenommen')",
+          "type": "button",
+          "status": "live",
+          "line": 220
+        },
+        {
+          "label": "Ablehnen",
+          "target": "handleReject → updateAnfrage(id, 'abgelehnt')",
+          "type": "button",
+          "status": "live",
+          "line": 235
+        },
+        {
+          "label": "Alle Anfragen",
+          "target": "/dashboard/berater/anfragen",
+          "type": "navigation",
+          "status": "live",
+          "line": 289
+        },
+        {
+          "label": "Meine Beratungen",
+          "target": "/dashboard/berater/beratungen",
+          "type": "navigation",
+          "status": "live",
+          "line": 292
+        },
+        {
+          "label": "Nachrichten",
+          "target": "/dashboard/berater/nachrichten",
+          "type": "navigation",
+          "status": "live",
+          "line": 295
+        },
+        {
+          "label": "Provisionen",
+          "target": "/dashboard/berater/abwicklung",
+          "type": "navigation",
+          "status": "live",
+          "line": 298,
+          "issue": "Label says 'Provisionen' but links to /abwicklung — labeling mismatch"
+        }
+      ],
+      "outgoing_links": [
+        "/dashboard/berater/anfragen",
+        "/dashboard/berater/beratungen",
+        "/dashboard/berater/nachrichten",
+        "/dashboard/berater/abwicklung"
+      ],
+      "incoming_links": [
+        "/dashboard/berater/profil",
+        "/dashboard/unternehmen/antraege",
+        "/login",
+        "/onboarding/dienstleistungen",
+        "/onboarding/unternehmen",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/dashboard/berater/anfragen",
+      "file": "app/dashboard/berater/anfragen/page.tsx",
+      "ctas": [
+        {
+          "label": "Annehmen",
+          "target": "handleAccept → updateAnfrage(id,'angenommen')",
+          "type": "button",
+          "status": "live",
+          "line": 184
+        },
+        {
+          "label": "Ablehnen",
+          "target": "handleReject → updateAnfrage(id,'abgelehnt')",
+          "type": "button",
+          "status": "live",
+          "line": 199
+        }
+      ],
+      "outgoing_links": [],
+      "incoming_links": [
+        "/dashboard/berater",
+        "/dashboard/berater/beratungen",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/dashboard/berater/beratungen",
+      "file": "app/dashboard/berater/beratungen/page.tsx",
+      "ctas": [
+        {
+          "label": "Neue Anfragen",
+          "target": "/dashboard/berater/anfragen",
+          "type": "navigation",
+          "status": "live",
+          "line": 84,
+          "issue": "Label 'Neue Anfragen' (plural) but icon is Plus; semantically unclear as a 'create' CTA"
+        },
+        {
+          "label": "Zu den Anfragen",
+          "target": "/dashboard/berater/anfragen",
+          "type": "navigation",
+          "status": "live",
+          "line": 115
+        },
+        {
+          "label": "Beratung card",
+          "target": "/dashboard/berater/beratungen/{id}",
+          "type": "navigation",
+          "status": "live",
+          "line": 128
+        }
+      ],
+      "outgoing_links": [
+        "/dashboard/berater/anfragen",
+        "/dashboard/berater/beratungen/{id}",
+        "/login",
+        "/dashboard/unternehmen"
+      ],
+      "incoming_links": [
+        "/dashboard/berater"
+      ]
+    },
+    {
+      "route": "/dashboard/berater/beratungen/[id]",
+      "file": "app/dashboard/berater/beratungen/[id]/page.tsx",
+      "ctas": [
+        {
+          "label": "Phase select",
+          "target": "handlePhaseChange → save({phase})",
+          "type": "button",
+          "status": "live",
+          "line": 186
+        },
+        {
+          "label": "Förderhöhe input (autosave onBlur)",
+          "target": "handleFoerderBlur → save({foerderhoehe})",
+          "type": "form",
+          "status": "live",
+          "line": 205
+        },
+        {
+          "label": "Eigenanteil input (autosave onBlur)",
+          "target": "handleEigenBlur → save({eigenanteil})",
+          "type": "form",
+          "status": "live",
+          "line": 225
+        },
+        {
+          "label": "Protokoll textarea (autosave onBlur)",
+          "target": "handleProtokollBlur → save({protokoll})",
+          "type": "form",
+          "status": "live",
+          "line": 248
+        }
+      ],
+      "outgoing_links": [
+        "/login",
+        "/dashboard/unternehmen"
+      ],
+      "incoming_links": [
+        "app/dashboard/berater/beratungen/page.tsx"
+      ]
+    },
+    {
+      "route": "/dashboard/berater/berichte",
+      "file": "app/dashboard/berater/berichte/page.tsx",
+      "ctas": [
+        {
+          "label": "Neuer Bericht",
+          "target": "/dashboard/berater/berichte/new",
+          "type": "navigation",
+          "status": "live",
+          "line": 53
+        },
+        {
+          "label": "Bericht erstellen (empty state)",
+          "target": "/dashboard/berater/berichte/new",
+          "type": "navigation",
+          "status": "live",
+          "line": 83
+        },
+        {
+          "label": "Bericht card",
+          "target": "/dashboard/berater/berichte/{id}",
+          "type": "navigation",
+          "status": "live",
+          "line": 94
+        }
+      ],
+      "outgoing_links": [
+        "/dashboard/berater/berichte/new",
+        "/dashboard/berater/berichte/{id}",
+        "/login",
+        "/dashboard/unternehmen"
+      ],
+      "incoming_links": []
+    },
+    {
+      "route": "/dashboard/berater/berichte/[id]",
+      "file": "app/dashboard/berater/berichte/[id]/page.tsx",
+      "ctas": [
+        {
+          "label": "Content field textareas (autosave onBlur)",
+          "target": "handleBlur → createBericht | updateBericht",
+          "type": "form",
+          "status": "live",
+          "line": 158
+        },
+        {
+          "label": "FinalizeButton",
+          "target": "handleFinalize → finalizeBericht()",
+          "type": "button",
+          "status": "conditional",
+          "line": 187,
+          "issue": "Gated on bafa_certified flag (bafaCertified from nutzer)"
+        }
+      ],
+      "outgoing_links": [
+        "/login",
+        "/dashboard/unternehmen",
+        "/dashboard/berater/berichte/{id}"
+      ],
+      "incoming_links": [
+        "app/dashboard/berater/berichte/page.tsx"
+      ]
+    },
+    {
+      "route": "/dashboard/berater/abwicklung",
+      "file": "app/dashboard/berater/abwicklung/page.tsx",
+      "ctas": [
+        {
+          "label": "PDF link (dokument_url)",
+          "target": "vertrag.dokument_url (external R2)",
+          "type": "navigation",
+          "status": "external",
+          "line": 191
+        },
+        {
+          "label": "Upload / Ersetzen",
+          "target": "handleUploadClick → fileInput.click() → uploadAbwicklungDokument()",
+          "type": "button",
+          "status": "live",
+          "line": 208
+        },
+        {
+          "label": "File input (hidden) onChange",
+          "target": "handleFileSelect → uploadAbwicklungDokument()",
+          "type": "form",
+          "status": "live",
+          "line": 223
+        }
+      ],
+      "outgoing_links": [],
+      "incoming_links": [
+        "/dashboard/berater",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/dashboard/berater/nachrichten",
+      "file": "app/dashboard/berater/nachrichten/page.tsx",
+      "ctas": [
+        {
+          "label": "Anfrage select button",
+          "target": "setSelectedAnfrageId(id)",
+          "type": "button",
+          "status": "live",
+          "line": 137
+        },
+        {
+          "label": "Send message form",
+          "target": "handleSend → sendeNachricht()",
+          "type": "form",
+          "status": "live",
+          "line": 211
+        },
+        {
+          "label": "Send button",
+          "target": "form submit",
+          "type": "button",
+          "status": "live",
+          "line": 220
+        }
+      ],
+      "outgoing_links": [],
+      "incoming_links": [
+        "/dashboard/berater"
+      ]
+    },
+    {
+      "route": "/dashboard/berater/profil",
+      "file": "app/dashboard/berater/profil/page.tsx",
+      "ctas": [
+        {
+          "label": "Zurück",
+          "target": "/dashboard/berater",
+          "type": "navigation",
+          "status": "live",
+          "line": 130
+        },
+        {
+          "label": "Form submit (Änderungen speichern)",
+          "target": "onSubmit → updateBeraterProfil()",
+          "type": "form",
+          "status": "live",
+          "line": 155,
+          "issue": "Silent data loss: form collects spezialisierungen + websiteUrl but only displayName/bio/region/branchen/verfuegbar are sent (H-P1-04)"
+        },
+        {
+          "label": "Änderungen speichern button",
+          "target": "form submit",
+          "type": "button",
+          "status": "live",
+          "line": 270
+        }
+      ],
+      "outgoing_links": [
+        "/",
+        "/onboarding/profil",
+        "/dashboard/berater"
+      ],
+      "incoming_links": []
+    },
+    {
+      "route": "/dashboard/berater/tracker",
+      "file": "app/dashboard/berater/tracker/page.tsx",
+      "ctas": [
+        {
+          "label": "Drag-and-drop cards",
+          "target": "handleDragEnd → updateTrackerPhase()",
+          "type": "button",
+          "status": "live",
+          "line": 55
+        }
+      ],
+      "outgoing_links": [],
+      "incoming_links": []
+    },
+    {
+      "route": "/dashboard/berater/vorlagen",
+      "file": "app/dashboard/berater/vorlagen/page.tsx",
+      "ctas": [
+        {
+          "label": "Neue Vorlage",
+          "target": "setModalOpen(true)",
+          "type": "modal",
+          "status": "live",
+          "line": 85
+        },
+        {
+          "label": "Vorlage erstellen (empty state)",
+          "target": "setModalOpen(true)",
+          "type": "modal",
+          "status": "live",
+          "line": 105
+        },
+        {
+          "label": "Verwenden / Kopiert",
+          "target": "handleCopy → navigator.clipboard.writeText()",
+          "type": "button",
+          "status": "live",
+          "line": 128
+        },
+        {
+          "label": "Trash icon (Vorlage löschen)",
+          "target": "handleDelete → deleteVorlage() [after confirm()]",
+          "type": "native-dialog",
+          "status": "live",
+          "line": 140,
+          "issue": "Uses native confirm() — inconsistent UX (line 65)"
+        },
+        {
+          "label": "NeueVorlageModal submit → createVorlage",
+          "target": "createVorlage()",
+          "type": "form",
+          "status": "live",
+          "line": 49
+        }
+      ],
+      "outgoing_links": [
+        "/login",
+        "/dashboard/unternehmen"
+      ],
+      "incoming_links": []
+    },
+    {
+      "route": "/admin",
+      "file": "app/admin/page.tsx",
+      "ctas": [
+        {
+          "label": "Freigeben",
+          "target": "handleApprove → approveCert()",
+          "type": "button",
+          "status": "live",
+          "line": 172
+        },
+        {
+          "label": "Ablehnen",
+          "target": "handleReject → rejectCert()",
+          "type": "button",
+          "status": "live",
+          "line": 175
+        },
+        {
+          "label": "Nutzer verwalten (Öffnen)",
+          "target": "/admin/users",
+          "type": "navigation",
+          "status": "live",
+          "line": 116
+        },
+        {
+          "label": "Aktuelles (Öffnen)",
+          "target": "/admin/aktuelles",
+          "type": "navigation",
+          "status": "live",
+          "line": 117
+        },
+        {
+          "label": "Provisionen (Öffnen)",
+          "target": "/admin/provisionen",
+          "type": "navigation",
+          "status": "live",
+          "line": 118
+        }
+      ],
+      "outgoing_links": [
+        "/admin/users",
+        "/admin/aktuelles",
+        "/admin/provisionen",
+        "/"
+      ],
+      "incoming_links": [
+        "/admin/aktuelles",
+        "/admin/provisionen",
+        "/admin/users",
+        "/login",
+        "/verifizieren",
+        "components/layout/Navbar.tsx"
+      ]
+    },
+    {
+      "route": "/admin/aktuelles",
+      "file": "app/admin/aktuelles/page.tsx",
+      "ctas": [
+        {
+          "label": "Zurück",
+          "target": "/admin",
+          "type": "navigation",
+          "status": "live",
+          "line": 207
+        },
+        {
+          "label": "Neuer Artikel",
+          "target": "handleOpenDialog() → Dialog open",
+          "type": "modal",
+          "status": "live",
+          "line": 218
+        },
+        {
+          "label": "Edit (row-action)",
+          "target": "handleOpenDialog(item) → Dialog edit",
+          "type": "modal",
+          "status": "live",
+          "line": 366
+        },
+        {
+          "label": "Speichern / Erstellen (dialog submit)",
+          "target": "handleSave → createAdminNews | updateAdminNews",
+          "type": "button",
+          "status": "live",
+          "line": 319,
+          "issue": "Not an onSubmit form — click button on Dialog"
+        }
+      ],
+      "outgoing_links": [
+        "/",
+        "/admin"
+      ],
+      "incoming_links": [
+        "/admin",
+        "app/admin/page.tsx"
+      ]
+    },
+    {
+      "route": "/admin/audit-logs",
+      "file": "app/admin/audit-logs/page.tsx",
+      "ctas": [
+        {
+          "label": "User ID input",
+          "target": "setFilter({user_id})",
+          "type": "form",
+          "status": "live",
+          "line": 100
+        },
+        {
+          "label": "Event Type input",
+          "target": "setFilter({action})",
+          "type": "form",
+          "status": "live",
+          "line": 111
+        },
+        {
+          "label": "Limit select",
+          "target": "setFilter({limit})",
+          "type": "form",
+          "status": "live",
+          "line": 122
+        },
+        {
+          "label": "Filtern",
+          "target": "handleFilter → load(true)",
+          "type": "button",
+          "status": "live",
+          "line": 132
+        },
+        {
+          "label": "Mehr laden",
+          "target": "load(false)",
+          "type": "button",
+          "status": "live",
+          "line": 196
+        }
+      ],
+      "outgoing_links": [
+        "/login",
+        "/"
+      ],
+      "incoming_links": []
+    },
+    {
+      "route": "/admin/email-outbox",
+      "file": "app/admin/email-outbox/page.tsx",
+      "ctas": [
+        {
+          "label": "Status filter select",
+          "target": "setStatusFilter(value)",
+          "type": "form",
+          "status": "live",
+          "line": 116
+        },
+        {
+          "label": "Filtern",
+          "target": "load(true)",
+          "type": "button",
+          "status": "live",
+          "line": 128
+        },
+        {
+          "label": "Erneut senden",
+          "target": "handleRetry → retryEmail()",
+          "type": "button",
+          "status": "conditional",
+          "line": 184,
+          "issue": "Only visible when status === 'failed'"
+        },
+        {
+          "label": "Mehr laden",
+          "target": "load(false)",
+          "type": "button",
+          "status": "live",
+          "line": 210
+        }
+      ],
+      "outgoing_links": [
+        "/login",
+        "/"
+      ],
+      "incoming_links": []
+    },
+    {
+      "route": "/admin/provisionen",
+      "file": "app/admin/provisionen/page.tsx",
+      "ctas": [
+        {
+          "label": "Zurück",
+          "target": "/admin",
+          "type": "navigation",
+          "status": "live",
+          "line": 152
+        },
+        {
+          "label": "Status filter Select",
+          "target": "setStatusFilter(value)",
+          "type": "form",
+          "status": "live",
+          "line": 173
+        },
+        {
+          "label": "Betrag span (click to edit)",
+          "target": "setEditingId + setEditBetrag",
+          "type": "button",
+          "status": "live",
+          "line": 225
+        },
+        {
+          "label": "Status Select (row)",
+          "target": "handleStatusChange → updateAdminProvision({status})",
+          "type": "form",
+          "status": "live",
+          "line": 240
+        },
+        {
+          "label": "Speichern (edit betrag)",
+          "target": "handleBetragChange → updateAdminProvision({notiz: 'bewilligt: X EUR'})",
+          "type": "button",
+          "status": "mock",
+          "line": 265,
+          "issue": "Hardcoded 9,99% provision rate in header (line 197); handleBetragChange stores structured value into free-text notiz field — no real persistence of bewilligteSumme/provisionBetrag server-side"
+        }
+      ],
+      "outgoing_links": [
+        "/",
+        "/admin"
+      ],
+      "incoming_links": [
+        "/admin",
+        "app/admin/page.tsx"
+      ]
+    },
+    {
+      "route": "/admin/users",
+      "file": "app/admin/users/page.tsx",
+      "ctas": [
+        {
+          "label": "Zurück",
+          "target": "/admin",
+          "type": "navigation",
+          "status": "live",
+          "line": 114
+        },
+        {
+          "label": "Search input",
+          "target": "setSearchQuery(value)",
+          "type": "form",
+          "status": "live",
+          "line": 133
+        },
+        {
+          "label": "Role Select (row)",
+          "target": "handleRoleChange → updateAdminUser({role})",
+          "type": "form",
+          "status": "live",
+          "line": 167
+        },
+        {
+          "label": "Trash icon (deactivate)",
+          "target": "handleDeactivate → deleteAdminUser() [after confirm()]",
+          "type": "native-dialog",
+          "status": "live",
+          "line": 183,
+          "issue": "Uses native confirm() on line 90 — inconsistent UX"
+        }
+      ],
+      "outgoing_links": [
+        "/",
+        "/admin"
+      ],
+      "incoming_links": [
+        "/admin",
+        "app/admin/page.tsx"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "summary": "Inkonsistenter Fördercheck-Pfad: /aktuelles/[slug] linkt auf /foerdercheck, alle anderen Seiten auf /foerder-schnellcheck",
+      "file": "app/(public)/aktuelles/[slug]/page.tsx",
+      "line": 135,
+      "evidence": "<Link href=\"/foerdercheck\" className=...>Fördercheck starten</Link> — Landing page (app/(public)/page.tsx:41) und Preise-Seite nutzen aber /foerder-schnellcheck als Einstiegspfad. Beide Routen existieren, was aber zu uneinheitlicher UX und SEO-Dopplung führen kann.",
+      "from_group": "A-landing-legal-auth"
+    },
+    {
+      "severity": "low",
+      "summary": "AGB- und Datenschutz-Seiten enthalten Demo-Disclaimer in Produktionscode",
+      "file": "app/(public)/agb/page.tsx",
+      "line": 231,
+      "evidence": "Diese AGB sind zu Demonstrationszwecken erstellt. Bitte lassen Sie diese von einem Rechtsanwalt überarbeiten...' wird im Footer gerendert. Identische Notiz in datenschutz/page.tsx:282. Rechtliches Compliance-Risiko bei Live-Betrieb.",
+      "from_group": "A-landing-legal-auth"
+    },
+    {
+      "severity": "low",
+      "summary": "Passwort-reset Success-Screen (Link href=/login) kann nicht über href weiter zu Dashboard navigieren, sondern nur zum Login — Nutzer muss erneut credentials eingeben obwohl frisch reset",
+      "file": "app/(public)/passwort-reset/page.tsx",
+      "line": 109,
+      "evidence": "Nach erfolgreichem Reset wird nur ein statischer Link zu /login angeboten; keine automatische Session-Erstellung. Das ist sicherheitstechnisch ok, aber UX-Friction.",
+      "from_group": "A-landing-legal-auth"
+    },
+    {
+      "severity": "low",
+      "summary": "Registrieren-Seite: nach 'requiresVerification' im legacy-Path Navigation zu /verifizieren ohne email-Query",
+      "file": "app/(auth)/registrieren/page.tsx",
+      "line": 119,
+      "evidence": "else { login(res.token, res.user); ... router.push('/verifizieren') } — verifizieren/page.tsx:31 redirected sofort zu /login wenn kein email in URL oder store ist. Fallback funktioniert nur wenn store-user bereits gesetzt ist. Fragiler Code-Pfad.",
+      "from_group": "A-landing-legal-auth"
+    },
+    {
+      "severity": "high",
+      "summary": "DSGVO consent bundling on /foerder-schnellcheck/bericht — single checkbox combines privacy-policy acceptance with marketing-email opt-in",
+      "file": "app/(public)/foerder-schnellcheck/bericht/page.tsx",
+      "line": 151,
+      "evidence": "<Label>Ich akzeptiere die Datenschutzerklärung UND möchte E-Mails von fund24 erhalten</Label> — bundled into z.object({ dsgvo: z.boolean() }). TTDSG §25 / DSGVO Art. 7(2) require separate, specific consent for marketing emails vs. contract-based processing.",
+      "from_group": "B-public-business-schnellcheck"
+    },
+    {
+      "severity": "high",
+      "summary": "/programme/[id] is known-dead (H-P1-01): all outgoing links from /programme land on a 404",
+      "file": "app/(public)/programme/[id]/page.tsx",
+      "line": 19,
+      "evidence": "await getProgramm(Number(id)) calls /api/foerderprogramme/{id} which 404s. notFound() fires for every ID, so 'Zurück zu Förderungen' and 'Zum Fördercheck' CTAs never render. ProgrammKarte links to /programme/{id} from /programme — entire detail path is broken.",
+      "from_group": "B-public-business-schnellcheck"
+    },
+    {
+      "severity": "medium",
+      "summary": "router.push() called during render (React anti-pattern) on chat, ergebnis, bericht pages",
+      "file": "app/(public)/foerder-schnellcheck/chat/page.tsx, ergebnis/page.tsx, bericht/page.tsx",
+      "line": 25,
+      "evidence": "chat/page.tsx:25-28 and ergebnis/page.tsx:16-19 and bericht/page.tsx:46-49 all call router.push() synchronously in the component body (not in useEffect), then 'return null'. Next.js warns against this; it can cause 'Cannot update Router while rendering' errors and navigation race conditions. /profil/page.tsx correctly uses useEffect — inconsistent.",
+      "from_group": "B-public-business-schnellcheck"
+    },
+    {
+      "severity": "medium",
+      "summary": "Native alert() used for success feedback on /berater/[id] Anfrage send — inconsistent with Toaster UX used elsewhere",
+      "file": "app/(public)/berater/[id]/page.tsx",
+      "line": 116,
+      "evidence": "alert('Ihre Anfrage wurde erfolgreich gesendet!') — blocking browser dialog instead of the project's shadcn Sonner/Toaster component. Degrades UX and breaks design system consistency.",
+      "from_group": "B-public-business-schnellcheck"
+    },
+    {
+      "severity": "medium",
+      "summary": "/foerder-schnellcheck does not read ?programm={id} query param sent from /programme/[id]",
+      "file": "app/(public)/foerder-schnellcheck/page.tsx",
+      "line": 22,
+      "evidence": "The Fördercheck entry page (FoerderSchnellcheckPage) calls analysiereWebsite(data.url) with zero awareness of searchParams. The 'Zum Fördercheck' CTA from /programme/[id] passes ?programm={id} which is silently dropped — user intent lost. Also compounds with H-P1-01 since /programme/[id] never renders anyway.",
+      "from_group": "B-public-business-schnellcheck"
+    },
+    {
+      "severity": "medium",
+      "summary": "No consent/DSGVO gate on website URL submission",
+      "file": "app/(public)/foerder-schnellcheck/page.tsx",
+      "line": 80,
+      "evidence": "Form submits URL to analysiereWebsite() which scrapes the URL on the server with no user checkbox/consent that the URL will be processed + cached. Only the bericht (email) step has DSGVO. URL-scraping is processing of user-supplied data and should have a notice + checkbox at the entry point.",
+      "from_group": "B-public-business-schnellcheck"
+    },
+    {
+      "severity": "low",
+      "summary": "Inconsistent Select implementations between /berater (shadcn Select) and /programme (native HTML <select>)",
+      "file": "components/foerdercheck/ProgrammListe.tsx",
+      "line": 103,
+      "evidence": "ProgrammListe uses native <select> elements with extensive Tailwind classes while /berater uses @/components/ui/select (shadcn). Visual and a11y behavior diverge across two sibling public pages.",
+      "from_group": "B-public-business-schnellcheck"
+    },
+    {
+      "severity": "high",
+      "summary": "Unauthenticated leak (H-P1-02): /antraege/[id] only protects with a post-hydration router.replace('/login') — the page shell renders with header/metadata before the effect runs. No server-side guard.",
+      "file": "app/antraege/[id]/page.tsx",
+      "line": 52,
+      "evidence": "useEffect(() => { if (!token) { router.replace('/login'); } }, [token, router]); — runs after hydration; no Next.js middleware/server redirect",
+      "from_group": "C-protected-onboarding-foerdercheck"
+    },
+    {
+      "severity": "high",
+      "summary": "PDF download CTA is a mock: clicking invokes alert('PDF-Download wird in Kürze implementiert'). Button is also `disabled` — user sees no feedback at all in normal state.",
+      "file": "app/foerdercheck/[sessionId]/ergebnisse/page.tsx",
+      "line": 83,
+      "evidence": "const handleDownloadPDF = () => { alert('PDF-Download wird in Kürze implementiert') } ... <Button onClick={handleDownloadPDF} disabled><Download/>Ergebnisse als PDF</Button>",
+      "from_group": "C-protected-onboarding-foerdercheck"
+    },
+    {
+      "severity": "high",
+      "summary": "Partial-failure risk in onboarding expertise: sequential `for (const entry of data.entries) { await addExpertise(entry) }` persists entries 1..N-1 server-side if entry N fails, with no rollback or retry-from-N. Error state shows a generic message.",
+      "file": "app/onboarding/expertise/page.tsx",
+      "line": 90,
+      "evidence": "for (const entry of data.entries) { await addExpertise(entry); } router.push('/onboarding/dienstleistungen')",
+      "from_group": "C-protected-onboarding-foerdercheck"
+    },
+    {
+      "severity": "high",
+      "summary": "Partial-failure risk in onboarding dienstleistungen: identical pattern. Client has no idempotency key / no 'already-added' deduplication — re-submit after partial failure would duplicate entries.",
+      "file": "app/onboarding/dienstleistungen/page.tsx",
+      "line": 94,
+      "evidence": "for (const entry of data.entries) { await addDienstleistung(entry); } router.push('/dashboard/berater')",
+      "from_group": "C-protected-onboarding-foerdercheck"
+    },
+    {
+      "severity": "medium",
+      "summary": "Inconsistent UX: DokumenteListe uses native browser confirm() for document delete — all other destructive actions in the Antrag detail (revoke ACL) use inline buttons with no confirmation.",
+      "file": "components/antraege/DokumenteListe.tsx",
+      "line": 54,
+      "evidence": "if (!confirm('Dokument wirklich löschen?')) return;",
+      "from_group": "C-protected-onboarding-foerdercheck"
+    },
+    {
+      "severity": "medium",
+      "summary": "Berater-role onboarding pages (profil/expertise/dienstleistungen) rely only on client-side `istBerater()` checks inside useEffect. Unternehmen users hitting these URLs see the full page before redirect fires.",
+      "file": "app/onboarding/profil/page.tsx",
+      "line": 74,
+      "evidence": "useEffect(() => { if (!token) router.replace('/login'); if (nutzer && !istBerater()) router.replace('/dashboard/unternehmen'); }, ...)",
+      "from_group": "C-protected-onboarding-foerdercheck"
+    },
+    {
+      "severity": "low",
+      "summary": "Analyse page polls for up to 120s, then shows a fallback 'Zum Dashboard' button but no retry/refresh action — if backend status is slow, user must leave.",
+      "file": "app/foerdercheck/[sessionId]/analyse/page.tsx",
+      "line": 134,
+      "evidence": "{timeout ? (<Button onClick={() => router.push('/dashboard/unternehmen')}>Zum Dashboard</Button>) : ...}",
+      "from_group": "C-protected-onboarding-foerdercheck"
+    },
+    {
+      "severity": "high",
+      "summary": "Dead link to /dashboard/checks/[id] — route does not exist",
+      "file": "app/dashboard/unternehmen/page.tsx",
+      "line": 212,
+      "evidence": "Link href=`/dashboard/checks/${check.id}`; glob app/dashboard/checks/** returns no files (confirms H-P1-05).",
+      "from_group": "D-dashboard-admin"
+    },
+    {
+      "severity": "high",
+      "summary": "Silent data loss on Berater-Profil form (H-P1-04)",
+      "file": "app/dashboard/berater/profil/page.tsx",
+      "line": 93,
+      "evidence": "Form collects spezialisierungen + websiteUrl (zod schema line 26–27) but updateBeraterProfil payload at lines 93–102 omits them — user edits are silently dropped.",
+      "from_group": "D-dashboard-admin"
+    },
+    {
+      "severity": "high",
+      "summary": "Admin Provisionen uses free-text notiz field instead of structured columns, hardcoded 9,99% rate",
+      "file": "app/admin/provisionen/page.tsx",
+      "line": 110,
+      "evidence": "handleBetragChange serializes `bewilligt: ${betrag} EUR` into notiz (line 110); header label shows hardcoded 'Provision (9,99%)' (line 197); provisionBetrag is only updated in local state, never persisted server-side.",
+      "from_group": "D-dashboard-admin"
+    },
+    {
+      "severity": "medium",
+      "summary": "Native confirm() dialog used in Vorlagen delete",
+      "file": "app/dashboard/berater/vorlagen/page.tsx",
+      "line": 65,
+      "evidence": "`if (!confirm('Vorlage wirklich löschen?')) return;` — blocking native dialog, inconsistent with app-wide UI Dialog.",
+      "from_group": "D-dashboard-admin"
+    },
+    {
+      "severity": "medium",
+      "summary": "Native confirm() dialog used in Admin Users deactivate",
+      "file": "app/admin/users/page.tsx",
+      "line": 90,
+      "evidence": "`if (!confirm('Diesen Nutzer wirklich deaktivieren?')) return` — bypasses shadcn Dialog / AlertDialog; inconsistent UX.",
+      "from_group": "D-dashboard-admin"
+    },
+    {
+      "severity": "medium",
+      "summary": "Dead 'Nachricht' button on unternehmen/anfragen (no onClick)",
+      "file": "app/dashboard/unternehmen/anfragen/page.tsx",
+      "line": 149,
+      "evidence": "<Button> for accepted Anfrage is rendered without any onClick handler; clicking does nothing.",
+      "from_group": "D-dashboard-admin"
+    },
+    {
+      "severity": "medium",
+      "summary": "Favoriten delete has no confirmation (destructive action)",
+      "file": "app/dashboard/unternehmen/favoriten/page.tsx",
+      "line": 112,
+      "evidence": "Trash button calls handleRemove(id) immediately — no confirm() or dialog guard for destructive favorite removal.",
+      "from_group": "D-dashboard-admin"
+    },
+    {
+      "severity": "low",
+      "summary": "Berater dashboard labels 'Provisionen' but links to /abwicklung",
+      "file": "app/dashboard/berater/page.tsx",
+      "line": 298,
+      "evidence": "Button labelled 'Provisionen' navigates to /dashboard/berater/abwicklung — label/target mismatch.",
+      "from_group": "D-dashboard-admin"
+    },
+    {
+      "severity": "low",
+      "summary": "Berater dashboard renders anfrage.nachricht under 'Dienstleistung:' label",
+      "file": "app/dashboard/berater/page.tsx",
+      "line": 213,
+      "evidence": "<p>Dienstleistung: {anfrage.nachricht || '-'}</p> — data-model mismatch, `nachricht` is free-text message, not service-id.",
+      "from_group": "D-dashboard-admin"
+    },
+    {
+      "severity": "low",
+      "summary": "Bericht autosave uses onBlur — user losing focus in unusual flows may skip save",
+      "file": "app/dashboard/berater/berichte/[id]/page.tsx",
+      "line": 162,
+      "evidence": "All 5 fields call onBlur={handleBlur}; no debounced interval save. If user closes tab with focused field, changes may not persist (router.replace on create also relies on blur).",
+      "from_group": "D-dashboard-admin"
+    },
+    {
+      "severity": "low",
+      "summary": "Audit-logs useCallback uses `offset` in deps but initial load only depends on `token`",
+      "file": "app/admin/audit-logs/page.tsx",
+      "line": 52,
+      "evidence": "load callback deps include [filter, offset]; useEffect at line 74 ignores exhaustive-deps — filter changes via typing do not auto-reload (needs Filtern click); acceptable but brittle.",
+      "from_group": "D-dashboard-admin"
+    }
+  ]
+}
