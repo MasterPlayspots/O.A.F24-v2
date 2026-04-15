@@ -1,0 +1,7 @@
+│ 9a41ed93-e2a4-440d-8ef1-a3e63cb0c6e3 │ zfbf-db                        │ 2026-04-08T03:27:09.570Z │ production │ 0          │ 585728    │              │
+│ 1700bf9b-4aaa-44ee-8844-5c1748011a8c │ foerder_leads                  │ 2026-03-25T00:12:16.668Z │ production │ 0          │ 2207744   │              │
+│ 0b2479a3-13eb-45bc-8c71-105208ed71ad │ foerdermittel-checks           │ 2026-03-02T02:38:02.005Z │ production │ 0          │ 221184    │              │
+│ 7f5947f7-42af-455e-81ad-0c57be23b940 │ bafa_learnings                 │ 2026-01-23T15:01:40.207Z │ production │ 0          │ 229376    │              │
+│ f7593090-e6d0-4777-8c3c-78a6a0c7c535 │ bafa_branchen                  │ 2026-01-23T15:01:33.711Z │ production │ 0          │ 204800    │              │
+│ 8582e9dd-8063-4dbd-b079-f38b2bb3918f │ bafa_antraege                  │ 2026-01-23T15:01:27.450Z │ production │ 0          │ 1359872   │              │
+│ b95adb7b-ed86-441b-841e-4cd3a9a15135 │ foerderprogramme               │ 2026-01-23T04:26:22.180Z │ production │ 0          │ 79396864  │              │

@@ -1,0 +1,363 @@
+{
+  "summary": {
+    "overallScore": 7.0,
+    "maturity": "Mid — most Kern-Flows live + wired, 1 BROKEN admin surface, 1 MISSING feature, polish items open",
+    "stackDetected": [
+      "Next.js 15.5.x on Vercel",
+      "React 19.1",
+      "Tailwind CSS v4",
+      "TypeScript 5.x",
+      "Hono 4.12.8 on Cloudflare Workers",
+      "Cloudflare D1 (5 databases)",
+      "Cloudflare KV (4 namespaces used)",
+      "Cloudflare R2 (4 buckets, 2 bound)",
+      "Resend email API",
+      "Sentry (Toucan on Worker, Next SDK on frontend)",
+      "Zustand auth store with persist",
+      "Zod for validation"
+    ],
+    "loc": 89000,
+    "tsFiles": 250,
+    "commitHistory": 209,
+    "auditDate": "2026-04-15",
+    "gitHead": "41fa37c"
+  },
+  "dimensions": [
+    { "num": 1, "name": "Architecture", "score": 7, "weight": 15, "notes": "Clean 3-tier monorepo, 0 circular deps, 2 ungebundene R2 buckets" },
+    { "num": 2, "name": "Code Quality", "score": 6, "weight": 10, "notes": "TSC sauber, 48× `as any`, 12 console.* im FE" },
+    { "num": 3, "name": "Security", "score": 7, "weight": 15, "notes": "PBKDF2 100k, param SQL, CORS/CSRF/RateLimit da; Sentry PII an, Hono CVEs" },
+    { "num": 4, "name": "Performance", "score": 6, "weight": 8, "notes": "Worker 589 KB, Sentry 100% sampling, 1 sehr große Route-Datei" },
+    { "num": 5, "name": "Tests", "score": 7, "weight": 10, "notes": "13 Worker tests, keine E2E, kein Test-Step in CI" },
+    { "num": 6, "name": "API Design", "score": 8, "weight": 8, "notes": "55 Zod, Shape-Konsistenz, 1 silent catch" },
+    { "num": 7, "name": "Dependencies", "score": 6, "weight": 10, "notes": "10 npm-audit (2 HIGH, 8 MOD), Hono < 4.12.12" },
+    { "num": 8, "name": "Git", "score": 8, "weight": 3, "notes": "Aktive Historie, 3 Commits/Tag Avg, gut verteilt" },
+    { "num": 9, "name": "Documentation", "score": 6, "weight": 5, "notes": "ECOSYSTEM.md stale, kein API.md, kein MIGRATIONS.md" },
+    { "num": 10, "name": "DevOps", "score": 8, "weight": 8, "notes": "Auto-Deploy aller 3 Targets, Actions unpinned" },
+    { "num": 11, "name": "Frontend", "score": 7, "weight": 8, "notes": "55 pages, Error-Boundaries, 1 TODO in SupportWidget" },
+    { "num": 12, "name": "Database", "score": 7, "weight": 8, "notes": "Cross-DB-Design akzeptiert, 46 Tables, 113 Indexes, keine rollbacks" },
+    { "num": 13, "name": "Error Handling", "score": 7, "weight": 5, "notes": "Sentry in global-error, 1 silent catch, app/error.tsx ohne Sentry" },
+    { "num": 14, "name": "Monitoring", "score": 7, "weight": 5, "notes": "OA-CP, OA-VA, Onboarding cron laufen, 100% Sentry sampling" },
+    { "num": 15, "name": "Env Config", "score": 7, "weight": 4, "notes": "Keine .env.example, requireEnv() validiert server-side" }
+  ],
+  "findings": [
+    {
+      "id": "F-001",
+      "severity": "HIGH",
+      "dimension": "Security",
+      "file": "instrumentation-client.ts",
+      "line": 14,
+      "issue": "tracesSampleRate: 1.0 + potential sendDefaultPii: true — GDPR-Risiko + Sentry-Kosten",
+      "fix": "Sampling auf 0.1, PII-Scrubber im beforeSend",
+      "effort": "Quick",
+      "evidence": "grep -n 'tracesSampleRate' instrumentation-client.ts sentry.*.config.ts"
+    },
+    {
+      "id": "F-002",
+      "severity": "HIGH",
+      "dimension": "Dependencies",
+      "file": "worker/package.json",
+      "line": 29,
+      "issue": "hono 4.12.8 — 3 MODERATE-CVEs (cookie bypass, IPv6 bypass, path traversal). Latest is 4.12.12+",
+      "fix": "cd worker && npm install hono@latest",
+      "effort": "Quick",
+      "evidence": "npm audit --json (docs/analysis/raw_metrics/audit.json)"
+    },
+    {
+      "id": "F-003",
+      "severity": "HIGH",
+      "dimension": "Feature Matrix",
+      "file": "worker/src/routes/admin.ts",
+      "line": 0,
+      "issue": "Wrapper listPendingCerts/approveCert/rejectCert in lib/api/fund24.ts:380-388 rufen /api/admin/bafa-cert/* — Handler in admin.ts nicht vorhanden (0 grep matches für 'bafa-cert')",
+      "fix": "3 neue Routes: GET /bafa-cert/pending, POST /bafa-cert/:userId/approve, POST /bafa-cert/:userId/reject",
+      "effort": "Medium",
+      "evidence": "grep -rn 'bafa-cert' worker/src → empty; curl mit admin token → 404"
+    },
+    {
+      "id": "F-004",
+      "severity": "HIGH",
+      "dimension": "Feature Matrix",
+      "file": "app/dashboard/berater/",
+      "line": 0,
+      "issue": "ECOSYSTEM.md nennt BAFA-Zert-Antrag, weder UI (app/dashboard/berater/bafa-cert/page.tsx) noch Worker-Endpoint existieren",
+      "fix": "UI + POST /api/berater/bafa-cert + R2-Upload-Flow, oder aus Docs entfernen",
+      "effort": "Large",
+      "evidence": "find app -path '*bafa-cert*' → empty"
+    },
+    {
+      "id": "F-005",
+      "severity": "HIGH",
+      "dimension": "Documentation",
+      "file": "ECOSYSTEM.md",
+      "line": 0,
+      "issue": "Doc ist stale — nennt /api/bafa (entfernt in 18e4a54), /api/forum/*, WebAuthn/MagicLink (alle entfernt)",
+      "fix": "Doc refreshen oder durch docs/API.md ersetzen",
+      "effort": "Medium",
+      "evidence": "diff /tmp/docs_endpoints.txt /tmp/code_endpoints.txt"
+    },
+    {
+      "id": "F-006",
+      "severity": "MEDIUM",
+      "dimension": "Code Quality",
+      "file": "app/**/*.tsx",
+      "line": 0,
+      "issue": "12× console.log/warn/error im Frontend (ungeschützt)",
+      "fix": "Entweder via ESLint-Rule verbieten oder isDev-Gate",
+      "effort": "Quick",
+      "evidence": "grep -rn 'console\\\\.\\\\(log\\\\|warn\\\\|error\\\\)' app lib --include='*.ts' --include='*.tsx' | wc -l → 12"
+    },
+    {
+      "id": "F-007",
+      "severity": "MEDIUM",
+      "dimension": "Code Quality",
+      "file": "app lib worker/src",
+      "line": 0,
+      "issue": "48× `as any` / `: any` — überwiegend für D1 Row Types + Hono Context Types",
+      "fix": "Sweep: richtig typen via Repository-Layer, DTO-Types",
+      "effort": "Medium",
+      "evidence": "grep -rn ': any\\\\b\\\\|as any\\\\b' app lib worker/src --include='*.ts' --include='*.tsx' | wc -l → 48"
+    },
+    {
+      "id": "F-008",
+      "severity": "MEDIUM",
+      "dimension": "Performance",
+      "file": "worker/src/routes/foerdermittel.ts",
+      "line": 0,
+      "issue": "Route-Datei ~1500 LOC, vermischt Katalog + Search + Match + Chat + Cases",
+      "fix": "Split in foerdermittel/catalog.ts, foerdermittel/match.ts, foerdermittel/cases.ts",
+      "effort": "Medium",
+      "evidence": "wc -l worker/src/routes/foerdermittel.ts"
+    },
+    {
+      "id": "F-009",
+      "severity": "MEDIUM",
+      "dimension": "Tests",
+      "file": ".github/workflows/ci.yml",
+      "line": 22,
+      "issue": "CI führt lint + typecheck + build aus, aber keinen Worker-Test-Step (13 Tests existieren)",
+      "fix": "Add `cd worker && npm test` step",
+      "effort": "Quick",
+      "evidence": "cat .github/workflows/ci.yml"
+    },
+    {
+      "id": "F-010",
+      "severity": "MEDIUM",
+      "dimension": "API Design",
+      "file": "worker/src/routes/check.ts",
+      "line": 72,
+      "issue": "Silent catch `} catch { }` — Fehler geschluckt",
+      "fix": "Mit Sentry.captureException oder strukturiertem log() ersetzen",
+      "effort": "Quick",
+      "evidence": "grep -n 'catch' worker/src/routes/check.ts"
+    },
+    {
+      "id": "F-011",
+      "severity": "MEDIUM",
+      "dimension": "Documentation",
+      "file": "docs/",
+      "line": 0,
+      "issue": "Kein docs/API.md, kein docs/MIGRATIONS.md — keine zentrale Endpoint-/Schema-Doku",
+      "fix": "Manuell oder via Auto-Gen anlegen",
+      "effort": "Medium",
+      "evidence": "ls docs/"
+    },
+    {
+      "id": "F-012",
+      "severity": "MEDIUM",
+      "dimension": "Database/Infra",
+      "file": "worker/wrangler.toml",
+      "line": 59,
+      "issue": "CF R2-Buckets `fund24-dokumente` + `fund24-company-files` existieren, aber nicht in Worker gebunden",
+      "fix": "Entweder binden (wenn aktiv) oder löschen (wenn tot)",
+      "effort": "Quick",
+      "evidence": "npx wrangler r2 bucket list vs grep '\\\\[\\\\[r2_buckets\\\\]\\\\]' worker/wrangler.toml"
+    },
+    {
+      "id": "F-013",
+      "severity": "MEDIUM",
+      "dimension": "Error Handling",
+      "file": "app/error.tsx",
+      "line": 14,
+      "issue": "App-level Error-Boundary, aber kein Sentry.captureException — nur console.error",
+      "fix": "useEffect → Sentry.captureException(error)",
+      "effort": "Quick",
+      "evidence": "cat app/error.tsx"
+    },
+    {
+      "id": "F-014",
+      "severity": "LOW",
+      "dimension": "DevOps",
+      "file": ".github/workflows/*.yml",
+      "line": 0,
+      "issue": "Third-party actions auf Major-Version-Tag (@v3/@v4), nicht auf SHA",
+      "fix": "Pin via SHA oder Dependabot-automated-updates",
+      "effort": "Quick",
+      "evidence": "grep -n 'uses:' .github/workflows/*.yml"
+    },
+    {
+      "id": "F-015",
+      "severity": "LOW",
+      "dimension": "Frontend",
+      "file": "components/support/SupportWidget.tsx",
+      "line": 7,
+      "issue": "TODO: 'Vor Go-Live echte Kontaktdaten eintragen'",
+      "fix": "Kontaktdaten einsetzen oder TODO entfernen",
+      "effort": "Quick",
+      "evidence": "grep -n TODO components/support/SupportWidget.tsx"
+    },
+    {
+      "id": "F-016",
+      "severity": "LOW",
+      "dimension": "Database",
+      "file": "worker/db/migrations/",
+      "line": 0,
+      "issue": "29 Migrations, keine *-rollback.sql Scripts",
+      "fix": "Rollback-Pattern einführen für risikoreiche Migrations",
+      "effort": "Medium",
+      "evidence": "find worker/db/migrations -name '*rollback*' → empty"
+    },
+    {
+      "id": "F-017",
+      "severity": "LOW",
+      "dimension": "Env Config",
+      "file": "/",
+      "line": 0,
+      "issue": "Keine .env.example — neue Entwickler sehen keine Env-Var-Referenz",
+      "fix": "Anlegen mit Public-Vars (Dummy-Werte)",
+      "effort": "Quick",
+      "evidence": "ls -la .env*"
+    },
+    {
+      "id": "F-018",
+      "severity": "LOW",
+      "dimension": "Security",
+      "file": "worker/src/middleware/cors.ts",
+      "line": 15,
+      "issue": "DEV-Origins (localhost, vercel.app) auch in prod zugelassen (Environment-Gate existiert)",
+      "fix": "strictCorsCheck ist korrekt; Dokumentation im Code-Comment ergänzen",
+      "effort": "Quick",
+      "evidence": "cat worker/src/middleware/cors.ts"
+    }
+  ],
+  "featureMatrix": [
+    { "persona": "public", "feature": "Landing", "ui": "app/(public)/page.tsx", "apiWrapper": "-", "workerRoute": "-", "status": "LIVE", "liveCheckStatus": 200 },
+    { "persona": "public", "feature": "Programme", "ui": "app/(public)/programme/page.tsx", "apiWrapper": "lib/api/fund24.ts:23", "workerRoute": "worker/src/routes/foerdermittel.ts:36", "status": "LIVE", "liveCheckStatus": 200 },
+    { "persona": "public", "feature": "Berater-Verzeichnis", "ui": "app/(public)/berater/page.tsx", "apiWrapper": "lib/api/check.ts:175", "workerRoute": "worker/src/routes/netzwerk.ts:20", "status": "LIVE", "liveCheckStatus": 200 },
+    { "persona": "public", "feature": "News", "ui": "app/(public)/aktuelles/page.tsx", "apiWrapper": "lib/api/fund24.ts:getNews", "workerRoute": "worker/src/routes/news.ts:55", "status": "LIVE", "liveCheckStatus": 200 },
+    { "persona": "public", "feature": "Fördercheck-Entry", "ui": "app/(public)/foerder-schnellcheck/page.tsx", "apiWrapper": "lib/api/check.ts:15", "workerRoute": "worker/src/routes/checks.ts:40", "status": "LIVE", "liveCheckStatus": 200 },
+    { "persona": "auth", "feature": "Login", "ui": "app/(auth)/login/page.tsx", "apiWrapper": "lib/api/auth.ts:login", "workerRoute": "worker/src/routes/auth.ts", "status": "LIVE", "liveCheckStatus": 200 },
+    { "persona": "auth", "feature": "Register", "ui": "app/(auth)/registrieren/page.tsx", "apiWrapper": "lib/api/auth.ts:register", "workerRoute": "worker/src/routes/auth.ts", "status": "LIVE", "liveCheckStatus": 200 },
+    { "persona": "unternehmen", "feature": "Dashboard", "ui": "app/dashboard/unternehmen/page.tsx", "apiWrapper": "lib/api/fund24.ts:92", "workerRoute": "worker/src/routes/me.ts:89", "status": "LIVE", "liveCheckStatus": 401 },
+    { "persona": "unternehmen", "feature": "Antrag-Detail", "ui": "app/antraege/[id]/page.tsx", "apiWrapper": "lib/api/fund24.ts:206", "workerRoute": "worker/src/routes/antraege.ts:91", "status": "LIVE", "liveCheckStatus": 401 },
+    { "persona": "unternehmen", "feature": "Dokumenten-Upload", "ui": "app/antraege/[id]/page.tsx", "apiWrapper": "lib/api/fund24.ts:311", "workerRoute": "worker/src/routes/antraege.ts:313", "status": "LIVE", "liveCheckStatus": 401 },
+    { "persona": "unternehmen", "feature": "Berater-Zugriff", "ui": "app/antraege/[id]/page.tsx", "apiWrapper": "lib/api/fund24.ts:355", "workerRoute": "worker/src/routes/antraege.ts:458", "status": "LIVE", "liveCheckStatus": 401 },
+    { "persona": "unternehmen", "feature": "Tracker", "ui": "app/dashboard/unternehmen/tracker/page.tsx", "apiWrapper": "lib/api/fund24.ts:476", "workerRoute": "worker/src/routes/tracker.ts:41", "status": "LIVE", "liveCheckStatus": 401 },
+    { "persona": "berater", "feature": "Dashboard", "ui": "app/dashboard/berater/page.tsx", "apiWrapper": "lib/api/check.ts:113", "workerRoute": "worker-check/src/index.js:4415", "status": "LIVE", "liveCheckStatus": 401 },
+    { "persona": "berater", "feature": "Beratungen-Detail", "ui": "app/dashboard/berater/beratungen/[id]/page.tsx", "apiWrapper": "lib/api/fund24.ts:156", "workerRoute": "worker/src/routes/beratungen.ts:77", "status": "LIVE", "liveCheckStatus": 401 },
+    { "persona": "berater", "feature": "Berichte-Editor", "ui": "app/dashboard/berater/berichte/[id]/page.tsx", "apiWrapper": "lib/api/fund24.ts:107", "workerRoute": "worker/src/routes/reports.ts:338", "status": "LIVE", "liveCheckStatus": 401 },
+    { "persona": "berater", "feature": "BAFA-Zert-Antrag", "ui": "MISSING", "apiWrapper": "MISSING", "workerRoute": "MISSING", "status": "MISSING", "liveCheckStatus": 0 },
+    { "persona": "admin", "feature": "Dashboard", "ui": "app/admin/page.tsx", "apiWrapper": "lib/api/fund24.ts:getAdminDashboard", "workerRoute": "worker/src/routes/admin.ts:15", "status": "LIVE", "liveCheckStatus": 401 },
+    { "persona": "admin", "feature": "Cert-Queue", "ui": "app/admin/page.tsx", "apiWrapper": "lib/api/fund24.ts:380-388", "workerRoute": "MISSING handler in admin.ts", "status": "BROKEN", "liveCheckStatus": 401 },
+    { "persona": "admin", "feature": "User-Management", "ui": "app/admin/users/page.tsx", "apiWrapper": "lib/api/fund24.ts:getAdminUsers", "workerRoute": "worker/src/routes/admin.ts:155", "status": "LIVE", "liveCheckStatus": 401 },
+    { "persona": "admin", "feature": "Aktuelles-CMS", "ui": "app/admin/aktuelles/page.tsx", "apiWrapper": "lib/api/fund24.ts:getAdminNews", "workerRoute": "worker/src/routes/news.ts:107", "status": "LIVE", "liveCheckStatus": 401 }
+  ],
+  "gaps": [
+    {
+      "id": "GAP-001",
+      "feature": "Admin Cert-Queue",
+      "status": "BROKEN",
+      "existingPaths": ["app/admin/page.tsx:34-42", "lib/api/fund24.ts:380-388"],
+      "targetPaths": ["worker/src/routes/admin.ts (add 3 routes)"],
+      "apiContract": {
+        "method": "GET/POST",
+        "path": "/api/admin/bafa-cert/{pending,:userId/approve,:userId/reject}",
+        "schema": "{success, certs[]} / {success}"
+      },
+      "dependencies": ["users.bafa_cert_status column", "Audit-Log event"],
+      "effort": "Medium"
+    },
+    {
+      "id": "GAP-002",
+      "feature": "Berater BAFA-Zert Upload",
+      "status": "MISSING",
+      "existingPaths": [],
+      "targetPaths": [
+        "app/dashboard/berater/bafa-cert/page.tsx",
+        "lib/api/fund24.ts (uploadBafaCert + getBafaCertStatus)",
+        "worker/src/routes/berater.ts (2 new routes)"
+      ],
+      "apiContract": {
+        "method": "POST/GET",
+        "path": "/api/berater/bafa-cert{,/status}",
+        "schema": "multipart PDF upload / {status, bafa_berater_nr, uploaded_at}"
+      },
+      "dependencies": ["R2 bucket (bafa-reports oder neuer bafa-certs)", "users.bafa_cert_* columns"],
+      "effort": "Large"
+    },
+    {
+      "id": "GAP-003",
+      "feature": "ECOSYSTEM.md Refresh",
+      "status": "STALE-DOC",
+      "existingPaths": ["ECOSYSTEM.md"],
+      "targetPaths": ["docs/API.md (new) oder ECOSYSTEM.md (rewrite)"],
+      "apiContract": {},
+      "dependencies": [],
+      "effort": "Medium"
+    },
+    {
+      "id": "GAP-004",
+      "feature": "Worker Tests in CI",
+      "status": "MISSING",
+      "existingPaths": ["worker/src/__tests__/*.test.ts", "worker/vitest.config.ts"],
+      "targetPaths": [".github/workflows/ci.yml (add test step)"],
+      "apiContract": {},
+      "dependencies": [],
+      "effort": "Quick"
+    },
+    {
+      "id": "GAP-005",
+      "feature": "R2 Bucket Cleanup",
+      "status": "STALE-INFRA",
+      "existingPaths": [],
+      "targetPaths": ["worker/wrangler.toml (add bindings) or CF-delete"],
+      "apiContract": {},
+      "dependencies": ["User decision: keep or drop fund24-dokumente + fund24-company-files"],
+      "effort": "Quick"
+    },
+    {
+      "id": "GAP-006",
+      "feature": "Developer .env.example",
+      "status": "MISSING",
+      "existingPaths": [],
+      "targetPaths": [".env.example"],
+      "apiContract": {},
+      "dependencies": [],
+      "effort": "Quick"
+    },
+    {
+      "id": "GAP-007",
+      "feature": "API Reference Documentation",
+      "status": "MISSING",
+      "existingPaths": [],
+      "targetPaths": ["docs/API.md"],
+      "apiContract": {},
+      "dependencies": ["Script scripts/gen-api-docs.ts (optional)"],
+      "effort": "Medium"
+    }
+  ],
+  "quickWins": ["F-001", "F-002", "F-006", "F-010", "F-013", "F-015", "F-017"],
+  "criticalPath": ["F-002", "F-001", "F-003/GAP-001"],
+  "rawMetrics": {
+    "npmAuditHigh": 2,
+    "npmAuditMedium": 8,
+    "tscErrors": 0,
+    "eslintWarnings": 0,
+    "depcheckUnused": 0,
+    "commitTotal": 209,
+    "testFilesWorker": 13,
+    "testFilesFrontend": 0,
+    "loc": 89000,
+    "tsFiles": 250,
+    "routes": 120
+  }
+}
