@@ -35,6 +35,7 @@ import { performBackup, cleanupOldBackups } from "./services/backup";
 import { cleanupAuditLogs } from "./services/audit";
 import { cleanupExpiredData } from "./services/retention";
 import { log } from "./services/logger";
+import { recordCronRun } from "./services/cron-status";
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -217,6 +218,7 @@ export default {
 
         // OA-CP + OA-VA: daily at 02:30 UTC
         if (triggerHour === 2 && triggerMinute === 30) {
+          const cpStart = new Date();
           try {
             log("info", "oa_cp_start", { scheduledTime: trigger.toISOString() });
             const cpReport = await runCP(env);
@@ -225,8 +227,16 @@ export default {
               endpoints_failed: cpReport.summary.endpoints_failed,
               db_total_rows: cpReport.summary.db_total_rows,
             });
+            await recordCronRun(env.CACHE, "oa-cp", cpStart, {
+              ok: true,
+              meta: {
+                endpoints_ok: cpReport.summary.endpoints_ok,
+                endpoints_failed: cpReport.summary.endpoints_failed,
+              },
+            });
 
             // OA-VA runs immediately after CP
+            const vaStart = new Date();
             log("info", "oa_va_start", {});
             const vaReport = await runVA(env);
             log("info", "oa_va_complete", {
@@ -235,16 +245,25 @@ export default {
               uptime_pct: vaReport.uptime_pct,
               growth_direction: vaReport.growth_trend.direction,
             });
+            await recordCronRun(env.CACHE, "oa-va", vaStart, {
+              ok: true,
+              meta: {
+                verdict: vaReport.verdict,
+                issues: vaReport.issues.length,
+              },
+            });
           } catch (err) {
             log("error", "oa_agents_failed", {
               error: err instanceof Error ? err.message : String(err),
             });
+            await recordCronRun(env.CACHE, "oa-cp", cpStart, { ok: false, error: err });
           }
           return; // OA agents only, don't run backup in this trigger
         }
 
         // Onboarding email sequence: daily at 10:00 UTC (≈ 11:00/12:00 CET)
         if (triggerHour === 10 && triggerMinute === 0) {
+          const started = new Date();
           try {
             log("info", "onboarding_dispatch_start", { scheduledTime: trigger.toISOString() });
             const report = await runOnboardingDispatch(env);
@@ -255,14 +274,24 @@ export default {
               failed: report.failed,
               perDay: report.perDay,
             });
+            await recordCronRun(env.CACHE, "onboarding-dispatch", started, {
+              ok: true,
+              meta: { scanned: report.scanned, sent: report.sent, failed: report.failed },
+            });
           } catch (err) {
             log("error", "onboarding_dispatch_failed", {
               error: err instanceof Error ? err.message : String(err),
+            });
+            await recordCronRun(env.CACHE, "onboarding-dispatch", started, {
+              ok: false,
+              error: err,
             });
           }
           return;
         }
 
+        // Nightly backup (02:00 UTC) + audit/retention + Monday 03:00 learning cycle
+        const backupStart = new Date();
         try {
           // Daily backup at 02:00 UTC
           await performBackup(
@@ -273,12 +302,30 @@ export default {
             env.REPORTS
           );
           await cleanupOldBackups(env.REPORTS);
+          await recordCronRun(env.CACHE, "nightly-backup", backupStart, { ok: true });
 
           // GDPR audit log cleanup (90 days)
-          await cleanupAuditLogs(env.DB);
+          const auditStart = new Date();
+          try {
+            await cleanupAuditLogs(env.DB);
+            await recordCronRun(env.CACHE, "audit-cleanup", auditStart, { ok: true });
+          } catch (err) {
+            await recordCronRun(env.CACHE, "audit-cleanup", auditStart, { ok: false, error: err });
+            throw err;
+          }
 
           // GDPR data retention cleanup (pass both DBs)
-          await cleanupExpiredData(env.DB, env.BAFA_DB);
+          const retentionStart = new Date();
+          try {
+            await cleanupExpiredData(env.DB, env.BAFA_DB);
+            await recordCronRun(env.CACHE, "retention-cleanup", retentionStart, { ok: true });
+          } catch (err) {
+            await recordCronRun(env.CACHE, "retention-cleanup", retentionStart, {
+              ok: false,
+              error: err,
+            });
+            throw err;
+          }
 
           // Weekly learning cycle (cron: 0 3 * * 1 - Monday 03:00 UTC)
           if (trigger.getUTCDay() === 1 && trigger.getUTCHours() === 3) {
@@ -356,8 +403,15 @@ export default {
               branchenProcessed,
             });
           }
-        } catch {
-          // cron failure - errors surface via Cloudflare dashboard
+        } catch (err) {
+          // Cron failure surfaces via CF dashboard + (now) cron-status KV.
+          log("error", "nightly_cron_failed", {
+            error: err instanceof Error ? err.message : String(err),
+          });
+          await recordCronRun(env.CACHE, "nightly-backup", backupStart, {
+            ok: false,
+            error: err,
+          });
         }
       })()
     );

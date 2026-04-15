@@ -9,7 +9,7 @@ _Last generated: 2026-04-15_
 
 | Group | Endpoints |
 |---|---:|
-| `admin` | 15 |
+| `admin` | 16 |
 | `antraege` | 8 |
 | `auth` | 11 |
 | `berater` | 11 |
@@ -33,27 +33,28 @@ _Last generated: 2026-04-15_
 | `verify-payment` | 1 |
 | `vorlagen` | 3 |
 
-**Total:** 143 endpoints across 23 groups
+**Total:** 144 endpoints across 23 groups
 
-## admin (15)
+## admin (16)
 
 | Method | Path | Auth | Source |
 |---|---|---|---|
-| `GET` | `/audit-logs` | requireAuth (blanket) | [`admin.ts:135`](../worker/src/routes/admin.ts#L135) |
-| `POST` | `/audit-logs/cleanup` | requireAuth (blanket) | [`admin.ts:149`](../worker/src/routes/admin.ts#L149) |
-| `GET` | `/bafa-cert/pending` | requireAuth (blanket) | [`admin.ts:427`](../worker/src/routes/admin.ts#L427) |
-| `GET` | `/check-foerdermittel` | requireAuth (blanket) | [`admin.ts:261`](../worker/src/routes/admin.ts#L261) |
-| `GET` | `/dashboard` | requireAuth (blanket) | [`admin.ts:103`](../worker/src/routes/admin.ts#L103) |
-| `GET` | `/email-outbox` | requireAuth (blanket) | [`admin.ts:334`](../worker/src/routes/admin.ts#L334) |
-| `POST` | `/email-outbox/:id/retry` | requireAuth (blanket) | [`admin.ts:374`](../worker/src/routes/admin.ts#L374) |
-| `POST` | `/onboarding/dispatch` | requireAuth (blanket) | [`admin.ts:95`](../worker/src/routes/admin.ts#L95) |
-| `GET` | `/provisionen` | requireAuth (blanket) | [`admin.ts:41`](../worker/src/routes/admin.ts#L41) |
-| `PATCH` | `/provisionen/:id` | requireAuth (blanket) | [`admin.ts:59`](../worker/src/routes/admin.ts#L59) |
-| `GET` | `/stats` | requireAuth (blanket) | [`admin.ts:236`](../worker/src/routes/admin.ts#L236) |
-| `GET` | `/users` | requireAuth (blanket) | [`admin.ts:155`](../worker/src/routes/admin.ts#L155) |
-| `DELETE` | `/users/:id` | requireAuth (blanket) | [`admin.ts:207`](../worker/src/routes/admin.ts#L207) |
-| `PATCH` | `/users/:id` | requireAuth (blanket) | [`admin.ts:164`](../worker/src/routes/admin.ts#L164) |
-| `PATCH` | `/users/:id/role` | requireAuth (blanket) | [`admin.ts:193`](../worker/src/routes/admin.ts#L193) |
+| `GET` | `/audit-logs` | requireAuth (blanket) | [`admin.ts:136`](../worker/src/routes/admin.ts#L136) |
+| `POST` | `/audit-logs/cleanup` | requireAuth (blanket) | [`admin.ts:150`](../worker/src/routes/admin.ts#L150) |
+| `GET` | `/bafa-cert/pending` | requireAuth (blanket) | [`admin.ts:428`](../worker/src/routes/admin.ts#L428) |
+| `GET` | `/check-foerdermittel` | requireAuth (blanket) | [`admin.ts:262`](../worker/src/routes/admin.ts#L262) |
+| `GET` | `/cron-status` | requireAuth (blanket) | [`admin.ts:486`](../worker/src/routes/admin.ts#L486) |
+| `GET` | `/dashboard` | requireAuth (blanket) | [`admin.ts:104`](../worker/src/routes/admin.ts#L104) |
+| `GET` | `/email-outbox` | requireAuth (blanket) | [`admin.ts:335`](../worker/src/routes/admin.ts#L335) |
+| `POST` | `/email-outbox/:id/retry` | requireAuth (blanket) | [`admin.ts:375`](../worker/src/routes/admin.ts#L375) |
+| `POST` | `/onboarding/dispatch` | requireAuth (blanket) | [`admin.ts:96`](../worker/src/routes/admin.ts#L96) |
+| `GET` | `/provisionen` | requireAuth (blanket) | [`admin.ts:42`](../worker/src/routes/admin.ts#L42) |
+| `PATCH` | `/provisionen/:id` | requireAuth (blanket) | [`admin.ts:60`](../worker/src/routes/admin.ts#L60) |
+| `GET` | `/stats` | requireAuth (blanket) | [`admin.ts:237`](../worker/src/routes/admin.ts#L237) |
+| `GET` | `/users` | requireAuth (blanket) | [`admin.ts:156`](../worker/src/routes/admin.ts#L156) |
+| `DELETE` | `/users/:id` | requireAuth (blanket) | [`admin.ts:208`](../worker/src/routes/admin.ts#L208) |
+| `PATCH` | `/users/:id` | requireAuth (blanket) | [`admin.ts:165`](../worker/src/routes/admin.ts#L165) |
+| `PATCH` | `/users/:id/role` | requireAuth (blanket) | [`admin.ts:194`](../worker/src/routes/admin.ts#L194) |
 
 ## antraege (8)
 

@@ -1,0 +1,155 @@
+name: Weekly Health Report
+
+# Runs every Monday 07:00 UTC. Gathers:
+#   * D1 sizes + row counts
+#   * npm audit HIGH/CRIT counts (root + worker)
+#   * CI failure rate in the last 7 days
+# Writes result to docs/ops/HEALTH_REPORTS/YYYY-MM-DD.md and commits
+# back to main. Also exposes the report as a workflow summary so you
+# can read it without cloning.
+#
+# Manual: Actions tab → "Weekly Health Report" → Run workflow.
+
+on:
+  schedule:
+    - cron: '0 7 * * MON'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # commit the report back
+  actions: read     # gh api access to CI runs
+
+concurrency:
+  group: weekly-health
+  cancel-in-progress: false
+
+jobs:
+  gather:
+    name: Gather + commit report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            worker/package-lock.json
+
+      - name: Install deps
+        run: |
+          npm ci
+          cd worker && npm ci
+
+      - name: Collect — D1 sizes
+        id: d1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set +e
+          cd worker
+          echo "# D1 databases" > /tmp/d1.md
+          echo "" >> /tmp/d1.md
+          echo "| DB | tables | size (bytes) |" >> /tmp/d1.md
+          echo "|---|---:|---:|" >> /tmp/d1.md
+          for db in zfbf-db bafa_antraege foerderprogramme bafa_learnings foerdermittel-checks; do
+            BODY=$(npx wrangler d1 info "$db" --json 2>/dev/null || echo '{}')
+            SIZE=$(echo "$BODY" | jq -r '.file_size // .database_size_bytes // 0')
+            TABLES=$(npx wrangler d1 execute "$db" --remote --json --command \
+              "SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%'" \
+              2>/dev/null | jq -r '.[0].results[0].n // "-"' || echo "-")
+            echo "| $db | $TABLES | $SIZE |" >> /tmp/d1.md
+          done
+
+      - name: Collect — npm audit (prod deps only)
+        run: |
+          set +e
+          echo "# npm audit — prod" > /tmp/audit.md
+          echo "" >> /tmp/audit.md
+          echo "## Frontend (root)" >> /tmp/audit.md
+          echo '```' >> /tmp/audit.md
+          npm audit --audit-level=moderate --production 2>&1 | tail -20 >> /tmp/audit.md || true
+          echo '```' >> /tmp/audit.md
+          echo "## Worker" >> /tmp/audit.md
+          echo '```' >> /tmp/audit.md
+          (cd worker && npm audit --audit-level=moderate --production 2>&1 | tail -20) >> /tmp/audit.md || true
+          echo '```' >> /tmp/audit.md
+
+      - name: Collect — CI fail-rate last 7 days
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SINCE=$(date -u -d '7 days ago' '+%Y-%m-%dT%H:%M:%SZ')
+          # Total + failed workflow runs on main
+          gh api -X GET "repos/${GITHUB_REPOSITORY}/actions/runs" \
+            -f "created=>=$SINCE" -f "branch=main" --paginate \
+            > /tmp/runs.json || echo '{}' > /tmp/runs.json
+          TOTAL=$(jq '[.workflow_runs[]?] | length' /tmp/runs.json)
+          FAIL=$(jq '[.workflow_runs[]? | select(.conclusion=="failure")] | length' /tmp/runs.json)
+          echo "# CI last 7 days (main branch)" > /tmp/ci.md
+          echo "" >> /tmp/ci.md
+          echo "- **Total runs:** $TOTAL" >> /tmp/ci.md
+          echo "- **Failures:** $FAIL" >> /tmp/ci.md
+          if [ "$TOTAL" -gt 0 ]; then
+            RATE=$(awk "BEGIN{printf \"%.1f\", ($FAIL / $TOTAL) * 100}")
+            echo "- **Fail rate:** ${RATE}%" >> /tmp/ci.md
+          else
+            echo "- **Fail rate:** n/a (no runs in window)" >> /tmp/ci.md
+          fi
+
+      - name: Assemble report
+        id: assemble
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          OUT="docs/ops/HEALTH_REPORTS/${DATE}.md"
+          mkdir -p docs/ops/HEALTH_REPORTS
+          {
+            echo "# Fund24 — Weekly Health Report · ${DATE}"
+            echo ""
+            echo "_Generated automatically by \`.github/workflows/weekly-health.yml\`_"
+            echo ""
+            cat /tmp/ci.md
+            echo ""
+            cat /tmp/d1.md
+            echo ""
+            cat /tmp/audit.md
+            echo ""
+            echo "## Last 5 deploys (main)"
+            echo ""
+            gh run list --branch main --workflow=Deploy\ Workers --limit 5 \
+              --json conclusion,createdAt,displayTitle \
+              -q '.[] | "- \(.createdAt) · \(.conclusion) · \(.displayTitle[:70])"' || true
+          } > "$OUT"
+          cat "$OUT" >> "$GITHUB_STEP_SUMMARY"
+          echo "report_path=$OUT" >> "$GITHUB_OUTPUT"
+          echo "report_date=$DATE" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "${{ steps.assemble.outputs.report_path }}"
+          if git diff --cached --quiet; then
+            echo "No changes to commit (report unchanged)."
+            exit 0
+          fi
+          git commit -m "ops(health): weekly health report ${{ steps.assemble.outputs.report_date }}"
+          git push
+
+      - name: Optional Slack webhook
+        if: env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          URL="https://github.com/${GITHUB_REPOSITORY}/blob/main/${{ steps.assemble.outputs.report_path }}"
+          curl -s -X POST -H 'Content-Type: application/json' \
+            --data "{\"text\":\":chart_with_upwards_trend: fund24 weekly health report · ${{ steps.assemble.outputs.report_date }} · $URL\"}" \
+            "$SLACK_WEBHOOK_URL"

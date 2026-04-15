@@ -6,6 +6,7 @@ import { AUDIT_EVENTS } from "../types";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { queryAuditLogs, cleanupAuditLogs, writeAuditLog } from "../services/audit";
 import { runOnboardingDispatch } from "../services/onboarding";
+import { readAllCronStatus, EXPECTED_CRON_JOBS } from "../services/cron-status";
 import * as UserRepo from "../repositories/user.repository";
 import * as ReportRepo from "../repositories/report.repository";
 import * as OrderRepo from "../repositories/order.repository";
@@ -478,5 +479,43 @@ for (const [action, next] of [
     return c.json({ success: true });
   });
 }
+
+// GET /api/admin/cron-status — returns the last run of every scheduled job
+// recorded in KV by services/cron-status.ts#recordCronRun. Jobs that never
+// ran during the current 7-day TTL window appear with status `missing`.
+admin.get("/cron-status", async (c) => {
+  const records = await readAllCronStatus(c.env.CACHE);
+  const byName = new Map(records.map((r) => [r.name, r]));
+  const jobs = EXPECTED_CRON_JOBS.map((name) => {
+    const r = byName.get(name);
+    if (!r) {
+      return { name, status: "missing" as const, lastRun: null };
+    }
+    return {
+      name,
+      status: r.ok ? ("ok" as const) : ("failed" as const),
+      lastRun: r.finishedAt,
+      startedAt: r.startedAt,
+      durationMs: r.durationMs,
+      error: r.error,
+      meta: r.meta,
+    };
+  });
+  // Also expose any unexpected names (helps if someone adds a new cron and
+  // forgets to update EXPECTED_CRON_JOBS).
+  for (const [name, r] of byName) {
+    if (EXPECTED_CRON_JOBS.includes(name as (typeof EXPECTED_CRON_JOBS)[number])) continue;
+    jobs.push({
+      name,
+      status: r.ok ? ("ok" as const) : ("failed" as const),
+      lastRun: r.finishedAt,
+      startedAt: r.startedAt,
+      durationMs: r.durationMs,
+      error: r.error,
+      meta: r.meta,
+    });
+  }
+  return c.json({ success: true, jobs });
+});
 
 export { admin };

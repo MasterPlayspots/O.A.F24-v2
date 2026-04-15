@@ -519,6 +519,30 @@ export async function deleteTrackerVorgang(id: string) {
   )
 }
 
+// ---------- Admin: Cron Status (ops) ----------
+
+export type CronJobStatus = 'ok' | 'failed' | 'missing'
+
+export interface CronJobEntry {
+  name: string
+  status: CronJobStatus
+  lastRun: string | null
+  startedAt?: string
+  durationMs?: number
+  error?: string
+  meta?: Record<string, unknown>
+}
+
+export async function getCronStatus(): Promise<CronJobEntry[]> {
+  const r = await apiCall<{ success: boolean; jobs: CronJobEntry[] }>(
+    API.FUND24,
+    '/api/admin/cron-status',
+    undefined,
+    token(),
+  )
+  return r.jobs ?? []
+}
+
 // ---------- Admin: Dashboard ----------
 
 export async function getAdminDashboard(): Promise<AdminDashboard> {
