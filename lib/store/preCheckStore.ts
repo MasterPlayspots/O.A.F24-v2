@@ -19,9 +19,11 @@ interface PreCheckState {
   antworten: PrecheckAntwort[]
   scoring: PrecheckScoring | null
   fehlerMeldung: string | null
+  preselectedProgramm: string | null
 
   setPhase: (phase: PrecheckPhase) => void
   setWebsiteUrl: (url: string) => void
+  setPreselectedProgramm: (id: string | null) => void
   setSession: (id: string, profil: PrecheckProfil) => void
   setFragen: (fragen: PrecheckFrage[]) => void
   beantworteAktiveFrage: (antwort: string) => void
@@ -42,6 +44,7 @@ const initialState = {
   antworten: [],
   scoring: null,
   fehlerMeldung: null,
+  preselectedProgramm: null,
 }
 
 export const usePreCheck = create<PreCheckState>()((set, get) => ({
@@ -50,6 +53,8 @@ export const usePreCheck = create<PreCheckState>()((set, get) => ({
   setPhase: (phase) => set({ phase }),
 
   setWebsiteUrl: (url) => set({ websiteUrl: url }),
+
+  setPreselectedProgramm: (id) => set({ preselectedProgramm: id }),
 
   setSession: (id, profil) =>
     set({ sessionId: id, profil, phase: 'profil_ready' }),

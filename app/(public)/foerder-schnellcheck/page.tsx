@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -9,6 +10,8 @@ import { usePreCheck } from '@/lib/store/preCheckStore'
 import { analysiereWebsite } from '@/lib/api/precheck'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { LadeSpinner } from '@/components/shared/LadeSpinner'
 import { FehlerBox } from '@/components/shared/FehlerBox'
 import { ArrowRight } from 'lucide-react'
@@ -21,9 +24,19 @@ type FormData = z.infer<typeof schema>
 
 export default function FoerderSchnellcheckPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const store = usePreCheck()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [urlConsent, setUrlConsent] = useState(false)
+
+  // If the user arrives via /programme/[id]'s "Zum Fördercheck" CTA,
+  // stash the referenced programm ID into the store so downstream
+  // steps (chat/analyse) can prioritise it in the matching output.
+  const programmParam = searchParams.get('programm')
+  useEffect(() => {
+    if (programmParam) store.setPreselectedProgramm(programmParam)
+  }, [programmParam, store])
 
   const {
     register,
@@ -98,10 +111,31 @@ export default function FoerderSchnellcheckPage() {
             </p>
           </div>
 
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="url-consent"
+              checked={urlConsent}
+              onCheckedChange={(c) => setUrlConsent(!!c)}
+              className="mt-1"
+            />
+            <Label htmlFor="url-consent" className="text-sm cursor-pointer leading-relaxed text-white/80">
+              Ich stimme zu, dass meine Website analysiert wird.{' '}
+              <Link href="/datenschutz" target="_blank" className="text-architect-primary-light underline hover:text-white">
+                Datenschutzerklärung
+              </Link>
+            </Label>
+          </div>
+
+          {programmParam && (
+            <div className="rounded-lg bg-architect-primary/20 p-4 text-sm text-architect-primary-light">
+              Fördercheck für Programm <code className="font-mono">#{programmParam}</code> — wir priorisieren dieses Programm in den Ergebnissen.
+            </div>
+          )}
+
           <Button
             type="submit"
             size="lg"
-            disabled={isLoading}
+            disabled={isLoading || !urlConsent}
             className="w-full bg-architect-primary hover:bg-architect-primary-container text-white"
           >
             Analyse starten

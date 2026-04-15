@@ -53,7 +53,8 @@ export async function scrapeCompanyFromUrl(url: string): Promise<ScrapedCompany>
     try {
       const resp = await fetch(tryUrl, {
         headers: { "User-Agent": "Fund24-Bot/1.0 (Foerdermittel-Check)" },
-        redirect: "follow",
+        redirect: "error",
+        signal: AbortSignal.timeout(5000),
       });
       if (resp.ok) {
         html = await resp.text();

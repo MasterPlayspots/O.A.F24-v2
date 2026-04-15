@@ -9,6 +9,30 @@ import {
   getProgramById,
 } from "../services/foerdermittel";
 import { scrapeCompanyFromUrl } from "../services/scraper";
+import { requireAuth } from "../middleware/auth";
+
+// Block private / internal hosts for any user-supplied URL before we fetch it.
+// Mirrors the allowlist-based admin handler. Returns true if the URL is
+// private / link-local / loopback / file: or otherwise unsafe.
+function isPrivateUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === "file:") return true;
+    const host = parsed.hostname;
+    if (host === "localhost" || host === "0.0.0.0") return true;
+    if (host === "127.0.0.1" || host.startsWith("127.")) return true;
+    if (host === "169.254.169.254" || host.startsWith("169.254.")) return true;
+    if (host.startsWith("10.")) return true;
+    if (host.startsWith("192.168.")) return true;
+    if (host.startsWith("172.")) {
+      const second = parseInt(host.split(".")[1] || "0", 10);
+      if (second >= 16 && second <= 31) return true;
+    }
+    return false;
+  } catch {
+    return true;
+  }
+}
 
 // Workers-AI `run()` uses a union of known model names — `@cf/meta/llama-3.1-8b-instruct`
 // isn't in the shipped AiModels map, so we keep the cast localized to one helper.
@@ -51,7 +75,7 @@ const check = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 // ============================================
 // Step 1: Submit company form → create session
 // ============================================
-check.post("/", async (c) => {
+check.post("/", requireAuth, async (c) => {
   const body = (await c.req.json()) as {
     url?: string;
     firmenname?: string;
@@ -74,6 +98,9 @@ check.post("/", async (c) => {
   const formData = { ...body };
 
   if (body.url) {
+    if (isPrivateUrl(body.url)) {
+      return c.json({ error: "URL nicht erlaubt" }, 400);
+    }
     try {
       const scraped = await scrapeCompanyFromUrl(body.url);
       scrapedData = scraped as Record<string, unknown>;
@@ -219,7 +246,7 @@ async function saveSession(
 // ============================================
 // Step 2: Chat interaction
 // ============================================
-check.post("/:sessionId/chat", async (c) => {
+check.post("/:sessionId/chat", requireAuth, async (c) => {
   const sessionId = c.req.param("sessionId");
   const session = await loadSession(sessionId, c.env.SESSIONS);
   if (!session)
@@ -269,7 +296,7 @@ check.post("/:sessionId/chat", async (c) => {
 // ============================================
 // Step 3: Document upload
 // ============================================
-check.post("/:sessionId/docs", async (c) => {
+check.post("/:sessionId/docs", requireAuth, async (c) => {
   const sessionId = c.req.param("sessionId");
   const session = await loadSession(sessionId, c.env.SESSIONS);
   if (!session)
@@ -326,7 +353,7 @@ ${truncated}`,
 // ============================================
 // Step 4: Run full analysis
 // ============================================
-check.post("/:sessionId/analyze", async (c) => {
+check.post("/:sessionId/analyze", requireAuth, async (c) => {
   const sessionId = c.req.param("sessionId");
   const session = await loadSession(sessionId, c.env.SESSIONS);
   if (!session)
@@ -417,7 +444,7 @@ Nenne die Anzahl, die Top-Programme und eine grobe Einschätzung der Gesamtförd
 // ============================================
 // Step 5: Get action plan
 // ============================================
-check.get("/:sessionId/plan", async (c) => {
+check.get("/:sessionId/plan", requireAuth, async (c) => {
   const sessionId = c.req.param("sessionId");
   const session = await loadSession(sessionId, c.env.SESSIONS);
   if (!session)
