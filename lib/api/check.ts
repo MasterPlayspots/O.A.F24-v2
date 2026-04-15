@@ -13,7 +13,7 @@ import type {
 type CheckStartDaten = Omit<CheckSession, 'id' | 'status' | 'createdAt'>
 
 export async function checkStarten(daten: CheckStartDaten, token: string): Promise<{ id: string }> {
-  return apiCall<{ id: string }>(API.CHECK, '/api/checks', {
+  return apiCall<{ id: string }>(API.FUND24, '/api/checks', {
     method: 'POST',
     body: JSON.stringify(daten),
   }, token)
@@ -22,13 +22,13 @@ export async function checkStarten(daten: CheckStartDaten, token: string): Promi
 export async function getCheck(
   sessionId: string, token: string
 ): Promise<CheckSession & { nachrichten: ChatNachricht[]; ergebnisse: CheckErgebnis[] }> {
-  return apiCall(API.CHECK, `/api/checks/${sessionId}`, undefined, token)
+  return apiCall(API.FUND24, `/api/checks/${sessionId}`, undefined, token)
 }
 
 export async function chatNachricht(
   sessionId: string, nachricht: string, token: string
 ): Promise<{ nachricht: ChatNachricht; status: string }> {
-  return apiCall(API.CHECK, `/api/checks/${sessionId}/chat`, {
+  return apiCall(API.FUND24, `/api/checks/${sessionId}/chat`, {
     method: 'POST',
     body: JSON.stringify({ nachricht }),
   }, token)
@@ -39,7 +39,7 @@ export async function dokumenteHochladen(
 ): Promise<{ ok: boolean }> {
   // apiCall erkennt FormData und entfernt Content-Type automatisch:
   return apiCall<{ ok: boolean }>(
-    API.CHECK,
+    API.FUND24,
     `/api/checks/${sessionId}/docs`,
     { method: 'POST', body: formData },
     token
@@ -47,13 +47,13 @@ export async function dokumenteHochladen(
 }
 
 export async function schwarmStarten(sessionId: string, token: string): Promise<{ ok: boolean }> {
-  return apiCall(API.CHECK, `/api/checks/${sessionId}/schwarm`, { method: 'POST' }, token)
+  return apiCall(API.FUND24, `/api/checks/${sessionId}/schwarm`, { method: 'POST' }, token)
 }
 
 // ── MATCHING ─────────────────────────────────────────────────
 
 export async function getMatching(sessionId: string, token: string): Promise<{ berater: BeraterMatch[] }> {
-  return apiCall(API.CHECK, `/api/checks/${sessionId}/matching`, undefined, token)
+  return apiCall(API.FUND24, `/api/checks/${sessionId}/matching`, undefined, token)
 }
 
 // ── ANFRAGEN ─────────────────────────────────────────────────
