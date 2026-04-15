@@ -1,0 +1,783 @@
+{
+  "generatedAt": "2026-04-15",
+  "branch": "audit/phase-5-gap-analysis",
+  "sources": [
+    "docs/analysis/full-audit/01_pages.json",
+    "docs/analysis/full-audit/02_cta_routing.json",
+    "docs/analysis/full-audit/03_api_backend.json",
+    "docs/analysis/full-audit/04_db_mapping.json"
+  ],
+  "dead_code": {
+    "dead_files_in_lib_components": [
+      "components/ui/tabs.tsx",
+      "components/ui/sheet.tsx",
+      "components/ui/separator.tsx",
+      "components/ui/dropdown-menu.tsx",
+      "components/shared/EmptyState.tsx"
+    ],
+    "dead_frontend_exports": [
+      "lib/api/fund24.ts:getStats",
+      "lib/api/fund24.ts:verifyEmail",
+      "lib/api/fund24.ts:deleteDokument",
+      "lib/api/fund24.ts:deleteAdminNews",
+      "lib/api/fund24.ts:addFavorit (variant — check.ts version used instead)",
+      "lib/api/berater.ts:listExpertise",
+      "lib/api/berater.ts:listDienstleistungen",
+      "lib/api/unternehmen.ts:getUnternehmen",
+      "lib/api/check.ts:createTrackerVorgang",
+      "lib/api/check.ts:deleteTrackerVorgang"
+    ]
+  },
+  "dead_endpoints_sample": [
+    {
+      "method": "POST",
+      "path": "/api/auth/refresh",
+      "file": "worker/src/routes/auth.ts",
+      "line": 241
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/auth/me",
+      "file": "worker/src/routes/auth.ts",
+      "line": 452
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/generate",
+      "file": "worker/src/routes/reports.ts",
+      "line": 59
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/preview/:id",
+      "file": "worker/src/routes/reports.ts",
+      "line": 194
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/unlock",
+      "file": "worker/src/routes/reports.ts",
+      "line": 211
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/download/:token",
+      "file": "worker/src/routes/reports.ts",
+      "line": 249
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/",
+      "file": "worker/src/routes/reports.ts",
+      "line": 287
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/:id",
+      "file": "worker/src/routes/reports.ts",
+      "line": 338
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/",
+      "file": "worker/src/routes/reports.ts",
+      "line": 356
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/reports/:id",
+      "file": "worker/src/routes/reports.ts",
+      "line": 371
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports/:id/finalize",
+      "file": "worker/src/routes/reports.ts",
+      "line": 429
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/reports/:id/finalize",
+      "file": "worker/src/routes/reports.ts",
+      "line": 447
+    },
+    {
+      "method": "GET",
+      "path": "/api/branchen/",
+      "file": "worker/src/routes/branchen.ts",
+      "line": 20
+    },
+    {
+      "method": "GET",
+      "path": "/api/branchen/:id",
+      "file": "worker/src/routes/branchen.ts",
+      "line": 29
+    },
+    {
+      "method": "POST",
+      "path": "/api/promo/validate",
+      "file": "worker/src/routes/promo.ts",
+      "line": 21
+    },
+    {
+      "method": "POST",
+      "path": "/api/promo/redeem",
+      "file": "worker/src/routes/promo.ts",
+      "line": 40
+    },
+    {
+      "method": "GET",
+      "path": "/api/promo/codes",
+      "file": "worker/src/routes/promo.ts",
+      "line": 87
+    },
+    {
+      "method": "POST",
+      "path": "/api/promo/create",
+      "file": "worker/src/routes/promo.ts",
+      "line": 93
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders/create",
+      "file": "worker/src/routes/orders.ts",
+      "line": 17
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/stripe/create-session",
+      "file": "worker/src/routes/payments.ts",
+      "line": 20
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/stripe/webhook",
+      "file": "worker/src/routes/payments.ts",
+      "line": 77
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/paypal/create-order",
+      "file": "worker/src/routes/payments.ts",
+      "line": 146
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments/paypal/capture-order",
+      "file": "worker/src/routes/payments.ts",
+      "line": 185
+    },
+    {
+      "method": "POST",
+      "path": "/api/verify-payment",
+      "file": "worker/src/routes/verify-payment.ts",
+      "line": 12
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/onboarding/dispatch",
+      "file": "worker/src/routes/admin.ts",
+      "line": 95
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/audit-logs/cleanup",
+      "file": "worker/src/routes/admin.ts",
+      "line": 149
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/stats",
+      "file": "worker/src/routes/admin.ts",
+      "line": 236
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/check-foerdermittel",
+      "file": "worker/src/routes/admin.ts",
+      "line": 261
+    },
+    {
+      "method": "GET",
+      "path": "/api/user/export",
+      "file": "worker/src/routes/gdpr.ts",
+      "line": 13
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/user/account",
+      "file": "worker/src/routes/gdpr.ts",
+      "line": 48
+    }
+  ],
+  "dead_endpoints_total": 50,
+  "unmatched_frontend_calls": [
+    {
+      "endpoint": "GET /api/stats",
+      "callSite": "lib/api/fund24.ts:getStats@6",
+      "authHeader": "no",
+      "usedBy": [],
+      "notes": "unused export — no page imports it",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/filter-options",
+      "callSite": "lib/api/fund24.ts:getFilterOptions@10",
+      "authHeader": "no",
+      "usedBy": [
+        "/programme"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/me/favoriten/:programmId",
+      "callSite": "lib/api/fund24.ts:addFavorit@57",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but no page calls addFavorit (favorites page only lists/removes). Legacy lib/api/check.ts addFavorit is different (numeric id).",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "DELETE /api/me/favoriten/:programmId",
+      "callSite": "lib/api/fund24.ts:removeFavorit@60",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/unternehmen/favoriten"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/me/notifications/:id/read",
+      "callSite": "lib/api/fund24.ts:markNotificationRead@79",
+      "authHeader": "yes",
+      "usedBy": [
+        "components/shared/NotificationsBell.tsx"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/me/notifications/read-all",
+      "callSite": "lib/api/fund24.ts:markAllNotificationsRead@82",
+      "authHeader": "yes",
+      "usedBy": [
+        "components/shared/NotificationsBell.tsx"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/berichte/:id",
+      "callSite": "lib/api/fund24.ts:getBericht@107",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/berichte",
+      "callSite": "lib/api/fund24.ts:listBerichte@111",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/berichte",
+      "callSite": "lib/api/fund24.ts:createBericht@115",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/berichte/:id",
+      "callSite": "lib/api/fund24.ts:updateBericht@121",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/berichte/:id/finalize",
+      "callSite": "lib/api/fund24.ts:finalizeBericht@124",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/berichte/[id]"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/berater/me/kunden",
+      "callSite": "lib/api/fund24.ts:listBeraterKunden@373",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater"
+      ],
+      "notes": null,
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "DELETE /api/dokumente/:id",
+      "callSite": "lib/api/fund24.ts:deleteDokument@378",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "exported but no page calls it",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/checks/:sessionId",
+      "callSite": "lib/api/check.ts:getCheck@22",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/analyse",
+        "/foerdercheck/[sessionId]/chat",
+        "/foerdercheck/[sessionId]/ergebnisse"
+      ],
+      "notes": "hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/checks/:sessionId/chat",
+      "callSite": "lib/api/check.ts:chatNachricht@28",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/chat"
+      ],
+      "notes": "hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/checks/:sessionId/docs",
+      "callSite": "lib/api/check.ts:dokumenteHochladen@37",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/dokumente"
+      ],
+      "notes": "multipart/form-data, hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/checks/:sessionId/schwarm",
+      "callSite": "lib/api/check.ts:schwarmStarten@49",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/dokumente"
+      ],
+      "notes": "hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/checks/:sessionId/matching",
+      "callSite": "lib/api/check.ts:getMatching@55",
+      "authHeader": "yes",
+      "usedBy": [
+        "/foerdercheck/[sessionId]/ergebnisse"
+      ],
+      "notes": "hits API.FUND24",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/netzwerk/nachrichten?anfrageId=...",
+      "callSite": "lib/api/check.ts:getNachrichten@121",
+      "authHeader": "yes",
+      "usedBy": [
+        "/dashboard/berater/nachrichten"
+      ],
+      "notes": "hits API.CHECK (legacy worker) — suspect: may not exist on current worker.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/tracker (CHECK base)",
+      "callSite": "lib/api/check.ts:getTracker@134",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Pages import getTracker from lib/api/fund24.ts — this CHECK variant is shadowed/unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/tracker/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateTrackerPhase@138",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed by fund24.ts version.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "DELETE /api/favoriten/:programmId",
+      "callSite": "lib/api/check.ts:removeFavorit@158",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Legacy shadow, unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/news (CHECK base)",
+      "callSite": "lib/api/check.ts:getNews@164",
+      "authHeader": "no",
+      "usedBy": [],
+      "notes": "Shadowed by fund24.ts getNews — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/news/:slug (CHECK base)",
+      "callSite": "lib/api/check.ts:getNewsArtikel@169",
+      "authHeader": "no",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/berater/provision-vertraege (CHECK base)",
+      "callSite": "lib/api/check.ts:getProvisionVertraege@197",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Duplicate of fund24.ts getProvisionVertraege. Abwicklung page imports the fund24.ts version — this one is unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/berater/abwicklung/upload (CHECK base)",
+      "callSite": "lib/api/check.ts:uploadAbwicklungDokument@201",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Duplicate/unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/admin/dashboard (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminDashboard@216",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed by fund24.ts — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/admin/users (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminUsers@220",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/admin/users/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateAdminUser@224",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/admin/provisionen (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminProvisionen@235",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/admin/provisionen/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateAdminProvision@239",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/admin/news (CHECK base)",
+      "callSite": "lib/api/check.ts:getAdminNews@250",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/admin/news (CHECK base)",
+      "callSite": "lib/api/check.ts:createAdminNews@254",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "PATCH /api/admin/news/:id (CHECK base)",
+      "callSite": "lib/api/check.ts:updateAdminNews@263",
+      "authHeader": "yes",
+      "usedBy": [],
+      "notes": "Shadowed — unused.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/precheck/analyse",
+      "callSite": "lib/api/precheck.ts:analysiereWebsite@6",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck"
+      ],
+      "notes": "hits API.CHECK — public precheck worker.",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/precheck/:sessionId/fragen",
+      "callSite": "lib/api/precheck.ts:ladeFragen@13",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/profil"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/precheck/:sessionId/antwort",
+      "callSite": "lib/api/precheck.ts:sendeAntwort@17",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/chat"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/precheck/:sessionId/scoring",
+      "callSite": "lib/api/precheck.ts:fuehreScoring@26",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/chat"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "GET /api/precheck/:sessionId/status",
+      "callSite": "lib/api/precheck.ts:ladeStatus@30",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/analyse"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    },
+    {
+      "endpoint": "POST /api/precheck/bericht",
+      "callSite": "lib/api/precheck.ts:fordereBerichtAn@34",
+      "authHeader": "no",
+      "usedBy": [
+        "/foerder-schnellcheck/bericht"
+      ],
+      "notes": "hits API.CHECK",
+      "inWorkerCheck": 0
+    }
+  ],
+  "orphan_pages": [
+    "/passwort-reset",
+    "/antraege/[id]",
+    "/dashboard/unternehmen/tracker",
+    "/dashboard/berater/berichte",
+    "/dashboard/berater/profil",
+    "/dashboard/berater/tracker",
+    "/dashboard/berater/vorlagen",
+    "/admin/audit-logs",
+    "/admin/email-outbox"
+  ],
+  "orphan_tables": {
+    "candidates_count": 97,
+    "confidently_dead": [
+      "foerdermittel-checks.call_log",
+      "foerdermittel-checks.caller_sessions",
+      "foerdermittel-checks.password_reset_tokens",
+      "bafa_antraege.rechtsrahmen",
+      "bafa_antraege.kombinationsregeln",
+      "bafa_antraege.foerder_kombinationen",
+      "bafa_antraege.bafa_custom_templates",
+      "bafa_antraege.bafa_phasen",
+      "bafa_antraege.bafa_vorlagen",
+      "bafa_antraege.forum_antworten",
+      "bafa_antraege.forum_threads",
+      "bafa_antraege.forum_upvotes",
+      "zfbf-db.forum_posts",
+      "zfbf-db.forum_threads",
+      "bafa_antraege.antraege  (legacy — superseded by antraege_v2)",
+      "foerderprogramme.businessplaene",
+      "foerderprogramme.foerderkonzepte",
+      "foerderprogramme.foerderplaene"
+    ]
+  },
+  "feature_gaps": [
+    {
+      "feature": "Admin-Bereich (entire subtree)",
+      "evidence": "app/admin/layout.tsx — ComingSoonBanner wraps /admin/* despite admin BAFA-cert + users + provisionen endpoints working"
+    },
+    {
+      "feature": "Berater-Dashboard (entire subtree)",
+      "evidence": "app/dashboard/berater/layout.tsx — ComingSoonBanner eta Q2 2026 over functional dashboard + 10 sub-pages"
+    },
+    {
+      "feature": "Favoriten (unternehmen)",
+      "evidence": "app/dashboard/unternehmen/favoriten/layout.tsx — ComingSoonBanner Q2 2026"
+    },
+    {
+      "feature": "Antrags-Tracker (unternehmen)",
+      "evidence": "app/dashboard/unternehmen/tracker/layout.tsx — ComingSoonBanner Q2 2026"
+    },
+    {
+      "feature": "Anfragen-Verwaltung (unternehmen)",
+      "evidence": "app/dashboard/unternehmen/anfragen/layout.tsx — ComingSoonBanner Q2 2026"
+    },
+    {
+      "feature": "Aktuelles / News-Blog",
+      "evidence": "app/(public)/aktuelles/layout.tsx — ComingSoonBanner; 0 articles seeded; API returns empty"
+    },
+    {
+      "feature": "Berater-Verzeichnis (public)",
+      "evidence": "app/(public)/berater/layout.tsx — ComingSoonBanner though 16 berater profiles are live in DB"
+    },
+    {
+      "feature": "PDF-Export Fördercheck-Ergebnisse",
+      "evidence": "app/foerdercheck/[sessionId]/ergebnisse/page.tsx:85 — alert('PDF-Download wird in Kürze implementiert'); button also disabled → double-broken"
+    },
+    {
+      "feature": "BAFA-Cert Upload (Berater-seitig)",
+      "evidence": "Endpoints + R2 bucket designed in PR #26; PR open, not merged. Admin queue (PR #13) is merged but the upload counterpart is absent on main."
+    },
+    {
+      "feature": "Forum",
+      "evidence": "Tables exist in bafa_antraege + zfbf-db; no UI pages in app/; no API endpoints referencing forum_* tables"
+    },
+    {
+      "feature": "Kombinationsregeln (foerder_kombinationen)",
+      "evidence": "Tables exist (bafa_antraege + kombinationsregeln + foerder_kombinationen); no endpoint writes/reads; no UI"
+    },
+    {
+      "feature": "Phone/voice flow (leads → callers)",
+      "evidence": "foerdermittel-checks DB has call_log (13 cols) + caller_sessions + password_reset_tokens; no current UI or endpoints"
+    }
+  ],
+  "env_gaps": {
+    "used_not_in_example": [
+      "JWT_SECRET — middleware.ts:34 calls process.env.JWT_SECRET. .env.example lists it only under the 'Worker secrets' section as a comment. Vercel-side this must be set explicitly for middleware to verify JWTs — missing from the .env.example frontend section is a deployment-onboarding gap."
+    ],
+    "in_example_not_used": [],
+    "NEXT_PUBLIC_SUPPORT_PHONE/_EMAIL/_HOURS (PR #24 design)": "PR #24 proposes SupportWidget env-driven contact; neither used on main nor present in .env.example."
+  },
+  "dep_gaps": {
+    "unused_in_code": [
+      "@tailwindcss/typography — not imported in any TS/CSS/config file on main (may be planned, or dead)",
+      "@tanstack/react-query-devtools — not imported anywhere; originally for dev Devtools but no provider mount uses it"
+    ],
+    "note": "react-dom / tw-animate-css / jose were initially flagged by naive grep; all three are actually used (peer dep, globals.css @import, middleware.ts import)."
+  },
+  "findings": [
+    {
+      "severity": "medium",
+      "id": "G-P5-01",
+      "summary": "ComingSoonBanner over fully functional subtrees — /admin/*, /dashboard/berater/*, /dashboard/unternehmen/{favoriten,tracker,anfragen}, /aktuelles/*, /berater/*. Visible UX friction on features that already work.",
+      "fix": "Remove the banner from layouts where the feature actually ships."
+    },
+    {
+      "severity": "medium",
+      "id": "G-P5-02",
+      "summary": "PDF export of Fördercheck-Ergebnisse is double-broken (button disabled + onClick shows 'wird in Kürze implementiert' alert).",
+      "file": "app/foerdercheck/[sessionId]/ergebnisse/page.tsx:83,85,166"
+    },
+    {
+      "severity": "medium",
+      "id": "G-P5-03",
+      "summary": "BAFA-Cert upload flow for Berater designed (PR #26) but not merged. Admin queue is live; berater have no way to put cert into the queue.",
+      "fix": "Merge PR #26 after review; verify BAFA_CERTS R2 binding is actually applied in prod wrangler."
+    },
+    {
+      "severity": "medium",
+      "id": "G-P5-04",
+      "summary": "JWT_SECRET not documented in frontend .env.example. middleware.ts requires it server-side on Vercel; new onboarding engineer could miss it.",
+      "file": ".env.example"
+    },
+    {
+      "severity": "low",
+      "id": "G-P5-05",
+      "summary": "Forum tables (forum_threads, forum_antworten, forum_upvotes, forum_posts) exist across 2 DBs but no UI, no endpoint. Removable.",
+      "file": "worker/db/migrations/016-forum.sql"
+    },
+    {
+      "severity": "low",
+      "id": "G-P5-06",
+      "summary": "Kombinationsregeln / foerder_kombinationen / rechtsrahmen — Feature design artefacts never wired to UI or endpoints.",
+      "file": "worker/db/migrations/010-funding-platform.sql"
+    },
+    {
+      "severity": "low",
+      "id": "G-P5-07",
+      "summary": "Phone/voice flow leftovers in foerdermittel-checks (call_log, caller_sessions, password_reset_tokens).",
+      "file": "worker-check/src/index.js references removed"
+    },
+    {
+      "severity": "low",
+      "id": "G-P5-08",
+      "summary": "Legacy bafa_antraege.antraege — superseded by antraege_v2 but still migrated + indexed.",
+      "file": "worker/db/migrations/010-funding-platform.sql"
+    },
+    {
+      "severity": "low",
+      "id": "G-P5-09",
+      "summary": "Dead frontend wrapper exports: getStats, verifyEmail, deleteDokument, deleteAdminNews, fund24.addFavorit variant, berater.listExpertise, berater.listDienstleistungen, unternehmen.getUnternehmen, check.createTrackerVorgang, check.deleteTrackerVorgang.",
+      "file": "lib/api/*"
+    },
+    {
+      "severity": "low",
+      "id": "G-P5-10",
+      "summary": "5 UI component files not imported anywhere: components/ui/{tabs,sheet,separator,dropdown-menu}.tsx, components/shared/EmptyState.tsx. shadcn primitives may be added lazily — keep unless confirmed.",
+      "file": "lib/ui/*"
+    },
+    {
+      "severity": "low",
+      "id": "G-P5-11",
+      "summary": "2 unused npm deps: @tailwindcss/typography, @tanstack/react-query-devtools. Remove from package.json.",
+      "file": "package.json"
+    },
+    {
+      "severity": "low",
+      "id": "G-P5-12",
+      "summary": "83 worker endpoints have no frontend caller. ~30 are admin-only + cron-adjacent (kept); rest are candidates for cleanup after manual review.",
+      "file": "worker/src/routes/*"
+    },
+    {
+      "severity": "low",
+      "id": "G-P5-13",
+      "summary": "40 frontend calls match no worker endpoint (after cross-check with worker-check literal grep). Mix of shape-normalisation false positives and genuine mismatches.",
+      "file": "lib/api/*"
+    },
+    {
+      "severity": "low",
+      "id": "G-P5-14",
+      "summary": "8 protected pages are unreachable from any in-app nav (real orphans after Footer/Navbar merge): /dashboard/{berater/profil,berater/tracker,berater/vorlagen,berater/berichte,unternehmen/tracker}, /admin/{audit-logs,email-outbox}, /antraege/[id].",
+      "file": "see Phase 2 finding L-P2-07..L-P2-09"
+    },
+    {
+      "severity": "low",
+      "id": "G-P5-15",
+      "summary": "NEXT_PUBLIC_SUPPORT_PHONE/_EMAIL/_HOURS planned by PR #24 (support-contact placeholder fix) but not on main and not in .env.example.",
+      "file": "components/support/SupportWidget.tsx + .env.example"
+    }
+  ],
+  "summary": {
+    "dead_files": 5,
+    "dead_frontend_exports": 10,
+    "dead_endpoints_no_caller": 50,
+    "unmatched_calls_real_dead": 40,
+    "orphan_pages": 9,
+    "orphan_table_candidates": 97,
+    "confidently_dead_tables": 18,
+    "feature_gaps": 12,
+    "findings": 15
+  }
+}
