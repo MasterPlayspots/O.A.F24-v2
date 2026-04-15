@@ -7,13 +7,15 @@ export async function performBackup(databases: { name: string; db: D1Database }[
 
   for (const { name, db } of databases) {
     try {
-      const tables = await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%'").all()
+      const tables = await db
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%'")
+        .all<{ name: string }>()
       let dump = `-- Backup of ${name} at ${ts}\n\n`
 
-      for (const t of tables.results as any[]) {
-        const rows = await db.prepare(`SELECT * FROM "${t.name}"`).all()
+      for (const t of tables.results) {
+        const rows = await db.prepare(`SELECT * FROM "${t.name}"`).all<Record<string, unknown>>()
         dump += `-- ${t.name}: ${rows.results.length} rows\n`
-        for (const row of rows.results as any[]) {
+        for (const row of rows.results) {
           const cols = Object.keys(row)
           const vals = cols.map(c => row[c] === null ? 'NULL' : typeof row[c] === 'number' ? row[c].toString() : `'${String(row[c]).replace(/'/g, "''")}'`)
           dump += `INSERT OR REPLACE INTO "${t.name}" (${cols.map(c => `"${c}"`).join(',')}) VALUES (${vals.join(',')});\n`
