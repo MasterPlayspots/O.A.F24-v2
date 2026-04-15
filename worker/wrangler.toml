@@ -1,0 +1,99 @@
+name = "bafa-creator-ai-worker"
+main = "dist/index.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare Account ID
+# Find this in the Cloudflare Dashboard: https://dash.cloudflare.com
+# → Select your account → copy the Account ID from the URL or Overview page.
+# Alternatively, set the CLOUDFLARE_ACCOUNT_ID environment variable.
+# account_id = "your-cloudflare-account-id"
+
+[vars]
+
+ENVIRONMENT = "production"
+API_VERSION = "v1"
+# Fallback only — getClientOrigin() prefers Origin/Referer headers at runtime
+# since the worker serves both zfbf.info and fund24.io.
+FRONTEND_URL = "https://fund24.io"
+
+# D1 Databases
+[[d1_databases]]
+binding = "DB"
+database_name = "zfbf-db"
+database_id = "9a41ed93-e2a4-440d-8ef1-a3e63cb0c6e3"
+
+[[d1_databases]]
+binding = "BAFA_DB"
+database_name = "bafa_antraege"
+database_id = "8582e9dd-8063-4dbd-b079-f38b2bb3918f"
+
+[[d1_databases]]
+binding = "BAFA_CONTENT"
+database_name = "bafa_learnings"
+database_id = "7f5947f7-42af-455e-81ad-0c57be23b940"
+
+[[d1_databases]]
+binding = "FOERDER_DB"
+database_name = "foerderprogramme"
+database_id = "b95adb7b-ed86-441b-841e-4cd3a9a15135"
+
+# KV Namespaces
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "8cb1b5aaf7954e7a88859f36edf8b342"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "2fddaa5f66a94e8eb89920c91b89e83d"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "2edc5ca82a3d4e609b156a8f719c44ba"
+
+[[kv_namespaces]]
+binding = "WEBHOOK_EVENTS"
+id = "3ed392e35d6142e9a5330a056b6f60f3"
+
+# R2 Bucket
+[[r2_buckets]]
+binding = "REPORTS"
+bucket_name = "bafa-reports"
+
+# AI Binding
+[ai]
+binding = "AI"
+
+# Observability — logs & traces in Cloudflare Dashboard
+[observability]
+enabled = true
+
+# Cron Triggers
+# Daily backup at 02:00 UTC + Weekly learning cycle Monday 03:00 UTC
+[triggers]
+crons = ["0 2 * * *", "30 2 * * *", "0 3 * * 1"]
+
+# Worker Routes (Zone fund24.io = 809ef77b10e4c17bf959cfe7aadf9e28)
+# Mirrors the route created via Cloudflare API on 2026-04-08 so the
+# repo stays the source of truth and future deploys don't drift.
+[[routes]]
+pattern = "api.fund24.io/api/*"
+zone_id = "809ef77b10e4c17bf959cfe7aadf9e28"
+
+# Secrets (set via: wrangler secret put <NAME>)
+# JWT_SECRET
+# UNLOCK_SECRET
+# STRIPE_SECRET_KEY
+# STRIPE_WEBHOOK_SECRET
+# PAYPAL_CLIENT_ID
+# PAYPAL_CLIENT_SECRET
+# RESEND_API_KEY
+
+# Preview environment for feature branch PRs
+# Inherits D1, KV, R2, and AI bindings from base config
+[env.preview]
+name = "bafa-creator-ai-worker-preview"
+[env.preview.vars]
+ENVIRONMENT = "preview"
+API_VERSION = "v1-preview"
+FRONTEND_URL = "https://v0-bafa-creator-ai-preview.vercel.app"
