@@ -1,0 +1,1078 @@
+{
+  "generatedAt": "2026-04-15",
+  "scope": "Full DIN-ISO audit, phases 1-5 aggregated",
+  "aggregateStats": {
+    "pages": 58,
+    "ctas": 206,
+    "endpoints": 151,
+    "databases": 5,
+    "tables": 141,
+    "workers": 2,
+    "kvNamespaces": 4,
+    "r2Buckets": 2,
+    "findings": {
+      "total": 121,
+      "bySeverity": {
+        "critical": 2,
+        "high": 26,
+        "medium": 43,
+        "low": 50
+      },
+      "byPhase": {
+        "1": 27,
+        "2": 29,
+        "3": 35,
+        "4": 15,
+        "5": 15
+      }
+    },
+    "deadCode": {
+      "workerEndpoints": 83,
+      "frontendUnmatched": 46,
+      "frontendExports": 10,
+      "orphanPages": 9,
+      "orphanTablesConfirmed": 18,
+      "componentFiles": 5,
+      "npmPackages": 2
+    }
+  },
+  "top10Blockers": [
+    {
+      "rank": 1,
+      "id": "H-P1-01 / C-P3-01",
+      "area": "Programme detail",
+      "fix": "lib/api/fund24.ts:36 — change endpoint to /api/foerdermittel/katalog/:id. 1-line fix unlocks 3.408 programme detail pages."
+    },
+    {
+      "rank": 2,
+      "id": "H-P1-02",
+      "area": "Antraege auth",
+      "fix": "middleware.ts:23 — add '/antraege' to PROTECTED_PREFIXES. 1-line fix closes an auth leak."
+    },
+    {
+      "rank": 3,
+      "id": "H-P1-03 / H-P3-05",
+      "area": "Sitemap",
+      "fix": "app/sitemap.ts:34 and :52 — read data.data and data.berater (or verify actual response shape). Closes a big SEO loss."
+    },
+    {
+      "rank": 4,
+      "id": "H-P2-01",
+      "area": "DSGVO",
+      "fix": "app/(public)/foerder-schnellcheck/bericht/page.tsx:151 — split consent + marketing into two checkboxes; add link to /datenschutz."
+    },
+    {
+      "rank": 5,
+      "id": "H-P3-01",
+      "area": "API abuse",
+      "fix": "worker/src/routes/check.ts — add requireAuth to 5 endpoints; current state drains AI+R2 quota."
+    },
+    {
+      "rank": 6,
+      "id": "H-P3-03",
+      "area": "SSRF",
+      "fix": "worker/src/routes/admin.ts:261 — add host allowlist; disable redirect:'follow' for foerderprogramme.url checks."
+    },
+    {
+      "rank": 7,
+      "id": "C-P4-01",
+      "area": "Schema collision",
+      "fix": "Decide canonical 'users' table. Consolidate writes and reads to one DB. Multi-week migration."
+    },
+    {
+      "rank": 8,
+      "id": "H-P1-04 / L-P2-06",
+      "area": "Berater profil data loss",
+      "fix": "app/dashboard/berater/profil/page.tsx — include spezialisierungen + websiteUrl in update payload."
+    },
+    {
+      "rank": 9,
+      "id": "H-P1-05 / H-P2-02",
+      "area": "Dead link + broken listing",
+      "fix": "Either create /dashboard/checks/[id] or redirect 'Ansehen' to an existing detail route; fix /programme/[id] 404 (see #1)."
+    },
+    {
+      "rank": 10,
+      "id": "G-P5-01",
+      "area": "ComingSoon noise",
+      "fix": "Remove ComingSoonBanner from admin + dashboard/berater + unternehmen subpage layouts — features already ship."
+    }
+  ],
+  "findings": [
+    {
+      "phase": 1,
+      "severity": "high",
+      "id": "H-P1-01",
+      "route": "/programme/[id]",
+      "summary": "All IDs return 404 — getProgramm() calls non-existent endpoint /api/foerderprogramme/:id; correct path is /api/foerdermittel/katalog/:id.",
+      "fix": "lib/api/fund24.ts:36 — update URL"
+    },
+    {
+      "phase": 1,
+      "severity": "high",
+      "id": "H-P1-02",
+      "route": "/antraege/[id]",
+      "summary": "Served 200 without authentication; missing from middleware PROTECTED_PREFIXES. Only a post-hydration client-side guard.",
+      "fix": "middleware.ts:23 — add '/antraege'"
+    },
+    {
+      "phase": 1,
+      "severity": "high",
+      "id": "H-P1-03",
+      "route": "sitemap.xml",
+      "summary": "0 programme URLs emitted because fetchProgrammIds() reads wrong response field.",
+      "fix": "app/sitemap.ts:25-43 — map from data.data not data.results"
+    },
+    {
+      "phase": 1,
+      "severity": "high",
+      "id": "H-P1-04",
+      "route": "/dashboard/berater/profil",
+      "summary": "Silent data loss: form captures spezialisierungen + websiteUrl but the update payload omits them.",
+      "fix": "page.tsx onSubmit — include fields"
+    },
+    {
+      "phase": 1,
+      "severity": "high",
+      "id": "H-P1-05",
+      "route": "/dashboard/unternehmen",
+      "summary": "Dead link: 'Ansehen' → /dashboard/checks/[id] — route does not exist in app/.",
+      "fix": "Redirect to /foerdercheck/[sessionId]/ergebnisse or create the route"
+    },
+    {
+      "phase": 1,
+      "severity": "medium",
+      "id": "M-P1-01",
+      "route": "/foerder-schnellcheck/bericht",
+      "summary": "Single checkbox bundles Datenschutz-Consent and newsletter opt-in → DSGVO issue; no link to /datenschutz.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "medium",
+      "id": "M-P1-02",
+      "route": "/foerder-schnellcheck/chat",
+      "summary": "No <h1> on page; uses <h2> for active question. A11y + single-h1 convention.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "medium",
+      "id": "M-P1-03",
+      "route": "/berater/[id]",
+      "summary": "Uses native browser alert() on success despite sonner Toaster being configured.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "medium",
+      "id": "M-P1-04",
+      "route": "dashboard/* + admin/* + /aktuelles",
+      "summary": "ComingSoonBanner wraps entire subtrees even for functioning pages (berater dashboard, admin provisionen, aktuelles) — UX friction.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "medium",
+      "id": "M-P1-05",
+      "route": "/onboarding/{unternehmen,profil}",
+      "summary": "Branche taxonomy mismatch — 11 entries with amp-suffix vs 10 short-form entries. Matching logic will never line up.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "medium",
+      "id": "M-P1-06",
+      "route": "various",
+      "summary": "Native alert()/confirm() on /vorlagen, /admin/users, /berater/[id] vs sonner Toaster + custom dialogs elsewhere.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "medium",
+      "id": "M-P1-07",
+      "route": "/foerder-schnellcheck/{chat,ergebnis}",
+      "summary": "router.push() called during render, not in useEffect — hydration warnings.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "medium",
+      "id": "M-P1-08",
+      "route": "/admin/provisionen",
+      "summary": "Hardcoded '9,99%' in column header despite per-row provisionsSatz; edit writes structured 'bewilligt: X EUR' into free-text notiz field.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "medium",
+      "id": "M-P1-09",
+      "route": "/onboarding/{expertise,dienstleistungen}",
+      "summary": "Partial-failure risk: sequential for-await loop persists entry 1-2, silently drops 4-5 if 3 fails.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "medium",
+      "id": "M-P1-10",
+      "route": "/foerdercheck/*",
+      "summary": "Light-theme gradient styling leaks into authenticated wizard while rest of app uses the dark 'Institutional Architect' theme.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "low",
+      "id": "L-P1-01",
+      "route": "",
+      "summary": "0 per-page metadata on 55 of 58 pages — only root metadata + /programme + /impressum + /foerder-schnellcheck layout declare any. All social-share previews use the generic fund24 title/description.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "low",
+      "id": "L-P1-02",
+      "route": "",
+      "summary": "Program-count inconsistency: root metadata says '3.400+', /programme metadata says '2.500+'.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "low",
+      "id": "L-P1-03",
+      "route": "",
+      "summary": "Typos and Denglisch across public + authenticated pages: 'Konteniverwaltung', 'behhalten', 'behaften', 'Zahlte Provisionen', 'Förderbereichcen', 'aller Ihre Anfragen', 'matched' (should be 'matcht'), 'Was passiert nächster?', 'Newsletters'.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "low",
+      "id": "L-P1-04",
+      "route": "/passwort-reset",
+      "summary": "Lives in (public) route group instead of (auth); re-implements chrome inconsistent with the 4 other auth pages.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "low",
+      "id": "L-P1-05",
+      "route": "/datenschutz",
+      "summary": "Names Berlin data-protection authority, but company is in Kronach (Bavaria, IHK Oberfranken Bayreuth).",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "low",
+      "id": "L-P1-06",
+      "route": "/impressum",
+      "summary": "Heading still 'Angaben gemäß § 5 Telemediengesetz (TMG)' though law was superseded by DDG.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "low",
+      "id": "L-P1-07",
+      "route": "/agb, /datenschutz, /impressum",
+      "summary": "'Letzte Aktualisierung: new Date().toLocaleDateString()' — always shows today, no real audit trail.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "low",
+      "id": "L-P1-08",
+      "route": "/support vs SupportWidget",
+      "summary": "Support email inconsistency — info@fund24.io on /support, support@fund24.io in SupportWidget.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "low",
+      "id": "L-P1-09",
+      "route": "/agb, /datenschutz",
+      "summary": "TODO banners at bottom: 'zu Demonstrationszwecken erstellt — bitte anwaltlich überarbeiten'.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "low",
+      "id": "L-P1-10",
+      "route": "/registrieren vs /passwort-reset",
+      "summary": "Password regex mismatch — registrieren requires [!@#$%^&*], reset allows a broader set, so reset allows weaker-rule passwords.",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "low",
+      "id": "L-P1-11",
+      "route": "app/global-error.tsx",
+      "summary": "No reset() wired up; Sentry tagging convention missing (inconsistent with app/error.tsx and /passwort-reset).",
+      "fix": ""
+    },
+    {
+      "phase": 1,
+      "severity": "low",
+      "id": "L-P1-12",
+      "route": "/programme vs /berater",
+      "summary": "Design-system drift: /berater uses components/ui/select, /programme uses raw <select>.",
+      "fix": ""
+    },
+    {
+      "phase": 2,
+      "severity": "medium",
+      "id": "P2-?",
+      "route": "app/(public)/aktuelles/[slug]/page.tsx",
+      "summary": "Inkonsistenter Fördercheck-Pfad: /aktuelles/[slug] linkt auf /foerdercheck, alle anderen Seiten auf /foerder-schnellcheck",
+      "evidence": "<Link href=\"/foerdercheck\" className=...>Fördercheck starten</Link> — Landing page (app/(public)/page.tsx:41) und Preise-Seite nutzen aber /foerder-schnellcheck als Einstiegspfad. Beide Routen existieren, was aber zu uneinheitlicher UX und SEO-Dopplung führen kann."
+    },
+    {
+      "phase": 2,
+      "severity": "low",
+      "id": "P2-?",
+      "route": "app/(public)/agb/page.tsx",
+      "summary": "AGB- und Datenschutz-Seiten enthalten Demo-Disclaimer in Produktionscode",
+      "evidence": "Diese AGB sind zu Demonstrationszwecken erstellt. Bitte lassen Sie diese von einem Rechtsanwalt überarbeiten...' wird im Footer gerendert. Identische Notiz in datenschutz/page.tsx:282. Rechtliches Compliance-Risiko bei Live-Betrieb."
+    },
+    {
+      "phase": 2,
+      "severity": "low",
+      "id": "P2-?",
+      "route": "app/(public)/passwort-reset/page.tsx",
+      "summary": "Passwort-reset Success-Screen (Link href=/login) kann nicht über href weiter zu Dashboard navigieren, sondern nur zum Login — Nutzer muss erneut credentials eingeben obwohl frisch reset",
+      "evidence": "Nach erfolgreichem Reset wird nur ein statischer Link zu /login angeboten; keine automatische Session-Erstellung. Das ist sicherheitstechnisch ok, aber UX-Friction."
+    },
+    {
+      "phase": 2,
+      "severity": "low",
+      "id": "P2-?",
+      "route": "app/(auth)/registrieren/page.tsx",
+      "summary": "Registrieren-Seite: nach 'requiresVerification' im legacy-Path Navigation zu /verifizieren ohne email-Query",
+      "evidence": "else { login(res.token, res.user); ... router.push('/verifizieren') } — verifizieren/page.tsx:31 redirected sofort zu /login wenn kein email in URL oder store ist. Fallback funktioniert nur wenn store-user bereits gesetzt ist. Fragiler Code-Pfad."
+    },
+    {
+      "phase": 2,
+      "severity": "high",
+      "id": "P2-?",
+      "route": "app/(public)/foerder-schnellcheck/bericht/page.tsx",
+      "summary": "DSGVO consent bundling on /foerder-schnellcheck/bericht — single checkbox combines privacy-policy acceptance with marketing-email opt-in",
+      "evidence": "<Label>Ich akzeptiere die Datenschutzerklärung UND möchte E-Mails von fund24 erhalten</Label> — bundled into z.object({ dsgvo: z.boolean() }). TTDSG §25 / DSGVO Art. 7(2) require separate, specific consent for marketing emails vs. contract-based processing."
+    },
+    {
+      "phase": 2,
+      "severity": "high",
+      "id": "P2-?",
+      "route": "app/(public)/programme/[id]/page.tsx",
+      "summary": "/programme/[id] is known-dead (H-P1-01): all outgoing links from /programme land on a 404",
+      "evidence": "await getProgramm(Number(id)) calls /api/foerderprogramme/{id} which 404s. notFound() fires for every ID, so 'Zurück zu Förderungen' and 'Zum Fördercheck' CTAs never render. ProgrammKarte links to /programme/{id} from /programme — entire detail path is broken."
+    },
+    {
+      "phase": 2,
+      "severity": "medium",
+      "id": "P2-?",
+      "route": "app/(public)/foerder-schnellcheck/chat/page.tsx, ergebnis/page.tsx, bericht/page.tsx",
+      "summary": "router.push() called during render (React anti-pattern) on chat, ergebnis, bericht pages",
+      "evidence": "chat/page.tsx:25-28 and ergebnis/page.tsx:16-19 and bericht/page.tsx:46-49 all call router.push() synchronously in the component body (not in useEffect), then 'return null'. Next.js warns against this; it can cause 'Cannot update Router while rendering' errors and navigation race conditions. /profil/page.tsx correctly uses useEffect — inconsistent."
+    },
+    {
+      "phase": 2,
+      "severity": "medium",
+      "id": "P2-?",
+      "route": "app/(public)/berater/[id]/page.tsx",
+      "summary": "Native alert() used for success feedback on /berater/[id] Anfrage send — inconsistent with Toaster UX used elsewhere",
+      "evidence": "alert('Ihre Anfrage wurde erfolgreich gesendet!') — blocking browser dialog instead of the project's shadcn Sonner/Toaster component. Degrades UX and breaks design system consistency."
+    },
+    {
+      "phase": 2,
+      "severity": "medium",
+      "id": "P2-?",
+      "route": "app/(public)/foerder-schnellcheck/page.tsx",
+      "summary": "/foerder-schnellcheck does not read ?programm={id} query param sent from /programme/[id]",
+      "evidence": "The Fördercheck entry page (FoerderSchnellcheckPage) calls analysiereWebsite(data.url) with zero awareness of searchParams. The 'Zum Fördercheck' CTA from /programme/[id] passes ?programm={id} which is silently dropped — user intent lost. Also compounds with H-P1-01 since /programme/[id] never renders anyway."
+    },
+    {
+      "phase": 2,
+      "severity": "medium",
+      "id": "P2-?",
+      "route": "app/(public)/foerder-schnellcheck/page.tsx",
+      "summary": "No consent/DSGVO gate on website URL submission",
+      "evidence": "Form submits URL to analysiereWebsite() which scrapes the URL on the server with no user checkbox/consent that the URL will be processed + cached. Only the bericht (email) step has DSGVO. URL-scraping is processing of user-supplied data and should have a notice + checkbox at the entry point."
+    },
+    {
+      "phase": 2,
+      "severity": "low",
+      "id": "P2-?",
+      "route": "components/foerdercheck/ProgrammListe.tsx",
+      "summary": "Inconsistent Select implementations between /berater (shadcn Select) and /programme (native HTML <select>)",
+      "evidence": "ProgrammListe uses native <select> elements with extensive Tailwind classes while /berater uses @/components/ui/select (shadcn). Visual and a11y behavior diverge across two sibling public pages."
+    },
+    {
+      "phase": 2,
+      "severity": "high",
+      "id": "P2-?",
+      "route": "app/antraege/[id]/page.tsx",
+      "summary": "Unauthenticated leak (H-P1-02): /antraege/[id] only protects with a post-hydration router.replace('/login') — the page shell renders with header/metadata before the effect runs. No server-side guard.",
+      "evidence": "useEffect(() => { if (!token) { router.replace('/login'); } }, [token, router]); — runs after hydration; no Next.js middleware/server redirect"
+    },
+    {
+      "phase": 2,
+      "severity": "high",
+      "id": "P2-?",
+      "route": "app/foerdercheck/[sessionId]/ergebnisse/page.tsx",
+      "summary": "PDF download CTA is a mock: clicking invokes alert('PDF-Download wird in Kürze implementiert'). Button is also `disabled` — user sees no feedback at all in normal state.",
+      "evidence": "const handleDownloadPDF = () => { alert('PDF-Download wird in Kürze implementiert') } ... <Button onClick={handleDownloadPDF} disabled><Download/>Ergebnisse als PDF</Button>"
+    },
+    {
+      "phase": 2,
+      "severity": "high",
+      "id": "P2-?",
+      "route": "app/onboarding/expertise/page.tsx",
+      "summary": "Partial-failure risk in onboarding expertise: sequential `for (const entry of data.entries) { await addExpertise(entry) }` persists entries 1..N-1 server-side if entry N fails, with no rollback or retry-from-N. Error state shows a generic message.",
+      "evidence": "for (const entry of data.entries) { await addExpertise(entry); } router.push('/onboarding/dienstleistungen')"
+    },
+    {
+      "phase": 2,
+      "severity": "high",
+      "id": "P2-?",
+      "route": "app/onboarding/dienstleistungen/page.tsx",
+      "summary": "Partial-failure risk in onboarding dienstleistungen: identical pattern. Client has no idempotency key / no 'already-added' deduplication — re-submit after partial failure would duplicate entries.",
+      "evidence": "for (const entry of data.entries) { await addDienstleistung(entry); } router.push('/dashboard/berater')"
+    },
+    {
+      "phase": 2,
+      "severity": "medium",
+      "id": "P2-?",
+      "route": "components/antraege/DokumenteListe.tsx",
+      "summary": "Inconsistent UX: DokumenteListe uses native browser confirm() for document delete — all other destructive actions in the Antrag detail (revoke ACL) use inline buttons with no confirmation.",
+      "evidence": "if (!confirm('Dokument wirklich löschen?')) return;"
+    },
+    {
+      "phase": 2,
+      "severity": "medium",
+      "id": "P2-?",
+      "route": "app/onboarding/profil/page.tsx",
+      "summary": "Berater-role onboarding pages (profil/expertise/dienstleistungen) rely only on client-side `istBerater()` checks inside useEffect. Unternehmen users hitting these URLs see the full page before redirect fires.",
+      "evidence": "useEffect(() => { if (!token) router.replace('/login'); if (nutzer && !istBerater()) router.replace('/dashboard/unternehmen'); }, ...)"
+    },
+    {
+      "phase": 2,
+      "severity": "low",
+      "id": "P2-?",
+      "route": "app/foerdercheck/[sessionId]/analyse/page.tsx",
+      "summary": "Analyse page polls for up to 120s, then shows a fallback 'Zum Dashboard' button but no retry/refresh action — if backend status is slow, user must leave.",
+      "evidence": "{timeout ? (<Button onClick={() => router.push('/dashboard/unternehmen')}>Zum Dashboard</Button>) : ...}"
+    },
+    {
+      "phase": 2,
+      "severity": "high",
+      "id": "P2-?",
+      "route": "app/dashboard/unternehmen/page.tsx",
+      "summary": "Dead link to /dashboard/checks/[id] — route does not exist",
+      "evidence": "Link href=`/dashboard/checks/${check.id}`; glob app/dashboard/checks/** returns no files (confirms H-P1-05)."
+    },
+    {
+      "phase": 2,
+      "severity": "high",
+      "id": "P2-?",
+      "route": "app/dashboard/berater/profil/page.tsx",
+      "summary": "Silent data loss on Berater-Profil form (H-P1-04)",
+      "evidence": "Form collects spezialisierungen + websiteUrl (zod schema line 26–27) but updateBeraterProfil payload at lines 93–102 omits them — user edits are silently dropped."
+    },
+    {
+      "phase": 2,
+      "severity": "high",
+      "id": "P2-?",
+      "route": "app/admin/provisionen/page.tsx",
+      "summary": "Admin Provisionen uses free-text notiz field instead of structured columns, hardcoded 9,99% rate",
+      "evidence": "handleBetragChange serializes `bewilligt: ${betrag} EUR` into notiz (line 110); header label shows hardcoded 'Provision (9,99%)' (line 197); provisionBetrag is only updated in local state, never persisted server-side."
+    },
+    {
+      "phase": 2,
+      "severity": "medium",
+      "id": "P2-?",
+      "route": "app/dashboard/berater/vorlagen/page.tsx",
+      "summary": "Native confirm() dialog used in Vorlagen delete",
+      "evidence": "`if (!confirm('Vorlage wirklich löschen?')) return;` — blocking native dialog, inconsistent with app-wide UI Dialog."
+    },
+    {
+      "phase": 2,
+      "severity": "medium",
+      "id": "P2-?",
+      "route": "app/admin/users/page.tsx",
+      "summary": "Native confirm() dialog used in Admin Users deactivate",
+      "evidence": "`if (!confirm('Diesen Nutzer wirklich deaktivieren?')) return` — bypasses shadcn Dialog / AlertDialog; inconsistent UX."
+    },
+    {
+      "phase": 2,
+      "severity": "medium",
+      "id": "P2-?",
+      "route": "app/dashboard/unternehmen/anfragen/page.tsx",
+      "summary": "Dead 'Nachricht' button on unternehmen/anfragen (no onClick)",
+      "evidence": "<Button> for accepted Anfrage is rendered without any onClick handler; clicking does nothing."
+    },
+    {
+      "phase": 2,
+      "severity": "medium",
+      "id": "P2-?",
+      "route": "app/dashboard/unternehmen/favoriten/page.tsx",
+      "summary": "Favoriten delete has no confirmation (destructive action)",
+      "evidence": "Trash button calls handleRemove(id) immediately — no confirm() or dialog guard for destructive favorite removal."
+    },
+    {
+      "phase": 2,
+      "severity": "low",
+      "id": "P2-?",
+      "route": "app/dashboard/berater/page.tsx",
+      "summary": "Berater dashboard labels 'Provisionen' but links to /abwicklung",
+      "evidence": "Button labelled 'Provisionen' navigates to /dashboard/berater/abwicklung — label/target mismatch."
+    },
+    {
+      "phase": 2,
+      "severity": "low",
+      "id": "P2-?",
+      "route": "app/dashboard/berater/page.tsx",
+      "summary": "Berater dashboard renders anfrage.nachricht under 'Dienstleistung:' label",
+      "evidence": "<p>Dienstleistung: {anfrage.nachricht || '-'}</p> — data-model mismatch, `nachricht` is free-text message, not service-id."
+    },
+    {
+      "phase": 2,
+      "severity": "low",
+      "id": "P2-?",
+      "route": "app/dashboard/berater/berichte/[id]/page.tsx",
+      "summary": "Bericht autosave uses onBlur — user losing focus in unusual flows may skip save",
+      "evidence": "All 5 fields call onBlur={handleBlur}; no debounced interval save. If user closes tab with focused field, changes may not persist (router.replace on create also relies on blur)."
+    },
+    {
+      "phase": 2,
+      "severity": "low",
+      "id": "P2-?",
+      "route": "app/admin/audit-logs/page.tsx",
+      "summary": "Audit-logs useCallback uses `offset` in deps but initial load only depends on `token`",
+      "evidence": "load callback deps include [filter, offset]; useEffect at line 74 ignores exhaustive-deps — filter changes via typing do not auto-reload (needs Filtern click); acceptable but brittle."
+    },
+    {
+      "phase": 3,
+      "severity": "high",
+      "id": "P3-?",
+      "route": "worker/src/routes/check.ts",
+      "summary": "/api/check/* wizard is fully unauthenticated yet writes to BAFA_DB.foerdermittel_profile, uploads to R2 and consumes Workers AI on every request — abuse-vulnerable",
+      "evidence": "check.post('/', ...) — no requireAuth; only KV-session-id (caller-supplied) gates subsequent steps. Profile rows persist with user_id='check-{sessionId}'."
+    },
+    {
+      "phase": 3,
+      "severity": "high",
+      "id": "P3-?",
+      "route": "worker/src/routes/checks.ts",
+      "summary": "/api/checks/* proxy forwards anything (including body + Authorization header) to a separate Worker without any local auth or rate-limit on top of the global one",
+      "evidence": "forward() copies request to https://foerdermittel-check-api.froeba-kevin.workers.dev with browser-supplied headers; no token check on the Worker boundary"
+    },
+    {
+      "phase": 3,
+      "severity": "high",
+      "id": "P3-?",
+      "route": "worker/src/routes/admin.ts",
+      "summary": "/api/admin/check-foerdermittel performs outbound HEAD requests to URLs read from foerderprogramme.url with only an 8s timeout — admin-triggered SSRF surface, mass-fan-out (50 per call)",
+      "evidence": "Promise.all over 50 fetch(p.url, {method: 'HEAD', redirect: 'follow'}) with no host allowlist; redirect=follow lets attackers hop to internal addresses if any malicious url ever lands in the table"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "worker/src/routes/reports.ts",
+      "summary": "/api/reports/preview/:id and /api/reports/download/:token return raw HTML from generated content without explicit XSS sanitization — content is AI-generated",
+      "evidence": "new Response(generateReportPreview(...), { 'Content-Type': 'text/html' }) — relies on report-html service to escape; no Content-Security-Policy header set on this response"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "worker/src/routes/payments.ts",
+      "summary": "Stripe webhook returns 200 with {received: true, error: '...'} on amount-mismatch and missing-payment cases — Stripe will not retry, log entry only in DB",
+      "evidence": "lines 100-114 return c.json({received:true, error:...}) instead of 4xx; Stripe treats this as accepted"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "worker/src/routes/auth.ts",
+      "summary": "/api/auth/refresh has no per-IP/per-user rate limit (only the global one); refresh-token rotation is the primary credential-recovery path",
+      "evidence": "POST /refresh has no loginRateLimit-style guard"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "worker/src/routes/me.ts",
+      "summary": "/api/me/* uses sub-app .fetch() dispatch which re-enters the foerdermittel/unternehmen sub-app but bypasses the trailing-slash redirect + global pre-mount middleware that already ran on the outer request — works today but is fragile if middleware order changes",
+      "evidence": "forward() builds a new Request(targetUrl, c.req.raw) and calls foerdermittel.fetch(...) directly"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "worker/src/routes/admin.ts",
+      "summary": "/api/admin/users PATCH allows updating email without re-verifying — admin can silently take over accounts; no audit log shows old vs new email",
+      "evidence": "allowed list contains 'email'; updateProfile writes directly; audit log just records 'profile update {id}: email'"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "worker/src/routes/foerdermittel/cases.ts",
+      "summary": "/api/foerdermittel/cases (POST) auto-creates a foerdermittel_profile from unternehmen with no rate-limit and triggers Workers-AI funnel generation (3000 max_tokens) per program — costly per-call",
+      "evidence": "ai.run('@cf/meta/llama-3.1-8b-instruct-fp8', { max_tokens: 3000 }) on first case creation per program; only the global rate-limit guards"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "worker/src/routes/foerdermittel/match.ts",
+      "summary": "/api/foerdermittel/match runs LLM scoring in batches of 10 with no per-user concurrency cap; can exhaust Workers AI quota if hammered",
+      "evidence": "for-loop over chunks of 10 with ai.run(...) max_tokens=2000; only guarded by globalRateLimit"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "worker/src/routes/news.ts",
+      "summary": "/api/admin/news DELETE is hard-delete — no soft-delete or audit log of the deletion",
+      "evidence": "DELETE FROM news_articles WHERE id = ?; no writeAuditLog call"
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "worker/src/routes/admin.ts",
+      "summary": "PATCH /api/admin/provisionen/:id uses dynamic `${k} = ?` SQL, but keys come from zod-parsed object keys (safe). Still, pattern is duplicated across admin/tracker/reports — central helper would reduce drift risk",
+      "evidence": "for (const [k, v] of Object.entries(d)) sets.push(`${k} = ?`)"
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "worker/src/index.ts",
+      "summary": "Multiple endpoints leak DB-shape error strings in non-production (onError returns err.message) — fine, but verify ENVIRONMENT is set in dev preview deployments to avoid leaking stack info",
+      "evidence": "error: c.env.ENVIRONMENT === 'production' ? 'Interner Serverfehler' : err.message"
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "worker/src/routes/verify-payment.ts",
+      "summary": "/api/verify-payment is unauthenticated — only correlates by sessionId/paymentId. Anyone with a leaked stripe session id could observe payment status (low-impact, no PII beyond reportTitle)",
+      "evidence": "verifyPayment.post('/verify-payment', async (c) => ...) — no requireAuth"
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "worker/src/routes/oa.ts",
+      "summary": "/api/oa/* exposes operational/health metrics publicly (KV-cached CP/VA reports). Likely intentional, but worth confirming nothing-sensitive in those reports",
+      "evidence": "no requireAuth on any oa.* handler"
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "worker/src/routes/admin.ts",
+      "summary": "GAP-001 cert-approve loop registers two routes via shared closure ([approve|reject]) on a single `for ... of` — callable, but Hono line numbers all map to admin.ts:446. Re-check unit tests cover both paths",
+      "evidence": "for (const [action, next] of [['approve','approved'],['reject','rejected']] as const) { admin.post(`/bafa-cert/:userId/${action}`, ...) }"
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "worker/src/routes/check.ts",
+      "summary": "`scrapeCompanyFromUrl` (called from /api/check) fetches a user-supplied URL. Currently no documented allowlist; SSRF-relevant for an unauthenticated endpoint",
+      "evidence": "if (body.url) { const scraped = await scrapeCompanyFromUrl(body.url); }"
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "worker/src/routes/admin.ts",
+      "summary": "Role-check in /api/admin/users/:id/role only allows 'user'|'admin' — system has 'berater' and 'unternehmen' roles too. Promoting/demoting between those is not exposed (could be intentional)",
+      "evidence": "if (!['user','admin'].includes(role)) return ..."
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "worker/src/routes/check.ts",
+      "summary": "Several endpoints use `as any` / `as unknown as AiRunner` to cast the Workers-AI binding; safe today but masks future Workers-AI typed breakage (check.ts and inside services)",
+      "evidence": "type AiRunner = { run(model: string, options: Record<string, unknown>): Promise<any> }; (await (ai as unknown as AiRunner).run(...))"
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "worker/src/routes/antraege.ts",
+      "summary": "/api/antraege/:id PATCH and other endpoints email owners on phase change with executionCtx.waitUntil — failures swallowed silently; consider failure metric",
+      "evidence": "c.executionCtx.waitUntil(sendAntragStatusChangedEmail(...))"
+    },
+    {
+      "phase": 3,
+      "severity": "critical",
+      "id": "P3-?",
+      "route": "lib/api/fund24.ts",
+      "summary": "getProgramm() calls /api/foerderprogramme/:id but worker exposes /api/foerdermittel/katalog/:id — every /programme/[id] deep link 404s live (confirmed in 01_pages.json: flags BROKEN-all-ids-return-404).",
+      "evidence": "return apiCall<Foerderprogramm>(API.FUND24, `/api/foerderprogramme/${id}`)  // should be /api/foerdermittel/katalog/${id} — see app/(public)/programme/[id]/opengraph-image.tsx:15 which uses the correct path"
+    },
+    {
+      "phase": 3,
+      "severity": "high",
+      "id": "P3-?",
+      "route": "lib/api/fund24.ts",
+      "summary": "getProgramme() list also targets /api/foerderprogramme which is not the worker's current listing route (worker uses /api/foerdermittel/katalog, matching sitemap.ts:30 and OG image). High suspicion /programme listing calls a route that does not exist.",
+      "evidence": "return apiCall<ProgrammeResponse>(API.FUND24, `/api/foerderprogramme${qs ? `?${qs}` : ''}`)"
+    },
+    {
+      "phase": 3,
+      "severity": "high",
+      "id": "P3-?",
+      "route": "app/sitemap.ts",
+      "summary": "app/sitemap.ts:34 reads `data.results` but the katalog worker returns `{success, data, pagination}` — sitemap will always be empty in prod (known issue, still flagged).",
+      "evidence": "const data = (await res.json()) as { results?: KatalogItem[]; total?: number }  // actual worker response uses data: […]"
+    },
+    {
+      "phase": 3,
+      "severity": "high",
+      "id": "P3-?",
+      "route": "lib/api/check.ts",
+      "summary": "lib/api/check.ts contains massive legacy surface (news, admin, tracker, favoriten, abwicklung, dashboard) pointing at API.CHECK (NEXT_PUBLIC_CHECK_API_URL) that is almost entirely shadowed by fund24.ts on API.FUND24. Candidates for either deletion or accidental use of the wrong worker (e.g. getDashboard, getNachrichten, sendeNachricht still used by pages).",
+      "evidence": "getDashboard → apiCall(API.CHECK, `/api/dashboard/${rolle}`, …) called from /dashboard/unternehmen & /dashboard/berater. CHECK base may point to legacy worker / stale URL."
+    },
+    {
+      "phase": 3,
+      "severity": "high",
+      "id": "P3-?",
+      "route": "lib/api/check.ts",
+      "summary": "getNachrichten + sendeNachricht still target API.CHECK at /api/netzwerk/nachrichten — used by /dashboard/berater/nachrichten. If CHECK points to foerdermittel-check-api (precheck) worker this route almost certainly does not exist; nachrichten page may be non-functional.",
+      "evidence": "apiCall(API.CHECK, `/api/netzwerk/nachrichten?anfrageId=${anfrageId}`, undefined, token)"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "app/sitemap.ts",
+      "summary": "app/sitemap.ts:52 reads `data.profiles` from /api/netzwerk/berater; the app-side wrapper (check.ts:getBeraterListe) types the response as { berater: BeraterProfil[] }. Shape between sitemap and wrapper is inconsistent — one (or both) is wrong.",
+      "evidence": "return (data.profiles ?? []).map((b) => b.id)  // but wrapper expects {berater: […]}"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "lib/api/fund24.ts",
+      "summary": "createAntrag wrapper normalizes three different response shapes ({data:{caseId}}, {case:{id}}, {id}) — indicates historical API drift that is silently hidden; any change in worker response breaks the fallback.",
+      "evidence": "return { id: r.data?.caseId ?? r.case?.id ?? r.id ?? '' }"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "lib/api/fund24.ts",
+      "summary": "Many exports in lib/api/* are never imported by any page/component (dead surface): getStats, verifyEmail, deleteDokument, deleteAdminNews, listExpertise, listDienstleistungen, getUnternehmen, createTrackerVorgang, deleteTrackerVorgang, addFavorit (fund24.ts). Reduces clarity and grows attack surface; all still go over production Bearer tokens if invoked.",
+      "evidence": "getStats (@6), verifyEmail (auth.ts@103), deleteDokument (@378), deleteAdminNews (@459), listExpertise (berater.ts@123), listDienstleistungen (berater.ts@204), getUnternehmen (unternehmen.ts@57), createTrackerVorgang (@488), deleteTrackerVorgang (@513), addFavorit (@57)"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "lib/api/check.ts",
+      "summary": "updateAnfrage wrapper silently coerces any unrecognized status to 'abgelehnt' to keep compatibility with legacy AnfrageStatus union — can result in reject actions happening on user's behalf if UI passes an unexpected status string.",
+      "evidence": "const mapped: 'angenommen' | 'abgelehnt' = status === 'angenommen' ? 'angenommen' : 'abgelehnt'"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "lib/api/fund24.ts",
+      "summary": "All authenticated fund24.ts helpers resolve the token via useAuth.getState().token at call time and silently pass null on SSR (typeof window === 'undefined' branch). If any of these helpers is ever invoked from a server component/generateMetadata it will issue an unauthenticated request and produce either a 401 or an anonymous response.",
+      "evidence": "function token(): string | null { if (typeof window === 'undefined') return null; return useAuth.getState().token }"
+    },
+    {
+      "phase": 3,
+      "severity": "medium",
+      "id": "P3-?",
+      "route": "lib/api/fund24.ts",
+      "summary": "updateAdminProvision wrapper widens status to plain string so 'invalid values get a 400 from the worker' — i.e. the UI relies on the worker for enum validation rather than enforcing client-side. Increases likelihood of unguarded state transitions shipping to admin UI.",
+      "evidence": "// Widened to string so the UI can pass its own ProvisionStatus type; invalid values get a 400 from the worker."
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "lib/api/check.ts",
+      "summary": "Duplicate getTracker/updateTrackerPhase/getNews/getNewsArtikel/getAdminDashboard/getAdminUsers/getAdminProvisionen/getAdminNews/createAdminNews/updateAdminNews/getProvisionVertraege/uploadAbwicklungDokument live in both check.ts and fund24.ts with different auth bases. Name collisions could produce subtle bugs if an import is ever re-pointed.",
+      "evidence": "getTracker (check.ts@134 on API.CHECK) vs getTracker (fund24.ts@482 on API.FUND24) — both named the same, exported from different files."
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "lib/api/auth.ts",
+      "summary": "auth.ts:logout manually clears a document.cookie named 'fund24-auth' but the real HttpOnly cookie set by /api/session is 'fund24-token'. Client-side cookie clear is a no-op on the wrong name (plus HttpOnly cookies cannot be cleared from JS anyway — they require the POST/DELETE to /api/session, which logout doesn't call).",
+      "evidence": "document.cookie = 'fund24-auth=; path=/; max-age=0'"
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "lib/api/precheck.ts",
+      "summary": "precheck.ts endpoints target API.CHECK (NEXT_PUBLIC_CHECK_API_URL) — worth verifying the precheck worker is still deployed at the same env var that the legacy check endpoints use. If the env var was repurposed, every precheck call fails.",
+      "evidence": "return apiCall(API.CHECK, '/api/precheck/analyse', …)"
+    },
+    {
+      "phase": 3,
+      "severity": "low",
+      "id": "P3-?",
+      "route": "app/antraege/[id]/page.tsx",
+      "summary": "app/antraege/[id]/page.tsx is the only place that mutates Antrag dokumente; per 01_pages.json the route is marked AUTH-LEAK-missing-from-PROTECTED_PREFIXES — an unauthenticated user could still trigger the wrappers (Bearer=null) which will hit the worker anyway and likely return 401s, but no client-side guard blocks this first.",
+      "evidence": "Page imports getAntrag/updateAntragStatus/uploadAntragDokument etc. via fund24.ts; Route is flagged AUTH-LEAK in docs/analysis/full-audit/01_pages.json"
+    },
+    {
+      "phase": 4,
+      "severity": "critical",
+      "id": "C-P4-01",
+      "route": "worker/db/migrations/001-schema-base.sql + 010-funding-platform.sql",
+      "summary": "Same table name 'users' in TWO different D1 databases with DIFFERENT schemas (zfbf-db: 32 cols, bafa_antraege: 40 cols). Worker routes inconsistently query each. Root of silent data-loss bugs.",
+      "evidence": "Schema dump shows two distinct 'users' CREATE TABLE DDLs"
+    },
+    {
+      "phase": 4,
+      "severity": "high",
+      "id": "H-P4-01",
+      "route": "worker/db/migrations/015-favorites.sql + later",
+      "summary": "Three 'favorites' tables across two DBs: zfbf-db.favorites, bafa_antraege.foerdermittel_favoriten, bafa_antraege.me_favoriten. Two wrapper paths (fund24.ts + check.ts) may write to different ones.",
+      "evidence": "Schema dump"
+    },
+    {
+      "phase": 4,
+      "severity": "high",
+      "id": "H-P4-02",
+      "route": "worker/db/migrations/010 + 019",
+      "summary": "antraege (16 cols) and antraege_v2 (19 cols) coexist in bafa_antraege. Worker uses _v2 but legacy table remains migrated+indexed — dual-write/dual-read risk.",
+      "evidence": "Both tables present in schema dump"
+    },
+    {
+      "phase": 4,
+      "severity": "high",
+      "id": "H-P4-03",
+      "route": "worker/db/migrations/004-audit-logs.sql + inherited in bafa_antraege",
+      "summary": "Two audit_logs tables (zfbf-db + bafa_antraege). No single source of truth for compliance/forensics.",
+      "evidence": "Schema dump"
+    },
+    {
+      "phase": 4,
+      "severity": "high",
+      "id": "H-P4-04",
+      "route": "worker/db/migrations/024-berater-profiles-drop-fk.sql",
+      "summary": "berater_profile (singular, zfbf-db, 11 cols) vs berater_profiles (plural, bafa_antraege, 17 cols). Naming drift.",
+      "evidence": "Schema dump"
+    },
+    {
+      "phase": 4,
+      "severity": "high",
+      "id": "H-P4-05",
+      "route": "worker/db/migrations/012*.sql",
+      "summary": "Most bafa_antraege tables have 0-1 indexes. unternehmen (34 cols, 0 idx), berater_profiles (17 cols, 0 idx), provisions_modelle, forum_*, rechtsrahmen, kombinationsregeln. Dashboard queries scale linearly.",
+      "evidence": "Schema dump index counts"
+    },
+    {
+      "phase": 4,
+      "severity": "medium",
+      "id": "M-P4-01",
+      "route": "worker/db/migrations/010-funding-platform.sql",
+      "summary": "8 foerdermittel_* tables duplicated across zfbf-db AND bafa_antraege (profile, cases, matches, dokumente, funnel_templates, conversations, case_steps, benachrichtigungen). 16 instances total.",
+      "evidence": "Schema dump"
+    },
+    {
+      "phase": 4,
+      "severity": "medium",
+      "id": "M-P4-02",
+      "route": "worker/wrangler.toml + worker-check/wrangler.toml",
+      "summary": "CHECK_DB (foerdermittel-checks) bound to BOTH workers. check_sessions, check_chat, check_ergebnisse written only by worker-check; main worker proxies.",
+      "evidence": "Both bind database_id=0b2479a3-..."
+    },
+    {
+      "phase": 4,
+      "severity": "medium",
+      "id": "M-P4-03",
+      "route": "worker/wrangler.toml",
+      "summary": "BAFA_CERTS R2 bucket NOT bound. GAP-002 (PR #26) designed but unmerged → berater cannot upload cert.",
+      "evidence": "Only REPORTS R2 in main wrangler"
+    },
+    {
+      "phase": 4,
+      "severity": "medium",
+      "id": "M-P4-04",
+      "route": "worker/db/migrations/025-unternehmen-drop-fk.sql",
+      "summary": "bafa_antraege.unternehmen (34 cols, 0 idx) — even WHERE user_id = ? is a full scan. Drop-FK migrations (024, 025) removed FKs but didn't add replacement indexes.",
+      "evidence": "Schema dump"
+    },
+    {
+      "phase": 4,
+      "severity": "low",
+      "id": "L-P4-01",
+      "route": "worker/db/migrations/016-forum.sql + later",
+      "summary": "ki_konversationen, ki_usage, ki_verarbeitung stored in bafa_antraege — AI telemetry mixed with user data. Retention unclear.",
+      "evidence": "Schema dump"
+    },
+    {
+      "phase": 4,
+      "severity": "low",
+      "id": "L-P4-02",
+      "route": "worker/db/migrations/010 + 011",
+      "summary": "rechtsrahmen (19 cols, 0 idx), kombinationsregeln (12 cols, 0 idx), foerder_kombinationen (16 cols, 0 idx) — no caller references. Candidates for orphan-table list.",
+      "evidence": "Not in Phase-3 endpoint-to-table mapping"
+    },
+    {
+      "phase": 4,
+      "severity": "low",
+      "id": "L-P4-03",
+      "route": "n/a (pre-existing)",
+      "summary": "call_log, caller_sessions, password_reset_tokens in foerdermittel-checks DB look like leftovers from earlier phone/voice flow.",
+      "evidence": "No worker handler references"
+    },
+    {
+      "phase": 4,
+      "severity": "low",
+      "id": "L-P4-04",
+      "route": "migration schema-base",
+      "summary": "foerderprogramme.foerderprogramme has 73 columns. Scraper populates ~25; rest null. I/O waste on every katalog read.",
+      "evidence": "Column count in schema dump"
+    },
+    {
+      "phase": 4,
+      "severity": "low",
+      "id": "L-P4-05",
+      "route": "worker/src/index.ts:269 + worker/src/services/backup.ts",
+      "summary": "Daily backup dumps only DB + BAFA_DB (skips FOERDER_DB, CHECK_DB, BAFA_CONTENT). Restore-from-backup would lose foerderprogramme catalog, check sessions, and learnings.",
+      "evidence": "performBackup call in scheduled()"
+    },
+    {
+      "phase": 5,
+      "severity": "medium",
+      "id": "G-P5-01",
+      "route": "",
+      "summary": "ComingSoonBanner over fully functional subtrees — /admin/*, /dashboard/berater/*, /dashboard/unternehmen/{favoriten,tracker,anfragen}, /aktuelles/*, /berater/*. Visible UX friction on features that already work.",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "medium",
+      "id": "G-P5-02",
+      "route": "app/foerdercheck/[sessionId]/ergebnisse/page.tsx:83,85,166",
+      "summary": "PDF export of Fördercheck-Ergebnisse is double-broken (button disabled + onClick shows 'wird in Kürze implementiert' alert).",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "medium",
+      "id": "G-P5-03",
+      "route": "",
+      "summary": "BAFA-Cert upload flow for Berater designed (PR #26) but not merged. Admin queue is live; berater have no way to put cert into the queue.",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "medium",
+      "id": "G-P5-04",
+      "route": ".env.example",
+      "summary": "JWT_SECRET not documented in frontend .env.example. middleware.ts requires it server-side on Vercel; new onboarding engineer could miss it.",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "low",
+      "id": "G-P5-05",
+      "route": "worker/db/migrations/016-forum.sql",
+      "summary": "Forum tables (forum_threads, forum_antworten, forum_upvotes, forum_posts) exist across 2 DBs but no UI, no endpoint. Removable.",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "low",
+      "id": "G-P5-06",
+      "route": "worker/db/migrations/010-funding-platform.sql",
+      "summary": "Kombinationsregeln / foerder_kombinationen / rechtsrahmen — Feature design artefacts never wired to UI or endpoints.",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "low",
+      "id": "G-P5-07",
+      "route": "worker-check/src/index.js references removed",
+      "summary": "Phone/voice flow leftovers in foerdermittel-checks (call_log, caller_sessions, password_reset_tokens).",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "low",
+      "id": "G-P5-08",
+      "route": "worker/db/migrations/010-funding-platform.sql",
+      "summary": "Legacy bafa_antraege.antraege — superseded by antraege_v2 but still migrated + indexed.",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "low",
+      "id": "G-P5-09",
+      "route": "lib/api/*",
+      "summary": "Dead frontend wrapper exports: getStats, verifyEmail, deleteDokument, deleteAdminNews, fund24.addFavorit variant, berater.listExpertise, berater.listDienstleistungen, unternehmen.getUnternehmen, check.createTrackerVorgang, check.deleteTrackerVorgang.",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "low",
+      "id": "G-P5-10",
+      "route": "lib/ui/*",
+      "summary": "5 UI component files not imported anywhere: components/ui/{tabs,sheet,separator,dropdown-menu}.tsx, components/shared/EmptyState.tsx. shadcn primitives may be added lazily — keep unless confirmed.",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "low",
+      "id": "G-P5-11",
+      "route": "package.json",
+      "summary": "2 unused npm deps: @tailwindcss/typography, @tanstack/react-query-devtools. Remove from package.json.",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "low",
+      "id": "G-P5-12",
+      "route": "worker/src/routes/*",
+      "summary": "83 worker endpoints have no frontend caller. ~30 are admin-only + cron-adjacent (kept); rest are candidates for cleanup after manual review.",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "low",
+      "id": "G-P5-13",
+      "route": "lib/api/*",
+      "summary": "40 frontend calls match no worker endpoint (after cross-check with worker-check literal grep). Mix of shape-normalisation false positives and genuine mismatches.",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "low",
+      "id": "G-P5-14",
+      "route": "see Phase 2 finding L-P2-07..L-P2-09",
+      "summary": "8 protected pages are unreachable from any in-app nav (real orphans after Footer/Navbar merge): /dashboard/{berater/profil,berater/tracker,berater/vorlagen,berater/berichte,unternehmen/tracker}, /admin/{audit-logs,email-outbox}, /antraege/[id].",
+      "evidence": ""
+    },
+    {
+      "phase": 5,
+      "severity": "low",
+      "id": "G-P5-15",
+      "route": "components/support/SupportWidget.tsx + .env.example",
+      "summary": "NEXT_PUBLIC_SUPPORT_PHONE/_EMAIL/_HOURS planned by PR #24 (support-contact placeholder fix) but not on main and not in .env.example.",
+      "evidence": ""
+    }
+  ],
+  "recommendedFixOrder": [
+    "HOUR 1 — Quick wins (≤ 1-line patches): H-P1-01 endpoint URL, H-P1-02 middleware list, H-P1-03/H-P3-05 sitemap shape. Also remove ComingSoonBanner from 5 layouts (G-P5-01).",
+    "WEEK 1 — Security hardening: H-P3-01 (auth on /api/check), H-P3-03 (SSRF allowlist), H-P2-01 (DSGVO checkbox split), M-P3-02 (Stripe webhook 4xx on mismatch), L-P4-05 (backup all 5 D1s not just 2).",
+    "WEEK 1-2 — Data correctness: H-P1-04 (profil payload), H-P4-01 (favorites consolidation), H-P4-02 (antraege vs antraege_v2 — confirm dual-write absent then drop legacy), H-P4-05 (add idx_unternehmen_user_id etc.).",
+    "WEEK 2-4 — Schema consolidation (the deep work): C-P4-01 users table ownership, H-P4-03 audit_logs unification, M-P4-01 foerdermittel_* deduplication, H-P3-06 legacy CHECK worker migration to main worker.",
+    "WEEK 4+ — Feature gaps: Finish BAFA-Cert upload (G-P5-03), build PDF export (G-P5-02), decide Forum / Kombinationsregeln keep-or-kill."
+  ]
+}
