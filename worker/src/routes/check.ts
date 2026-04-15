@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { Toucan } from "toucan-js";
 import type { Bindings, Variables } from "../types";
 import {
   performMatching,
@@ -69,8 +70,21 @@ check.post("/", async (c) => {
       if (!formData.rechtsform && scraped.rechtsform) formData.rechtsform = scraped.rechtsform;
       if (!formData.bundesland && scraped.bundesland) formData.bundesland = scraped.bundesland;
       if (!formData.plz && scraped.plz) formData.plz = scraped.plz;
-    } catch {
-      // Scraping failed, continue with manual data
+    } catch (err) {
+      // Intentional: scraping is best-effort enrichment; if the remote
+      // page is down or returns garbage, fall back to the manual form.
+      // Still capture for observability — recurrent failures on a specific
+      // domain mean the scraper needs adjusting.
+      if (c.env.SENTRY_DSN) {
+        try {
+          const sentry = new Toucan({ dsn: c.env.SENTRY_DSN, request: c.req.raw });
+          sentry.setTag("route", "check");
+          sentry.setTag("op", "scrape-company");
+          sentry.captureException(err);
+        } catch {
+          // Sentry init itself must never break the request.
+        }
+      }
     }
   }
 

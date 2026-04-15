@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import { getFilterOptions } from '@/lib/api/fund24'
 import { ProgrammListe } from '@/components/foerdercheck/ProgrammListe'
 
@@ -14,7 +15,7 @@ export default async function ProgrammePage() {
   try {
     filterOptions = await getFilterOptions()
   } catch (error) {
-    console.error('Fehler beim Abrufen der Filteroptionen:', error)
+    Sentry.captureException(error, { tags: { area: 'programme', op: 'filter-options' } })
   }
 
   return (

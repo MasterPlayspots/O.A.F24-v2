@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 
 export default function Error({
   error,
@@ -11,7 +12,12 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error('[fund24] unhandled error:', error)
+    Sentry.captureException(error, {
+      tags: { boundary: 'app' },
+      contexts: error.digest
+        ? { digest: { value: error.digest } }
+        : undefined,
+    })
   }, [error])
 
   return (

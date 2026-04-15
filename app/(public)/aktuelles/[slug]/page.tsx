@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { marked } from 'marked'
 import sanitizeHtml from 'sanitize-html'
+import * as Sentry from '@sentry/nextjs'
 import { getNewsArtikel } from '@/lib/api/fund24'
 
 interface PageProps {
@@ -46,7 +47,7 @@ export default async function NewsArticlePage({ params }: PageProps) {
         },
       })
     } catch (err) {
-      console.error('Error parsing markdown:', err)
+      Sentry.captureException(err, { tags: { area: 'news', op: 'parse-markdown' } })
     }
   }
 

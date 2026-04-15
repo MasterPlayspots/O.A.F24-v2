@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { getBeraterListe } from '@/lib/api/check';
 import { BeraterKarte } from '@/components/berater/BeraterKarte';
 import {
@@ -60,7 +61,7 @@ export default function BeraterPage() {
         setBeraterListe(data.berater);
         setFilteredBerater(data.berater);
       } catch (err) {
-        console.error('Fehler beim Laden der Berater:', err);
+        Sentry.captureException(err, { tags: { area: 'berater', op: 'list' } });
         setError(
           'Entschuldigung, wir konnten die Beraterliste nicht laden. Bitte versuchen Sie es später erneut.'
         );

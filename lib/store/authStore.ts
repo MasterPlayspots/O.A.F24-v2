@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import * as Sentry from '@sentry/nextjs'
 import type { Nutzer } from '../types'
 
 interface AuthState {
@@ -37,7 +38,7 @@ export const useAuth = create<AuthState>()(
             body: JSON.stringify({ token }),
           })
         } catch (err) {
-          console.error('[fund24] /api/session POST failed', err)
+          Sentry.captureException(err, { tags: { area: 'auth', op: 'session-post' } })
         }
       },
 
@@ -48,7 +49,7 @@ export const useAuth = create<AuthState>()(
         try {
           await fetch('/api/session', { method: 'DELETE' })
         } catch (err) {
-          console.error('[fund24] /api/session DELETE failed', err)
+          Sentry.captureException(err, { tags: { area: 'auth', op: 'session-delete' } })
         }
         set({ token: null, nutzer: null })
       },
