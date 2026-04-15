@@ -391,7 +391,13 @@ export interface CertPending {
   bafa_cert_uploaded_at: string | null
 }
 export async function listPendingCerts(): Promise<CertPending[]> {
-  return apiCall<CertPending[]>(API.FUND24, '/api/admin/bafa-cert/pending', undefined, token())
+  const r = await apiCall<{ success: boolean; certs: CertPending[] }>(
+    API.FUND24,
+    '/api/admin/bafa-cert/pending',
+    undefined,
+    token(),
+  )
+  return r.certs ?? []
 }
 export async function approveCert(userId: string) {
   return apiCall(API.FUND24, `/api/admin/bafa-cert/${userId}/approve`, { method: 'POST' }, token())

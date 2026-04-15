@@ -407,4 +407,76 @@ admin.post("/email-outbox/:id/retry", async (c) => {
   return c.json({ success: true, ok: true });
 });
 
+// ============================================================
+// BAFA Cert-Queue (GAP-001)
+// UI: app/admin/page.tsx — Pending-Certs section
+// Wrapper: lib/api/fund24.ts:listPendingCerts / approveCert / rejectCert
+// ============================================================
+
+interface BafaCertRow {
+  id: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  company: string | null;
+  bafa_berater_nr: string | null;
+  bafa_cert_status: string;
+  bafa_cert_uploaded_at: string | null;
+}
+
+admin.get("/bafa-cert/pending", async (c) => {
+  const { results } = await c.env.DB
+    .prepare(
+      `SELECT id, email, first_name, last_name, company,
+              bafa_berater_nr, bafa_cert_status, bafa_cert_uploaded_at
+         FROM users
+        WHERE bafa_cert_status = 'pending'
+          AND deleted_at IS NULL
+        ORDER BY bafa_cert_uploaded_at DESC
+        LIMIT 500`
+    )
+    .all<BafaCertRow>();
+  return c.json({ success: true, certs: results ?? [] });
+});
+
+for (const [action, next] of [
+  ["approve", "approved"],
+  ["reject", "rejected"],
+] as const) {
+  admin.post(`/bafa-cert/:userId/${action}`, async (c) => {
+    const userId = c.req.param("userId");
+    if (!userId || userId.length > 64) {
+      return c.json({ success: false, error: "Ungültige User-ID" }, 400);
+    }
+    const actor = c.get("user");
+    const upd = await c.env.DB
+      .prepare(
+        `UPDATE users
+            SET bafa_cert_status = ?,
+                updated_at = datetime('now')
+          WHERE id = ?
+            AND bafa_cert_status = 'pending'
+            AND deleted_at IS NULL`
+      )
+      .bind(next, userId)
+      .run();
+
+    if (!upd.meta.changes) {
+      return c.json(
+        { success: false, error: "User nicht gefunden oder nicht im pending-Status" },
+        404
+      );
+    }
+
+    await writeAuditLog(c.env.DB, {
+      userId: actor.id,
+      eventType: `bafa_cert_${next}`,
+      detail: userId,
+      ip: c.req.header("CF-Connecting-IP"),
+    });
+
+    return c.json({ success: true });
+  });
+}
+
 export { admin };
