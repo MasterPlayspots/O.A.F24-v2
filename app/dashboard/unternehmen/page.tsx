@@ -209,7 +209,7 @@ export default function UnternehmenDashboardPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <Link
-                          href={`/dashboard/checks/${check.id}`}
+                          href={`/foerdercheck/${check.id}/ergebnisse`}
                           className="text-architect-primary-light hover:text-white inline-flex items-center gap-1"
                         >
                           Ansehen
