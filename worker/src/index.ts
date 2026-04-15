@@ -30,6 +30,7 @@ import { checks } from "./routes/checks";
 import { oa } from "./routes/oa";
 import { runCP } from "./services/oa-cp";
 import { runVA } from "./services/oa-va";
+import { runOnboardingDispatch } from "./services/onboarding";
 import { performBackup, cleanupOldBackups } from "./services/backup";
 import { cleanupAuditLogs } from "./services/audit";
 import { cleanupExpiredData } from "./services/retention";
@@ -221,6 +222,26 @@ export default {
             });
           }
           return; // OA agents only, don't run backup in this trigger
+        }
+
+        // Onboarding email sequence: daily at 10:00 UTC (≈ 11:00/12:00 CET)
+        if (triggerHour === 10 && triggerMinute === 0) {
+          try {
+            log("info", "onboarding_dispatch_start", { scheduledTime: trigger.toISOString() });
+            const report = await runOnboardingDispatch(env);
+            log("info", "onboarding_dispatch_complete", {
+              scanned: report.scanned,
+              sent: report.sent,
+              skipped: report.skipped,
+              failed: report.failed,
+              perDay: report.perDay,
+            });
+          } catch (err) {
+            log("error", "onboarding_dispatch_failed", {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
+          return;
         }
 
         try {

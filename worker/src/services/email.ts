@@ -276,6 +276,153 @@ ${cta(`${BRAND_URL}/antraege/${antragId}`, 'Antrag ansehen')}`;
   });
 }
 
+// ============================================================
+// Onboarding sequence — triggered by a daily cron via services/
+// onboarding.ts. Day 0 = welcome, day 3 = nudge, day 7 = feature tour.
+// Each role gets its own three-step arc.
+// ============================================================
+
+type OnboardingRole = 'unternehmen' | 'berater';
+type OnboardingDay = 0 | 3 | 7;
+
+export async function sendOnboardingEmail(
+  apiKey: string,
+  role: OnboardingRole,
+  day: OnboardingDay,
+  to: string,
+  firstName: string
+): Promise<boolean> {
+  const template = role === 'unternehmen' ? UNTERNEHMEN_SEQ[day] : BERATER_SEQ[day];
+  if (!template) return false;
+  const body = template.body(firstName);
+  return send(apiKey, {
+    to,
+    subject: template.subject,
+    html: wrap(template.preview, body, template.preview),
+  });
+}
+
+interface OnboardingTemplate {
+  subject: string;
+  preview: string;
+  body: (firstName: string) => string;
+}
+
+const UNTERNEHMEN_SEQ: Record<OnboardingDay, OnboardingTemplate> = {
+  0: {
+    subject: 'Willkommen bei fund24',
+    preview: 'Dein Konto ist bereit. So findest du dein erstes Förderprogramm.',
+    body: (name) => `
+<h2 style="margin:0 0 16px;color:#ffffff;font-size:22px;font-weight:600">Willkommen, ${name}.</h2>
+<p style="margin:0 0 12px;color:rgba(255,255,255,0.85);line-height:1.6">
+  Schön, dass du bei fund24 bist. In 5 Minuten weißt du, welche Fördertöpfe zu deinem
+  Vorhaben passen — und zwar datengestützt aus <strong>3.400+ aktiven Programmen</strong>.
+</p>
+<p style="margin:0 0 8px;color:rgba(255,255,255,0.85);line-height:1.6">Dein erster Schritt:</p>
+${cta(`${BRAND_URL}/foerder-schnellcheck`, 'Kostenlosen Fördercheck starten')}
+<p style="margin:16px 0 0;font-size:12px;color:rgba(255,255,255,0.5)">
+  Du kannst jederzeit antworten, wenn du Fragen hast — info@fund24.io.
+</p>`,
+  },
+  3: {
+    subject: 'Noch kein Fördercheck gestartet?',
+    preview: 'In 5 Minuten hast du eine klare Antwort — und keine Verpflichtung.',
+    body: (name) => `
+<h2 style="margin:0 0 16px;color:#ffffff;font-size:22px;font-weight:600">Hi ${name},</h2>
+<p style="margin:0 0 12px;color:rgba(255,255,255,0.85);line-height:1.6">
+  wir haben dich bisher noch nicht im Fördercheck gesehen. Kein Stress — aber
+  vielleicht wusstest du nicht: die meisten Unternehmen lassen Fördermittel
+  liegen, obwohl sie anspruchsberechtigt wären.
+</p>
+<p style="margin:0 0 12px;color:rgba(255,255,255,0.85);line-height:1.6">
+  Der Check ist kostenlos, unverbindlich, dauert 5 Minuten — und die KI sagt dir
+  klar, welche der 3.400+ Programme zu deinem Vorhaben passen.
+</p>
+${cta(`${BRAND_URL}/foerder-schnellcheck`, 'Jetzt Fördercheck starten')}
+<p style="margin:16px 0 8px;color:rgba(255,255,255,0.7);font-size:13px">
+  Alternativ: Stöber direkt durch den <a href="${BRAND_URL}/programme" style="color:#c9d1ff">Katalog</a>
+  und filter nach Branche, Region oder Förderart.
+</p>`,
+  },
+  7: {
+    subject: 'Einen Berater an deiner Seite',
+    preview: 'Für komplexe Anträge lohnt sich Expertise — zum Erfolgshonorar.',
+    body: (name) => `
+<h2 style="margin:0 0 16px;color:#ffffff;font-size:22px;font-weight:600">Hi ${name},</h2>
+<p style="margin:0 0 12px;color:rgba(255,255,255,0.85);line-height:1.6">
+  ein Fördermittelantrag kann aufwändig werden — vor allem bei größeren Summen.
+  Gute Nachrichten: Auf fund24 findest du geprüfte Berater, die dich durch den
+  Prozess führen.
+</p>
+<p style="margin:0 0 12px;color:rgba(255,255,255,0.85);line-height:1.6">
+  Das Honorar ist transparent: <strong>9,99 % der bewilligten Fördersumme</strong> —
+  und <strong>nur bei Erfolg</strong>. Bei Ablehnung zahlst du nichts.
+</p>
+${cta(`${BRAND_URL}/berater`, 'Berater entdecken')}
+<p style="margin:16px 0 0;font-size:12px;color:rgba(255,255,255,0.5)">
+  Du entscheidest, ob und mit wem du arbeitest. Kein Druck.
+</p>`,
+  },
+};
+
+const BERATER_SEQ: Record<OnboardingDay, OnboardingTemplate> = {
+  0: {
+    subject: 'Willkommen als Berater bei fund24',
+    preview: 'Dein Profil geht erst live, wenn du Expertise + Dienstleistungen hinterlegst.',
+    body: (name) => `
+<h2 style="margin:0 0 16px;color:#ffffff;font-size:22px;font-weight:600">Willkommen, ${name}.</h2>
+<p style="margin:0 0 12px;color:rgba(255,255,255,0.85);line-height:1.6">
+  Schön, dass du als Berater bei fund24 bist. Dein Profil erscheint im öffentlichen
+  Verzeichnis, sobald du drei Dinge hinterlegt hast:
+</p>
+<ol style="margin:0 0 16px;padding-left:24px;color:rgba(255,255,255,0.85);line-height:1.8">
+  <li>Grundprofil (Foto, Bio, Branchen, Region)</li>
+  <li>Fachliche Expertise (Förderbereiche, Bundesländer)</li>
+  <li>Mindestens eine Dienstleistung mit Preisstruktur</li>
+</ol>
+${cta(`${BRAND_URL}/onboarding/profil`, 'Profil vervollständigen')}
+<p style="margin:16px 0 0;font-size:12px;color:rgba(255,255,255,0.5)">
+  Durchschnittliche Zeit: 10 Minuten. Je aussagekräftiger dein Profil, desto
+  passgenauer die Anfragen.
+</p>`,
+  },
+  3: {
+    subject: 'Profil vollständig?',
+    preview: 'Profile ohne Expertise bleiben unsichtbar. Hier die Checkliste.',
+    body: (name) => `
+<h2 style="margin:0 0 16px;color:#ffffff;font-size:22px;font-weight:600">Hi ${name},</h2>
+<p style="margin:0 0 12px;color:rgba(255,255,255,0.85);line-height:1.6">
+  kurze Erinnerung: Berater-Profile ohne hinterlegte Expertise und mindestens
+  eine Dienstleistung erscheinen <strong>nicht</strong> im öffentlichen Verzeichnis.
+  Schade, denn Unternehmen können dich dann auch nicht anschreiben.
+</p>
+${cta(`${BRAND_URL}/dashboard/berater/profil`, 'Profil-Status prüfen')}
+<p style="margin:16px 0 0;color:rgba(255,255,255,0.7);line-height:1.6">
+  Tipp: Die spezifischsten Profile (konkrete Förderbereiche, klarer Service-Typ)
+  bekommen die meisten Anfragen. Vermeide Marketing-Floskeln, sei konkret.
+</p>`,
+  },
+  7: {
+    subject: 'So beantwortest du Anfragen richtig',
+    preview: 'Die ersten 24 Stunden entscheiden: Schnelle Antwort = doppelt so hohe Abschlussrate.',
+    body: (name) => `
+<h2 style="margin:0 0 16px;color:#ffffff;font-size:22px;font-weight:600">Hi ${name},</h2>
+<p style="margin:0 0 12px;color:rgba(255,255,255,0.85);line-height:1.6">
+  Sobald eine Anfrage reinkommt, siehst du sie in deinem Dashboard und bekommst
+  gleichzeitig eine E-Mail. Unsere Daten zeigen: Berater, die innerhalb von
+  24 Stunden antworten, haben <strong>2× höhere Abschlussraten</strong>.
+</p>
+<p style="margin:0 0 12px;color:rgba(255,255,255,0.85);line-height:1.6">
+  Dein Annehmen/Ablehnen landet sofort als E-Mail beim Unternehmen — nichts geht
+  verloren, nichts braucht manuelle Nachverfolgung.
+</p>
+${cta(`${BRAND_URL}/dashboard/berater/anfragen`, 'Anfragen-Inbox öffnen')}
+<p style="margin:16px 0 0;font-size:12px;color:rgba(255,255,255,0.5)">
+  Fragen zu Plattform oder Abrechnung? info@fund24.io.
+</p>`,
+  },
+};
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')

@@ -76,7 +76,7 @@ enabled = true
 # Cron Triggers
 # Daily backup at 02:00 UTC + Weekly learning cycle Monday 03:00 UTC
 [triggers]
-crons = ["0 2 * * *", "30 2 * * *", "0 3 * * 1"]
+crons = ["0 2 * * *", "30 2 * * *", "0 3 * * 1", "0 10 * * *"]
 
 # Worker Routes managed manually via Cloudflare Dashboard.
 # (Auto-sync from wrangler.toml requires Zone.Workers Routes permission

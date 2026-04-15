@@ -5,6 +5,7 @@ import type { Bindings, Variables } from "../types";
 import { AUDIT_EVENTS } from "../types";
 import { requireAuth, requireRole } from "../middleware/auth";
 import { queryAuditLogs, cleanupAuditLogs, writeAuditLog } from "../services/audit";
+import { runOnboardingDispatch } from "../services/onboarding";
 import * as UserRepo from "../repositories/user.repository";
 import * as ReportRepo from "../repositories/report.repository";
 import * as OrderRepo from "../repositories/order.repository";
@@ -87,6 +88,14 @@ admin.patch("/provisionen/:id", async (c) => {
     .run();
   if (!res.meta.changes) return c.json({ success: false, error: "Provision nicht gefunden" }, 404);
   return c.json({ success: true });
+});
+
+// POST /onboarding/dispatch — manual trigger of the daily sequence.
+// ?dryRun=1 counts matches without sending.
+admin.post("/onboarding/dispatch", async (c) => {
+  const dryRun = c.req.query("dryRun") === "1";
+  const report = await runOnboardingDispatch(c.env, { dryRun });
+  return c.json({ success: true, report, dryRun });
 });
 
 // GET /dashboard — 4-KPI-Aggregation für /admin/page.tsx.
