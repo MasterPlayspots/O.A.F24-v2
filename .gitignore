@@ -2,8 +2,13 @@
 
 # dependencies
 /node_modules
+/worker/node_modules
 /.pnp
 .pnp.*
+
+# worker build + state
+/worker/dist
+/worker/.wrangler
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
