@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
+import * as Sentry from '@sentry/nextjs'
 import { resetPassword } from '@/lib/api/auth'
 
 const passwordSchema = z.object({
@@ -75,7 +76,7 @@ function PasswordResetContent() {
       setSuccessMessage('Passwort erfolgreich geändert!')
       resetForm()
     } catch (error) {
-      console.error('Password reset error:', error)
+      Sentry.captureException(error, { tags: { area: 'auth', op: 'password-reset' } })
       if (error instanceof Error) {
         if (error.message.includes('expired') || error.message.includes('invalid')) {
           setErrorMessage('Link abgelaufen oder bereits verwendet. Bitte fordern Sie einen neuen Link an.')

@@ -2,15 +2,12 @@
 
 function requireEnv(key: string): string {
   const value = process.env[key]
-  if (!value) {
+  if (!value && typeof window === 'undefined') {
     // Auf dem Server hart fehlschlagen — niemals stille leere URLs.
-    if (typeof window === 'undefined') {
-      throw new Error(
-        `[fund24] Fehlende Umgebungsvariable: ${key}. ` +
-          `In Vercel Dashboard → Settings → Environment Variables setzen.`
-      )
-    }
-    console.error(`[fund24] Fehlende Umgebungsvariable: ${key}`)
+    throw new Error(
+      `[fund24] Fehlende Umgebungsvariable: ${key}. ` +
+        `In Vercel Dashboard → Settings → Environment Variables setzen.`
+    )
   }
   return value ?? ''
 }

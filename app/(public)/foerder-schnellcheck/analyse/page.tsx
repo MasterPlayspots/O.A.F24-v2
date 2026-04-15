@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import * as Sentry from '@sentry/nextjs'
 import { usePreCheck } from '@/lib/store/preCheckStore'
 import { ladeStatus } from '@/lib/api/precheck'
 import { FehlerBox } from '@/components/shared/FehlerBox'
@@ -51,7 +52,7 @@ export default function AnalysePage() {
           setError('Analyse konnte nicht abgeschlossen werden. Bitte versuchen Sie es später erneut.')
         }
       } catch (err) {
-        console.error('Polling error:', err)
+        Sentry.captureException(err, { tags: { area: 'foerdercheck', op: 'polling' } })
         // Continue polling even on error
       }
     }, 2000)

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import * as Sentry from '@sentry/nextjs'
 import { getNews } from '@/lib/api/fund24'
 import type { NewsArtikel } from '@/lib/types'
 
@@ -19,7 +20,7 @@ export default function NewsPage() {
         setArticles(data.artikel)
         setError(null)
       } catch (err) {
-        console.error('Error fetching news:', err)
+        Sentry.captureException(err, { tags: { area: 'news', op: 'list' } })
         setError('Nachrichten konnten nicht geladen werden. Bitte später erneut versuchen.')
       } finally {
         setLoading(false)

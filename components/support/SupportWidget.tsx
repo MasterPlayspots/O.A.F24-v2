@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { MessageCircle, Phone, Mail, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-// TODO: Vor Go-Live echte Kontaktdaten eintragen (PF-9-Checkliste)
 export function SupportWidget() {
   const [open, setOpen] = useState(false)
 

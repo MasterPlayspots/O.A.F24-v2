@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import * as Sentry from '@sentry/nextjs';
 import { getBeraterProfil, sendeAnfrage } from '@/lib/api/check';
 import { useAuth } from '@/lib/store/authStore';
 import { Button } from '@/components/ui/button';
@@ -72,7 +73,7 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
         const data = await getBeraterProfil(paramId);
         setBerater(data as BeraterProfilFull);
       } catch (err) {
-        console.error('Fehler beim Laden des Beraters:', err);
+        Sentry.captureException(err, { tags: { area: 'berater', op: 'detail' } });
         setError('Entschuldigung, dieser Berater konnte nicht geladen werden.');
         setBerater(null);
       } finally {
@@ -114,7 +115,7 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
       setAnfrageMessage('');
       alert('Ihre Anfrage wurde erfolgreich gesendet!');
     } catch (err) {
-      console.error('Fehler beim Senden der Anfrage:', err);
+      Sentry.captureException(err, { tags: { area: 'berater', op: 'anfrage-send' } });
       setAnfrageError(
         'Fehler beim Senden der Anfrage. Bitte versuchen Sie es später erneut.'
       );
