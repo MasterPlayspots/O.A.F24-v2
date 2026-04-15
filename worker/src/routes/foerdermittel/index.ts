@@ -11,9 +11,9 @@ import type {
   FoerdermittelFunnelTemplateRow,
   FoerdermittelDokumentRow,
   FoerdermittelConversationRow,
-} from "../types";
-import * as FavoritesRepo from "../repositories/favorites.repository";
-import { requireAuth } from "../middleware/auth";
+} from "../../types";
+import * as FavoritesRepo from "../../repositories/favorites.repository";
+import { requireAuth } from "../../middleware/auth";
 
 const foerdermittel = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
