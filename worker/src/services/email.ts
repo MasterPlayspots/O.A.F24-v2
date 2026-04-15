@@ -182,6 +182,100 @@ ${cta(`${BRAND_URL}/berater`, 'Weitere Berater entdecken')}`;
   });
 }
 
+// ============================================================
+// Beratung phase-change notification (→ company owner)
+// ============================================================
+
+const BERATUNG_PHASE_LABELS: Record<string, string> = {
+  anlauf: 'Anlauf',
+  datenerhebung: 'Datenerhebung',
+  durchfuehrung: 'Durchführung',
+  bericht: 'Berichterstellung',
+  eingereicht: 'Eingereicht',
+  bewilligt: 'Bewilligt',
+  abgeschlossen: 'Abgeschlossen',
+  abgelehnt: 'Abgelehnt',
+};
+
+export function formatBeratungPhase(phase: string): string {
+  return BERATUNG_PHASE_LABELS[phase] ?? phase;
+}
+
+export async function sendBeratungPhaseChangedEmail(
+  apiKey: string,
+  to: string,
+  empfaengerName: string,
+  beraterDisplayName: string,
+  beratungsanlass: string,
+  oldPhase: string,
+  newPhase: string,
+  beratungId: string
+): Promise<boolean> {
+  const body = `
+<h2 style="margin:0 0 16px;color:#ffffff;font-size:22px;font-weight:600">Beratung aktualisiert</h2>
+<p style="margin:0 0 8px;color:rgba(255,255,255,0.85);line-height:1.6">Hallo ${empfaengerName},</p>
+<p style="margin:0 0 8px;color:rgba(255,255,255,0.85);line-height:1.6">
+  <strong style="color:#ffffff">${beraterDisplayName}</strong> hat eine neue Phase für deine
+  Beratung <em>${escapeHtml(beratungsanlass)}</em> gesetzt.
+</p>
+<div style="margin:20px 0;padding:16px 20px;background:rgba(255,255,255,0.06);border-radius:6px;color:rgba(255,255,255,0.85);line-height:1.7">
+  <span style="color:rgba(255,255,255,0.5)">Status:</span>
+  <strong style="color:rgba(255,255,255,0.9)">${formatBeratungPhase(oldPhase)}</strong>
+  <span style="color:rgba(255,255,255,0.5)">→</span>
+  <strong style="color:#7fe8c8">${formatBeratungPhase(newPhase)}</strong>
+</div>
+${cta(`${BRAND_URL}/antraege/${beratungId}`, 'Beratung ansehen')}`;
+  return send(apiKey, {
+    to,
+    subject: `Beratung: ${formatBeratungPhase(newPhase)}`,
+    html: wrap('Beratung aktualisiert', body, `Phase neu: ${formatBeratungPhase(newPhase)}`),
+  });
+}
+
+// ============================================================
+// Antrag (case) status-change notification (→ company owner)
+// ============================================================
+
+export async function sendAntragStatusChangedEmail(
+  apiKey: string,
+  to: string,
+  empfaengerName: string,
+  programmName: string,
+  newStatus: 'eingereicht' | 'bewilligt' | 'abgelehnt',
+  antragId: string
+): Promise<boolean> {
+  const statusCopy: Record<typeof newStatus, { title: string; line: string; accent: string }> = {
+    eingereicht: {
+      title: 'Antrag eingereicht',
+      line: 'wurde erfolgreich eingereicht und ist in Prüfung.',
+      accent: '#c9d1ff',
+    },
+    bewilligt: {
+      title: 'Antrag bewilligt',
+      line: 'wurde bewilligt. Glückwunsch!',
+      accent: '#7fe8c8',
+    },
+    abgelehnt: {
+      title: 'Antrag abgelehnt',
+      line: 'wurde leider abgelehnt.',
+      accent: '#ffdad6',
+    },
+  };
+  const copy = statusCopy[newStatus];
+  const body = `
+<h2 style="margin:0 0 16px;color:#ffffff;font-size:22px;font-weight:600">${copy.title}</h2>
+<p style="margin:0 0 8px;color:rgba(255,255,255,0.85);line-height:1.6">Hallo ${empfaengerName},</p>
+<p style="margin:0 0 8px;color:rgba(255,255,255,0.85);line-height:1.6">
+  dein Antrag zum Programm <strong style="color:${copy.accent}">${escapeHtml(programmName)}</strong> ${copy.line}
+</p>
+${cta(`${BRAND_URL}/antraege/${antragId}`, 'Antrag ansehen')}`;
+  return send(apiKey, {
+    to,
+    subject: copy.title,
+    html: wrap(copy.title, body, `${programmName}: ${copy.title}`),
+  });
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')

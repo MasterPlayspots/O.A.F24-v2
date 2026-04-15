@@ -3,6 +3,7 @@
 import { Hono } from "hono";
 import type { Bindings, Variables } from "../types";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { sendBeratungPhaseChangedEmail } from "../services/email";
 
 const beratungen = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -137,6 +138,19 @@ beratungen.patch("/:id", requireAuth, requireRole("berater"), async (c) => {
     return c.json({ success: false, error: "Keine Änderungen" }, 400);
   }
 
+  // Snapshot the pre-update phase so we can detect real phase changes
+  // and notify the company owner only when it actually moved.
+  const before = await c.env.BAFA_DB
+    .prepare(
+      `SELECT b.phase, b.beratungsanlass, b.user_id, bp.display_name AS berater_name
+         FROM bafa_beratungen b
+         LEFT JOIN berater_profiles bp ON bp.id = b.berater_id
+        WHERE b.id = ?
+          AND b.berater_id = (SELECT id FROM berater_profiles WHERE user_id = ?)`
+    )
+    .bind(id, user.id)
+    .first<{ phase: string; beratungsanlass: string | null; user_id: string | null; berater_name: string | null }>();
+
   sets.push("updated_at = datetime('now')");
   // Sprint 18: berater_id in bafa_beratungen is the berater_profiles.id,
   // not user.id. Use a subquery to scope by ownership.
@@ -152,6 +166,34 @@ beratungen.patch("/:id", requireAuth, requireRole("berater"), async (c) => {
 
   if (!result.meta.changes) {
     return c.json({ success: false, error: "Beratung nicht gefunden" }, 404);
+  }
+
+  // Notify company owner on real phase transitions.
+  if (
+    c.env.RESEND_API_KEY &&
+    before &&
+    before.user_id &&
+    body.phase !== undefined &&
+    body.phase !== before.phase
+  ) {
+    const ownerContact = await c.env.DB
+      .prepare("SELECT email, first_name AS firstName FROM users WHERE id = ?")
+      .bind(before.user_id)
+      .first<{ email: string; firstName: string }>();
+    if (ownerContact?.email) {
+      c.executionCtx.waitUntil(
+        sendBeratungPhaseChangedEmail(
+          c.env.RESEND_API_KEY,
+          ownerContact.email,
+          ownerContact.firstName || "",
+          before.berater_name || "Dein Berater",
+          before.beratungsanlass || "Beratung",
+          before.phase,
+          body.phase,
+          id
+        )
+      );
+    }
   }
 
   return c.json({ success: true });
