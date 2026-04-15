@@ -9,7 +9,6 @@
 // frontend code.
 import { Hono } from "hono";
 import type { Bindings, Variables } from "../types";
-import { requireAuth } from "../middleware/auth";
 
 const checks = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -70,18 +69,18 @@ async function forward(
 }
 
 // POST /api/checks  — create a session
-checks.post("/", requireAuth, (c) => forward(c, "/api/checks"));
+checks.post("/", (c) => forward(c, "/api/checks"));
 
 // GET /api/checks  — list own sessions
-checks.get("/", requireAuth, (c) => forward(c, "/api/checks"));
+checks.get("/", (c) => forward(c, "/api/checks"));
 
 // :id + optional sub-path (GET, POST, PATCH)
-checks.all("/:id", requireAuth, (c) => {
+checks.all("/:id", (c) => {
   const id = c.req.param("id");
   return forward(c, `/api/checks/${id}`);
 });
 
-checks.all("/:id/:sub", requireAuth, (c) => {
+checks.all("/:id/:sub", (c) => {
   const id = c.req.param("id");
   const sub = c.req.param("sub");
   const subPath = `/${sub}`;
@@ -91,7 +90,7 @@ checks.all("/:id/:sub", requireAuth, (c) => {
   return forward(c, `/api/checks/${id}${subPath}`);
 });
 
-checks.all("/:id/:sub/:sub2", requireAuth, (c) => {
+checks.all("/:id/:sub/:sub2", (c) => {
   const id = c.req.param("id");
   const sub = c.req.param("sub");
   const sub2 = c.req.param("sub2");
