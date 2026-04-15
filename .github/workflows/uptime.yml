@@ -1,0 +1,81 @@
+name: Uptime
+
+# Pings prod every 5 min from GitHub-hosted runners.
+# - On failure: workflow run is marked failed (visible in GH Actions tab).
+# - If SLACK_WEBHOOK_URL secret is set: optional Slack notification.
+# - If GitHub Issues is the preferred channel instead, set
+#   CREATE_ISSUE_ON_FAILURE=true at workflow level.
+#
+# Note: GitHub cron granularity is 5 min minimum; runs may drift by up to
+# ~15 min during GitHub Actions peak load. For harder SLAs, upgrade to
+# Cloudflare Health Checks (requires paid CF plan) or an external
+# uptime service (BetterStack free tier = 10 monitors, 3-min interval).
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    name: Probe production endpoints
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Probe api.fund24.io/api/health
+        id: api
+        run: |
+          RESPONSE=$(curl -s -o /tmp/api.json -w "%{http_code}\t%{time_total}" https://api.fund24.io/api/health)
+          CODE=$(echo "$RESPONSE" | cut -f1)
+          TIME=$(echo "$RESPONSE" | cut -f2)
+          echo "api_http_code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "api_duration_s=$TIME" >> "$GITHUB_OUTPUT"
+          echo "API: HTTP $CODE in ${TIME}s"
+          if [ "$CODE" != "200" ]; then
+            echo "::error::api.fund24.io/api/health returned HTTP $CODE"
+            cat /tmp/api.json | head -200
+            exit 1
+          fi
+          BODY=$(cat /tmp/api.json)
+          if ! echo "$BODY" | grep -q '"status":"healthy"'; then
+            echo "::error::api.fund24.io/api/health responded 200 but checks aren't all green"
+            echo "$BODY"
+            exit 1
+          fi
+
+      - name: Probe fund24.io (landing)
+        id: fe
+        run: |
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" https://fund24.io/)
+          echo "fe_http_code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "Frontend: HTTP $CODE"
+          if [ "$CODE" != "200" ]; then
+            echo "::error::fund24.io returned HTTP $CODE"
+            exit 1
+          fi
+
+      - name: Probe fund24.io/login (client page)
+        run: |
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" https://fund24.io/login)
+          echo "Login: HTTP $CODE"
+          if [ "$CODE" != "200" ]; then
+            echo "::error::fund24.io/login returned HTTP $CODE"
+            exit 1
+          fi
+
+      - name: Notify Slack on failure (optional)
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST -H 'Content-Type: application/json' \
+            --data "{\"text\":\":rotating_light: fund24 uptime check failed — run ${{ github.run_id }}\"}" \
+            "$SLACK_WEBHOOK_URL"
