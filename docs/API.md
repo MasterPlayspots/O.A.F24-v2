@@ -1,0 +1,294 @@
+# Fund24 API Reference
+
+**Auto-generated** from `worker/src/routes` — do not edit by hand.
+Run `npm run docs:api` to regenerate. CI blocks merges when this file is stale.
+
+_Last generated: 2026-04-15_
+
+## Summary
+
+| Group | Endpoints |
+|---|---:|
+| `admin` | 15 |
+| `antraege` | 8 |
+| `auth` | 11 |
+| `berater` | 11 |
+| `beratungen` | 3 |
+| `branchen` | 2 |
+| `check` | 5 |
+| `checks` | 2 |
+| `foerdermittel` | 23 |
+| `gdpr` | 3 |
+| `me` | 10 |
+| `nachrichten` | 5 |
+| `netzwerk` | 5 |
+| `news` | 6 |
+| `oa` | 4 |
+| `orders` | 1 |
+| `payments` | 4 |
+| `promo` | 4 |
+| `reports` | 10 |
+| `tracker` | 5 |
+| `unternehmen` | 2 |
+| `verify-payment` | 1 |
+| `vorlagen` | 3 |
+
+**Total:** 143 endpoints across 23 groups
+
+## admin (15)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/audit-logs` | requireAuth (blanket) | [`admin.ts:135`](../worker/src/routes/admin.ts#L135) |
+| `POST` | `/audit-logs/cleanup` | requireAuth (blanket) | [`admin.ts:149`](../worker/src/routes/admin.ts#L149) |
+| `GET` | `/bafa-cert/pending` | requireAuth (blanket) | [`admin.ts:427`](../worker/src/routes/admin.ts#L427) |
+| `GET` | `/check-foerdermittel` | requireAuth (blanket) | [`admin.ts:261`](../worker/src/routes/admin.ts#L261) |
+| `GET` | `/dashboard` | requireAuth (blanket) | [`admin.ts:103`](../worker/src/routes/admin.ts#L103) |
+| `GET` | `/email-outbox` | requireAuth (blanket) | [`admin.ts:334`](../worker/src/routes/admin.ts#L334) |
+| `POST` | `/email-outbox/:id/retry` | requireAuth (blanket) | [`admin.ts:374`](../worker/src/routes/admin.ts#L374) |
+| `POST` | `/onboarding/dispatch` | requireAuth (blanket) | [`admin.ts:95`](../worker/src/routes/admin.ts#L95) |
+| `GET` | `/provisionen` | requireAuth (blanket) | [`admin.ts:41`](../worker/src/routes/admin.ts#L41) |
+| `PATCH` | `/provisionen/:id` | requireAuth (blanket) | [`admin.ts:59`](../worker/src/routes/admin.ts#L59) |
+| `GET` | `/stats` | requireAuth (blanket) | [`admin.ts:236`](../worker/src/routes/admin.ts#L236) |
+| `GET` | `/users` | requireAuth (blanket) | [`admin.ts:155`](../worker/src/routes/admin.ts#L155) |
+| `DELETE` | `/users/:id` | requireAuth (blanket) | [`admin.ts:207`](../worker/src/routes/admin.ts#L207) |
+| `PATCH` | `/users/:id` | requireAuth (blanket) | [`admin.ts:164`](../worker/src/routes/admin.ts#L164) |
+| `PATCH` | `/users/:id/role` | requireAuth (blanket) | [`admin.ts:193`](../worker/src/routes/admin.ts#L193) |
+
+## antraege (8)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/:id` | requireAuth | [`antraege.ts:91`](../worker/src/routes/antraege.ts#L91) |
+| `PATCH` | `/:id` | requireAuth | [`antraege.ts:192`](../worker/src/routes/antraege.ts#L192) |
+| `GET` | `/:id/dokumente` | requireAuth | [`antraege.ts:281`](../worker/src/routes/antraege.ts#L281) |
+| `POST` | `/:id/dokumente` | requireAuth | [`antraege.ts:313`](../worker/src/routes/antraege.ts#L313) |
+| `DELETE` | `/:id/dokumente/:dokId` | requireAuth | [`antraege.ts:364`](../worker/src/routes/antraege.ts#L364) |
+| `GET` | `/:id/zugriff` | requireAuth | [`antraege.ts:411`](../worker/src/routes/antraege.ts#L411) |
+| `POST` | `/:id/zugriff` | requireAuth | [`antraege.ts:458`](../worker/src/routes/antraege.ts#L458) |
+| `DELETE` | `/:id/zugriff/:zugriffId` | requireAuth | [`antraege.ts:510`](../worker/src/routes/antraege.ts#L510) |
+
+## auth (11)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `POST` | `/forgot-password` | - | [`auth.ts:476`](../worker/src/routes/auth.ts#L476) |
+| `POST` | `/login` | - | [`auth.ts:128`](../worker/src/routes/auth.ts#L128) |
+| `POST` | `/logout` | requireAuth | [`auth.ts:576`](../worker/src/routes/auth.ts#L576) |
+| `GET` | `/me` | requireAuth | [`auth.ts:428`](../worker/src/routes/auth.ts#L428) |
+| `PATCH` | `/me` | requireAuth | [`auth.ts:452`](../worker/src/routes/auth.ts#L452) |
+| `POST` | `/refresh` | - | [`auth.ts:241`](../worker/src/routes/auth.ts#L241) |
+| `POST` | `/register` | - | [`auth.ts:47`](../worker/src/routes/auth.ts#L47) |
+| `POST` | `/resend-code` | - | [`auth.ts:402`](../worker/src/routes/auth.ts#L402) |
+| `POST` | `/reset-password` | - | [`auth.ts:528`](../worker/src/routes/auth.ts#L528) |
+| `POST` | `/verify-code` | - | [`auth.ts:289`](../worker/src/routes/auth.ts#L289) |
+| `POST` | `/verify-email` | - | [`auth.ts:279`](../worker/src/routes/auth.ts#L279) |
+
+## berater (11)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `POST` | `/:id/anfrage` | requireAuth | [`berater.ts:501`](../worker/src/routes/berater.ts#L501) |
+| `POST` | `/abwicklung/upload` | requireAuth | [`berater.ts:629`](../worker/src/routes/berater.ts#L629) |
+| `GET` | `/anfragen` | requireAuth | [`berater.ts:393`](../worker/src/routes/berater.ts#L393) |
+| `PATCH` | `/anfragen/:id` | requireAuth | [`berater.ts:414`](../worker/src/routes/berater.ts#L414) |
+| `GET` | `/dienstleistungen` | requireAuth | [`berater.ts:316`](../worker/src/routes/berater.ts#L316) |
+| `POST` | `/dienstleistungen` | requireAuth | [`berater.ts:331`](../worker/src/routes/berater.ts#L331) |
+| `GET` | `/expertise` | requireAuth | [`berater.ts:238`](../worker/src/routes/berater.ts#L238) |
+| `POST` | `/expertise` | requireAuth | [`berater.ts:253`](../worker/src/routes/berater.ts#L253) |
+| `GET` | `/profil` | requireAuth | [`berater.ts:141`](../worker/src/routes/berater.ts#L141) |
+| `POST` | `/profil` | requireAuth | [`berater.ts:151`](../worker/src/routes/berater.ts#L151) |
+| `GET` | `/provision-vertraege` | requireAuth | [`berater.ts:595`](../worker/src/routes/berater.ts#L595) |
+
+## beratungen (3)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/` | requireAuth | [`beratungen.ts:57`](../worker/src/routes/beratungen.ts#L57) |
+| `GET` | `/:id` | requireAuth | [`beratungen.ts:77`](../worker/src/routes/beratungen.ts#L77) |
+| `PATCH` | `/:id` | requireAuth | [`beratungen.ts:101`](../worker/src/routes/beratungen.ts#L101) |
+
+## branchen (2)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/` | - | [`branchen.ts:20`](../worker/src/routes/branchen.ts#L20) |
+| `GET` | `/:id` | - | [`branchen.ts:29`](../worker/src/routes/branchen.ts#L29) |
+
+## check (5)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `POST` | `/` | - | [`check.ts:41`](../worker/src/routes/check.ts#L41) |
+| `POST` | `/:sessionId/analyze` | - | [`check.ts:315`](../worker/src/routes/check.ts#L315) |
+| `POST` | `/:sessionId/chat` | - | [`check.ts:209`](../worker/src/routes/check.ts#L209) |
+| `POST` | `/:sessionId/docs` | - | [`check.ts:258`](../worker/src/routes/check.ts#L258) |
+| `GET` | `/:sessionId/plan` | - | [`check.ts:405`](../worker/src/routes/check.ts#L405) |
+
+## checks (2)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/` | - | [`checks.ts:75`](../worker/src/routes/checks.ts#L75) |
+| `POST` | `/` | - | [`checks.ts:72`](../worker/src/routes/checks.ts#L72) |
+
+## foerdermittel (23)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/cases` | requireAuth | [`foerdermittel.ts:830`](../worker/src/routes/foerdermittel.ts#L830) |
+| `POST` | `/cases` | requireAuth | [`foerdermittel.ts:486`](../worker/src/routes/foerdermittel.ts#L486) |
+| `GET` | `/cases/:caseId/dokumente` | requireAuth | [`foerdermittel.ts:1349`](../worker/src/routes/foerdermittel.ts#L1349) |
+| `POST` | `/cases/:caseId/dokumente` | requireAuth | [`foerdermittel.ts:1288`](../worker/src/routes/foerdermittel.ts#L1288) |
+| `PATCH` | `/cases/:caseId/steps/:stepId` | requireAuth | [`foerdermittel.ts:915`](../worker/src/routes/foerdermittel.ts#L915) |
+| `GET` | `/cases/:id` | requireAuth | [`foerdermittel.ts:876`](../worker/src/routes/foerdermittel.ts#L876) |
+| `POST` | `/cases/:id/chat` | requireAuth | [`foerdermittel.ts:999`](../worker/src/routes/foerdermittel.ts#L999) |
+| `POST` | `/chat` | requireAuth | [`foerdermittel.ts:1140`](../worker/src/routes/foerdermittel.ts#L1140) |
+| `GET` | `/chat/:id` | requireAuth | [`foerdermittel.ts:1257`](../worker/src/routes/foerdermittel.ts#L1257) |
+| `GET` | `/favorites` | requireAuth | [`foerdermittel.ts:1423`](../worker/src/routes/foerdermittel.ts#L1423) |
+| `POST` | `/favorites` | requireAuth | [`foerdermittel.ts:1432`](../worker/src/routes/foerdermittel.ts#L1432) |
+| `DELETE` | `/favorites/:programId` | requireAuth | [`foerdermittel.ts:1457`](../worker/src/routes/foerdermittel.ts#L1457) |
+| `GET` | `/favorites/:programId/check` | requireAuth | [`foerdermittel.ts:1475`](../worker/src/routes/foerdermittel.ts#L1475) |
+| `GET` | `/katalog` | - | [`foerdermittel.ts:36`](../worker/src/routes/foerdermittel.ts#L36) |
+| `GET` | `/katalog/:id` | - | [`foerdermittel.ts:165`](../worker/src/routes/foerdermittel.ts#L165) |
+| `GET` | `/katalog/filters` | - | [`foerdermittel.ts:124`](../worker/src/routes/foerdermittel.ts#L124) |
+| `POST` | `/match` | requireAuth | [`foerdermittel.ts:286`](../worker/src/routes/foerdermittel.ts#L286) |
+| `GET` | `/matches` | requireAuth | [`foerdermittel.ts:441`](../worker/src/routes/foerdermittel.ts#L441) |
+| `GET` | `/notifications` | requireAuth | [`foerdermittel.ts:1378`](../worker/src/routes/foerdermittel.ts#L1378) |
+| `PATCH` | `/notifications/:id/read` | requireAuth | [`foerdermittel.ts:1406`](../worker/src/routes/foerdermittel.ts#L1406) |
+| `GET` | `/profile` | requireAuth | [`foerdermittel.ts:195`](../worker/src/routes/foerdermittel.ts#L195) |
+| `POST` | `/profile` | requireAuth | [`foerdermittel.ts:211`](../worker/src/routes/foerdermittel.ts#L211) |
+| `GET` | `/program-documents/:programId` | requireAuth | [`foerdermittel.ts:1490`](../worker/src/routes/foerdermittel.ts#L1490) |
+
+## gdpr (3)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `DELETE` | `/account` | requireAuth | [`gdpr.ts:48`](../worker/src/routes/gdpr.ts#L48) |
+| `GET` | `/export` | requireAuth | [`gdpr.ts:13`](../worker/src/routes/gdpr.ts#L13) |
+| `POST` | `/privacy-consent` | requireAuth | [`gdpr.ts:79`](../worker/src/routes/gdpr.ts#L79) |
+
+## me (10)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/anfragen` | requireAuth | [`me.ts:68`](../worker/src/routes/me.ts#L68) |
+| `GET` | `/antraege` | requireAuth | [`me.ts:27`](../worker/src/routes/me.ts#L27) |
+| `POST` | `/antraege` | requireAuth | [`me.ts:29`](../worker/src/routes/me.ts#L29) |
+| `GET` | `/beratungen` | requireAuth | [`me.ts:51`](../worker/src/routes/me.ts#L51) |
+| `GET` | `/dashboard` | requireAuth | [`me.ts:89`](../worker/src/routes/me.ts#L89) |
+| `GET` | `/favoriten` | requireAuth | [`me.ts:32`](../worker/src/routes/me.ts#L32) |
+| `GET` | `/notifications` | requireAuth | [`me.ts:35`](../worker/src/routes/me.ts#L35) |
+| `GET` | `/unternehmen` | requireAuth | [`me.ts:46`](../worker/src/routes/me.ts#L46) |
+| `POST` | `/unternehmen` | requireAuth | [`me.ts:48`](../worker/src/routes/me.ts#L48) |
+| `PUT` | `/unternehmen` | requireAuth | [`me.ts:47`](../worker/src/routes/me.ts#L47) |
+
+## nachrichten (5)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/` | requireAuth (blanket) | [`nachrichten.ts:14`](../worker/src/routes/nachrichten.ts#L14) |
+| `POST` | `/` | requireAuth (blanket) | [`nachrichten.ts:21`](../worker/src/routes/nachrichten.ts#L21) |
+| `GET` | `/:conversationId` | requireAuth (blanket) | [`nachrichten.ts:63`](../worker/src/routes/nachrichten.ts#L63) |
+| `POST` | `/:conversationId` | requireAuth (blanket) | [`nachrichten.ts:76`](../worker/src/routes/nachrichten.ts#L76) |
+| `PATCH` | `/:conversationId/read` | requireAuth (blanket) | [`nachrichten.ts:111`](../worker/src/routes/nachrichten.ts#L111) |
+
+## netzwerk (5)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/anfragen` | requireAuth | [`netzwerk.ts:133`](../worker/src/routes/netzwerk.ts#L133) |
+| `POST` | `/anfragen` | requireAuth | [`netzwerk.ts:145`](../worker/src/routes/netzwerk.ts#L145) |
+| `PATCH` | `/anfragen/:id` | requireAuth | [`netzwerk.ts:178`](../worker/src/routes/netzwerk.ts#L178) |
+| `GET` | `/berater` | - | [`netzwerk.ts:20`](../worker/src/routes/netzwerk.ts#L20) |
+| `GET` | `/berater/:id` | - | [`netzwerk.ts:72`](../worker/src/routes/netzwerk.ts#L72) |
+
+## news (6)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/` | requireAuth (blanket) | [`news.ts:55`](../worker/src/routes/news.ts#L55) |
+| `GET` | `/` | requireAuth (blanket) | [`news.ts:107`](../worker/src/routes/news.ts#L107) |
+| `POST` | `/` | requireAuth (blanket) | [`news.ts:115`](../worker/src/routes/news.ts#L115) |
+| `DELETE` | `/:id` | requireAuth (blanket) | [`news.ts:204`](../worker/src/routes/news.ts#L204) |
+| `PATCH` | `/:id` | requireAuth (blanket) | [`news.ts:158`](../worker/src/routes/news.ts#L158) |
+| `GET` | `/:slug` | requireAuth (blanket) | [`news.ts:77`](../worker/src/routes/news.ts#L77) |
+
+## oa (4)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/cp` | - | [`oa.ts:32`](../worker/src/routes/oa.ts#L32) |
+| `GET` | `/history` | - | [`oa.ts:42`](../worker/src/routes/oa.ts#L42) |
+| `GET` | `/status` | - | [`oa.ts:11`](../worker/src/routes/oa.ts#L11) |
+| `GET` | `/va` | - | [`oa.ts:37`](../worker/src/routes/oa.ts#L37) |
+
+## orders (1)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `POST` | `/create` | requireAuth | [`orders.ts:17`](../worker/src/routes/orders.ts#L17) |
+
+## payments (4)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `POST` | `/paypal/capture-order` | requireAuth | [`payments.ts:185`](../worker/src/routes/payments.ts#L185) |
+| `POST` | `/paypal/create-order` | requireAuth | [`payments.ts:146`](../worker/src/routes/payments.ts#L146) |
+| `POST` | `/stripe/create-session` | requireAuth | [`payments.ts:20`](../worker/src/routes/payments.ts#L20) |
+| `POST` | `/stripe/webhook` | - | [`payments.ts:77`](../worker/src/routes/payments.ts#L77) |
+
+## promo (4)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/codes` | requireAuth | [`promo.ts:87`](../worker/src/routes/promo.ts#L87) |
+| `POST` | `/create` | requireAuth | [`promo.ts:93`](../worker/src/routes/promo.ts#L93) |
+| `POST` | `/redeem` | requireAuth | [`promo.ts:40`](../worker/src/routes/promo.ts#L40) |
+| `POST` | `/validate` | - | [`promo.ts:21`](../worker/src/routes/promo.ts#L21) |
+
+## reports (10)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/` | requireAuth | [`reports.ts:287`](../worker/src/routes/reports.ts#L287) |
+| `POST` | `/` | requireAuth | [`reports.ts:356`](../worker/src/routes/reports.ts#L356) |
+| `GET` | `/:id` | requireAuth | [`reports.ts:338`](../worker/src/routes/reports.ts#L338) |
+| `PATCH` | `/:id` | requireAuth | [`reports.ts:371`](../worker/src/routes/reports.ts#L371) |
+| `PATCH` | `/:id/finalize` | requireAuth | [`reports.ts:447`](../worker/src/routes/reports.ts#L447) |
+| `POST` | `/:id/finalize` | requireAuth | [`reports.ts:429`](../worker/src/routes/reports.ts#L429) |
+| `GET` | `/download/:token` | - | [`reports.ts:249`](../worker/src/routes/reports.ts#L249) |
+| `POST` | `/generate` | requireAuth | [`reports.ts:59`](../worker/src/routes/reports.ts#L59) |
+| `GET` | `/preview/:id` | requireAuth | [`reports.ts:194`](../worker/src/routes/reports.ts#L194) |
+| `POST` | `/unlock` | - | [`reports.ts:211`](../worker/src/routes/reports.ts#L211) |
+
+## tracker (5)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/` | requireAuth | [`tracker.ts:41`](../worker/src/routes/tracker.ts#L41) |
+| `POST` | `/` | requireAuth | [`tracker.ts:76`](../worker/src/routes/tracker.ts#L76) |
+| `DELETE` | `/:id` | requireAuth | [`tracker.ts:203`](../worker/src/routes/tracker.ts#L203) |
+| `GET` | `/:id` | requireAuth | [`tracker.ts:124`](../worker/src/routes/tracker.ts#L124) |
+| `PATCH` | `/:id` | requireAuth | [`tracker.ts:147`](../worker/src/routes/tracker.ts#L147) |
+
+## unternehmen (2)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/profil` | requireAuth | [`unternehmen.ts:77`](../worker/src/routes/unternehmen.ts#L77) |
+| `POST` | `/profil` | requireAuth | [`unternehmen.ts:88`](../worker/src/routes/unternehmen.ts#L88) |
+
+## verify-payment (1)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `POST` | `/verify-payment` | - | [`verify-payment.ts:12`](../worker/src/routes/verify-payment.ts#L12) |
+
+## vorlagen (3)
+
+| Method | Path | Auth | Source |
+|---|---|---|---|
+| `GET` | `/` | requireAuth | [`vorlagen.ts:21`](../worker/src/routes/vorlagen.ts#L21) |
+| `POST` | `/` | requireAuth | [`vorlagen.ts:32`](../worker/src/routes/vorlagen.ts#L32) |
+| `DELETE` | `/:id` | requireAuth | [`vorlagen.ts:48`](../worker/src/routes/vorlagen.ts#L48) |

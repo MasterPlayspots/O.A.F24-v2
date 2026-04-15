@@ -1,0 +1,7 @@
+-- 026-netzwerk-anfragen-drop-fk-rollback.sql · NOT REVERSIBLE
+--
+-- Same situation as 024/025: the FK on netzwerk_anfragen.(von_user_id,
+-- an_user_id) targeted bafa_antraege.users (empty local shadow).
+--
+-- To recover, restore the netzwerk_anfragen table from an R2 backup
+-- taken before migration 026 was applied.

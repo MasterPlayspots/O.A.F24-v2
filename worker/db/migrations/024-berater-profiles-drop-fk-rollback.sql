@@ -1,0 +1,10 @@
+-- 024-berater-profiles-drop-fk-rollback.sql · NOT REVERSIBLE
+--
+-- The original FOREIGN KEY constraint on berater_profiles.user_id was
+-- pointing at bafa_antraege.users — a table that is empty (auth users
+-- live in zfbf-db). SQLite cannot enforce cross-database FKs anyway.
+--
+-- Re-adding the constraint would fail on any row inserted after the
+-- migration landed (because the referenced users table still doesn't
+-- contain auth users). To recover, restore the berater_profiles table
+-- from an R2 backup taken before commit 24.

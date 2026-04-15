@@ -48,6 +48,15 @@ Siehe `.env.example`. In **Vercel** müssen folgende Variablen für die Producti
 | `npm run start` | Start des Production-Builds |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript ohne Emit |
+| `npm run docs:api` | Regeneriert `docs/API.md` aus `worker/src/routes/` |
+
+## Documentation
+
+- [`docs/API.md`](docs/API.md) — Auto-generierte API-Referenz (143 Endpoints, 23 Groups). CI blockiert Merges, wenn diese Datei out-of-sync ist.
+- [`docs/MIGRATIONS.md`](docs/MIGRATIONS.md) — D1-Migrationen + Rollback-Konventionen.
+- [`docs/FIX_LOG.md`](docs/FIX_LOG.md) — Chronologisches Log der Audit-Findings und deren Behebung.
+- [`docs/BACKEND_WIRING_MAP.md`](docs/BACKEND_WIRING_MAP.md) — Frontend↔Worker Verbindungs-Matrix.
+- `ECOSYSTEM.md` — *Deprecated*. Historischer Architektur-Snapshot; API-Details siehe `docs/API.md`.
 
 ## Auth-Flow
 
