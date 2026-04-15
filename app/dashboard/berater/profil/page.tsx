@@ -98,6 +98,11 @@ export default function BeraterProfilPage() {
           .split(',')
           .map((b) => b.trim())
           .filter((b) => b.length > 0),
+        spezialisierungen: data.spezialisierungen
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0),
+        websiteUrl: data.websiteUrl || undefined,
         verfuegbar: true,
       })
 

@@ -29,11 +29,11 @@ export async function getProgramme(filter?: ProgrammeFilter): Promise<ProgrammeR
   if (filter?.limit) params.set('limit', String(filter.limit))
   if (filter?.offset) params.set('offset', String(filter.offset))
   const qs = params.toString()
-  return apiCall<ProgrammeResponse>(API.FUND24, `/api/foerderprogramme${qs ? `?${qs}` : ''}`)
+  return apiCall<ProgrammeResponse>(API.FUND24, `/api/foerdermittel/katalog${qs ? `?${qs}` : ''}`)
 }
 
 export async function getProgramm(id: number): Promise<Foerderprogramm> {
-  return apiCall<Foerderprogramm>(API.FUND24, `/api/foerderprogramme/${id}`)
+  return apiCall<Foerderprogramm>(API.FUND24, `/api/foerdermittel/katalog/${id}`)
 }
 
 // =====================================================================

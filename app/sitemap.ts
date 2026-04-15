@@ -31,8 +31,8 @@ async function fetchProgrammIds(): Promise<string[]> {
         next: { revalidate: 3600 },
       })
       if (!res.ok) break
-      const data = (await res.json()) as { results?: KatalogItem[]; total?: number }
-      const rows = data.results ?? []
+      const data = (await res.json()) as { data?: KatalogItem[]; pagination?: { total?: number } }
+      const rows = data.data ?? []
       if (rows.length === 0) break
       for (const r of rows) ids.push(String(r.id))
       if (rows.length < 50) break

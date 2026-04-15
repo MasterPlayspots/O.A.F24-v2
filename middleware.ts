@@ -20,7 +20,7 @@ const PUBLIC_PATHS = new Set([
   '/passwort-vergessen', '/passwort-reset', '/datenschutz', '/impressum', '/agb',
 ])
 
-const PROTECTED_PREFIXES = ['/foerdercheck', '/onboarding', '/dashboard', '/admin']
+const PROTECTED_PREFIXES = ['/foerdercheck', '/onboarding', '/dashboard', '/admin', '/antraege']
 const ADMIN_PREFIX = '/admin'
 const PUBLIC_PREFIXES = ['/programme/', '/berater/', '/aktuelles/', '/foerder-schnellcheck/']
 
