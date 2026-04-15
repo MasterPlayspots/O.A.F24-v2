@@ -414,7 +414,64 @@ export interface AuditLog {
   created_at: string
 }
 // ---------- Tracker ----------
-import type { TrackerVorgang, TrackerPhase, AdminDashboard, Nutzer, Provision } from '../types'
+import type { TrackerVorgang, TrackerPhase, AdminDashboard, Nutzer, Provision, NewsArtikel } from '../types'
+
+// ---------- News / Aktuelles ----------
+
+export async function getNews(kategorie?: string): Promise<{ artikel: NewsArtikel[] }> {
+  const qs = kategorie ? `?kategorie=${encodeURIComponent(kategorie)}` : ''
+  return apiCall<{ artikel: NewsArtikel[] }>(API.FUND24, `/api/news${qs}`)
+}
+
+export async function getNewsArtikel(slug: string): Promise<NewsArtikel> {
+  const r = await apiCall<{ artikel: NewsArtikel }>(API.FUND24, `/api/news/${encodeURIComponent(slug)}`)
+  return r.artikel
+}
+
+export async function getAdminNews(): Promise<{ artikel: NewsArtikel[] }> {
+  return apiCall<{ artikel: NewsArtikel[] }>(API.FUND24, '/api/admin/news', undefined, token())
+}
+
+export async function createAdminNews(daten: Omit<NewsArtikel, 'id' | 'veroeffentlichtAm'>): Promise<{ id: string }> {
+  return apiCall<{ id: string }>(
+    API.FUND24,
+    '/api/admin/news',
+    { method: 'POST', body: JSON.stringify(daten) },
+    token()
+  )
+}
+
+export async function updateAdminNews(id: string, daten: Partial<NewsArtikel>): Promise<{ ok: boolean }> {
+  return apiCall<{ ok: boolean }>(
+    API.FUND24,
+    `/api/admin/news/${id}`,
+    { method: 'PATCH', body: JSON.stringify(daten) },
+    token()
+  )
+}
+
+export async function deleteAdminNews(id: string) {
+  return apiCall(API.FUND24, `/api/admin/news/${id}`, { method: 'DELETE' }, token())
+}
+
+// ---------- Berater Abwicklung ----------
+
+export async function getProvisionVertraege(): Promise<{ provisionen: Provision[] }> {
+  return apiCall<{ provisionen: Provision[] }>(
+    API.FUND24, '/api/berater/provision-vertraege', undefined, token()
+  )
+}
+
+export async function uploadAbwicklungDokument(vertragId: string, fd: FormData) {
+  fd.append('vertrag_id', vertragId)
+  return apiCall<{ id: string; filename: string }>(
+    API.FUND24,
+    '/api/berater/abwicklung/upload',
+    { method: 'POST', body: fd },
+    token()
+  )
+}
+
 
 export async function getTracker(): Promise<{ vorgaenge: TrackerVorgang[] }> {
   return apiCall<{ vorgaenge: TrackerVorgang[] }>(

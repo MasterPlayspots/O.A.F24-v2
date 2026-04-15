@@ -25,6 +25,7 @@ import { berater } from "./routes/berater";
 import { unternehmen as unternehmenRoutes } from "./routes/unternehmen";
 import { antraege } from "./routes/antraege";
 import { tracker } from "./routes/tracker";
+import { news, adminNews } from "./routes/news";
 import { oa } from "./routes/oa";
 import { runCP } from "./services/oa-cp";
 import { runVA } from "./services/oa-va";
@@ -154,6 +155,8 @@ app.route("/api/berater", berater);
 app.route("/api/unternehmen", unternehmenRoutes);
 app.route("/api/antraege", antraege);
 app.route("/api/tracker", tracker);
+app.route("/api/news", news);
+app.route("/api/admin/news", adminNews);
 app.route("/api/oa", oa);
 
 // ============================================

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/store/authStore'
-import { getAdminNews, createAdminNews, updateAdminNews } from '@/lib/api/check'
+import { getAdminNews, createAdminNews, updateAdminNews } from '@/lib/api/fund24'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -54,7 +54,7 @@ export default function AdminAktuellesPage() {
     const fetchNews = async () => {
       try {
         if (!token) throw new Error('Kein Token')
-        const data = await getAdminNews(token)
+        const data = await getAdminNews()
         setArtikel(data.artikel)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Fehler beim Laden')
@@ -139,8 +139,7 @@ export default function AdminAktuellesPage() {
             kategorie: formData.kategorie,
             tags,
             inhaltMd: formData.inhaltMd,
-          },
-          token
+          }
         )
         setArtikel(
           artikel.map((a) =>
@@ -170,8 +169,7 @@ export default function AdminAktuellesPage() {
             tags,
             inhaltMd: formData.inhaltMd,
             autor: 'admin',
-          },
-          token
+          }
         )
         setArtikel([
           ...artikel,

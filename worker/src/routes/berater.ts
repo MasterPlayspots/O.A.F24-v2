@@ -573,4 +573,83 @@ berater.post("/:id/anfrage", requireAuth, async (c) => {
   return c.json({ success: true, anfrage: insert }, 201);
 });
 
+// ============================================================
+// Abwicklung — provision contract overview (berater-only)
+// Until a real `provisions_vertraege` table exists, this returns the
+// berater's own `provisionen` rows shaped as the frontend expects.
+// ============================================================
+
+interface ProvisionVertragRow {
+  id: string;
+  berater_profile_id: string;
+  unternehmen_user_id: string | null;
+  referenz_id: string;
+  foerderbereich: string | null;
+  betrag_basis: number | null;
+  provisions_satz: number;
+  provisions_betrag: number;
+  status: string;
+  created_at: string;
+}
+
+berater.get("/provision-vertraege", requireAuth, requireRole("berater"), async (c) => {
+  const user = c.get("user");
+  const beraterId = await getOwnBeraterId(c.env.BAFA_DB, user.id);
+  if (!beraterId) return c.json({ success: true, provisionen: [] });
+
+  const result = await c.env.BAFA_DB
+    .prepare(
+      `SELECT * FROM provisionen
+         WHERE berater_profile_id = ?
+         ORDER BY created_at DESC
+         LIMIT 100`
+    )
+    .bind(beraterId)
+    .all<ProvisionVertragRow>();
+
+  const provisionen = (result.results ?? []).map((r) => ({
+    id: r.id,
+    beraterId: r.berater_profile_id,
+    unternehmenId: r.unternehmen_user_id ?? "",
+    anfrageId: r.referenz_id,
+    programmName: r.foerderbereich,
+    bewilligteSummeEur: r.betrag_basis,
+    provisionsSatz: r.provisions_satz,
+    provisionBetrag: r.provisions_betrag,
+    status: r.status,
+    erstelltAm: r.created_at,
+  }));
+
+  return c.json({ success: true, provisionen });
+});
+
+// POST /abwicklung/upload — accept a document (multipart), store into R2,
+// return a stub acknowledgement. Full contract-management flow (linking
+// to a specific provision, admin approval) is a future sprint.
+berater.post("/abwicklung/upload", requireAuth, requireRole("berater"), async (c) => {
+  const user = c.get("user");
+  const form = await c.req.formData();
+  const file = form.get("file");
+  if (!(file instanceof File)) {
+    return c.json({ success: false, error: "Datei fehlt" }, 400);
+  }
+  if (file.size > 25 * 1024 * 1024) {
+    return c.json({ success: false, error: "Datei zu gross (max 25 MB)" }, 413);
+  }
+  const vertragId = (form.get("vertrag_id") as string | null) ?? "unzugeordnet";
+  const docId = crypto.randomUUID();
+  const safeName = file.name.replace(/[^\w.\-]/g, "_");
+  const r2Key = `abwicklung/${user.id}/${vertragId}/${docId}-${safeName}`;
+  await c.env.REPORTS.put(r2Key, file.stream(), {
+    httpMetadata: { contentType: file.type || "application/octet-stream" },
+  });
+  return c.json({
+    success: true,
+    id: docId,
+    filename: file.name,
+    size: file.size,
+    uploaded_at: new Date().toISOString(),
+  }, 201);
+});
+
 export { berater };

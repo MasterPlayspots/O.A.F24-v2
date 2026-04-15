@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { getNews } from '@/lib/api/check'
+import { getNews } from '@/lib/api/fund24'
 import type { NewsArtikel } from '@/lib/types'
 
 export default function NewsPage() {

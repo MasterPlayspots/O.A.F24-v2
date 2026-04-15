@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/lib/store/authStore';
 import { useVerifiedGuard } from '@/lib/hooks/useVerifiedGuard';
 import { useMount } from '@/lib/hooks/useMount';
-import { getProvisionVertraege, uploadAbwicklungDokument } from '@/lib/api/check';
+import { getProvisionVertraege, uploadAbwicklungDokument } from '@/lib/api/fund24';
 import { Provision } from '@/lib/types';
 import { LadeSpinner } from '@/components/shared/LadeSpinner';
 import { FehlerBox } from '@/components/shared/FehlerBox';
@@ -44,7 +44,7 @@ export default function AbwicklungPage() {
     const loadData = async () => {
       try {
         setFehler('');
-        const result = await getProvisionVertraege(token);
+        const result = await getProvisionVertraege();
         const vertraegeData = Array.isArray(result) ? result : (result as { provisionen: ProvisionVertrag[] }).provisionen || [];
         setVertraege(vertraegeData);
       } catch (error) {
@@ -75,8 +75,8 @@ export default function AbwicklungPage() {
       setUploading(vertragId);
       const formData = new FormData();
       formData.append('file', file);
-      await uploadAbwicklungDokument(vertragId, formData, token);
-      const result = await getProvisionVertraege(token);
+      await uploadAbwicklungDokument(vertragId, formData);
+      const result = await getProvisionVertraege();
       const vertraegeData = Array.isArray(result) ? result : (result as { provisionen: ProvisionVertrag[] }).provisionen || [];
       setVertraege(vertraegeData);
     } catch (error) {
