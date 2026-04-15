@@ -32,6 +32,7 @@ export type Bindings = {
   ENVIRONMENT: string;
   API_VERSION: string;
   SENTRY_DSN: string;
+  SENTRY_TRACES_SAMPLE_RATE?: string;
 };
 
 // ============================================

@@ -172,7 +172,26 @@ app.notFound((c) => c.json({ success: false, error: "Endpoint nicht gefunden" },
 // ============================================
 app.onError((err, c) => {
   if (c.env.SENTRY_DSN) {
-    const sentry = new Toucan({ dsn: c.env.SENTRY_DSN, request: c.req.raw });
+    const sampleRate = Number(c.env.SENTRY_TRACES_SAMPLE_RATE ?? "0.1");
+    const sentry = new Toucan({
+      dsn: c.env.SENTRY_DSN,
+      request: c.req.raw,
+      tracesSampleRate: isFinite(sampleRate) ? sampleRate : 0.1,
+      // DSGVO: strip PII before send
+      beforeSend(event) {
+        if (event.user) event.user = { id: "[REDACTED_UID]" };
+        if (event.request) {
+          if (event.request.cookies) event.request.cookies = "[REDACTED]";
+          if (event.request.headers) {
+            const h = event.request.headers as Record<string, string>;
+            if (h.authorization) h.authorization = "[REDACTED]";
+            if (h.cookie) h.cookie = "[REDACTED]";
+            if (h["x-forwarded-for"]) h["x-forwarded-for"] = "[REDACTED]";
+          }
+        }
+        return event;
+      },
+    });
     sentry.captureException(err);
   }
   return c.json(
