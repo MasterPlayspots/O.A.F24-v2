@@ -39,7 +39,8 @@
       "Bash(ls worker/src/services/email*)",
       "Bash(curl -s -o /dev/null -w \"W2 admin/dashboard: %{http_code}\\\\n\" \"https://foerdermittel-check-api.froeba-kevin.workers.dev/api/admin/dashboard\")",
       "Bash(curl -s -o /dev/null -w \"W2 admin/dashboard with token: %{http_code}\\\\n\" \"https://foerdermittel-check-api.froeba-kevin.workers.dev/api/admin/dashboard\" -H \"Authorization: Bearer invalid\")",
-      "Bash(curl -s \"https://foerdermittel-check-api.froeba-kevin.workers.dev/api/admin/dashboard\")"
+      "Bash(curl -s \"https://foerdermittel-check-api.froeba-kevin.workers.dev/api/admin/dashboard\")",
+      "Bash(curl -s -o /dev/null -w \"OG image: %{http_code} %{content_type}\\\\n\" \"https://fund24.io/opengraph-image\")"
     ],
     "additionalDirectories": [
       "/Users/our.ark./Desktop/02_AUTOMATISIERUNG/O.A.F24",

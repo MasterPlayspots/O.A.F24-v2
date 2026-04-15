@@ -1,0 +1,99 @@
+name: Deploy Workers
+
+# Runs on every push to main. Uses path filters so worker/ changes deploy
+# only the main API worker, and worker-check/ changes deploy only the
+# check worker. The Vercel deploy for the frontend is handled by the
+# Vercel Git Integration — no action needed here.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worker/**'
+      - 'worker-check/**'
+      - '.github/workflows/deploy-workers.yml'
+
+# Cancel older in-flight deploys for the same worker when a new push arrives.
+concurrency:
+  group: deploy-workers-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # -----------------------------------------------------------------
+  # Detect which worker directories changed on this push
+  # -----------------------------------------------------------------
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      worker: ${{ steps.filter.outputs.worker }}
+      worker_check: ${{ steps.filter.outputs.worker_check }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            worker:
+              - 'worker/**'
+              - '.github/workflows/deploy-workers.yml'
+            worker_check:
+              - 'worker-check/**'
+              - '.github/workflows/deploy-workers.yml'
+
+  # -----------------------------------------------------------------
+  # Main API Worker (api.fund24.io)
+  # -----------------------------------------------------------------
+  deploy-worker:
+    needs: changes
+    if: needs.changes.outputs.worker == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: worker/package-lock.json
+
+      - name: Install worker deps
+        run: npm ci
+
+      - name: Build worker bundle
+        run: npm run build
+
+      - name: Deploy via Wrangler
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: d7bdc9212bc6f429a5f2eb82853a9e83
+          workingDirectory: worker
+          command: deploy
+
+  # -----------------------------------------------------------------
+  # Check Worker (foerdermittel-check-api.workers.dev)
+  # -----------------------------------------------------------------
+  deploy-worker-check:
+    needs: changes
+    if: needs.changes.outputs.worker_check == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker-check
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Deploy via Wrangler
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: d7bdc9212bc6f429a5f2eb82853a9e83
+          workingDirectory: worker-check
+          command: deploy
