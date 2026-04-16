@@ -64,7 +64,7 @@ news.get("/", async (c) => {
   const rows = await c.env.BAFA_DB
     .prepare(
       `SELECT * FROM news_articles
-         ${where}
+         ${where ? where + " AND deleted_at IS NULL" : "WHERE deleted_at IS NULL"}
          ORDER BY veroeffentlicht_am DESC
          LIMIT 100`
     )
@@ -77,7 +77,7 @@ news.get("/", async (c) => {
 news.get("/:slug", async (c) => {
   const slug = c.req.param("slug");
   const row = await c.env.BAFA_DB
-    .prepare("SELECT * FROM news_articles WHERE slug = ?")
+    .prepare("SELECT * FROM news_articles WHERE slug = ? AND deleted_at IS NULL")
     .bind(slug)
     .first<NewsRow>();
   if (!row) return c.json({ success: false, error: "Artikel nicht gefunden" }, 404);
@@ -200,11 +200,12 @@ admin.patch("/:id", async (c) => {
   return c.json({ success: true, ok: true });
 });
 
-// DELETE /api/admin/news/:id
+// DELETE /api/admin/news/:id — soft-delete via deleted_at (migration 029).
+// The row stays; public readers filter on `deleted_at IS NULL`.
 admin.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const res = await c.env.BAFA_DB
-    .prepare("DELETE FROM news_articles WHERE id = ?")
+    .prepare("UPDATE news_articles SET deleted_at = datetime('now') WHERE id = ? AND deleted_at IS NULL")
     .bind(id)
     .run();
   if (!res.meta.changes) return c.json({ success: false, error: "Artikel nicht gefunden" }, 404);

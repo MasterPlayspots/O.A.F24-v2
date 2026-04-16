@@ -1,4 +1,12 @@
-// Netzwerk & Berater Repository - Data access layer for berater_profile and netzwerk_anfragen
+// Netzwerk & Berater Repository — data-access for `berater_profile`
+// (SINGULAR, zfbf-db, 11 cols) and `netzwerk_anfragen`.
+//
+// NAMING COLLISION WARNING:
+//   `berater_profile`  (singular, zfbf-db)   ← this repo (netzwerk_anfragen join)
+//   `berater_profiles` (plural,   bafa_antraege) ← worker/src/routes/berater.ts
+// Two tables with the same conceptual meaning but different columns. The
+// Phase-4 audit (H-P4-04) flagged this as a consolidation target. Until
+// migrated: this file only ever reads/writes the singular zfbf-db table.
 
 export interface BeraterProfileRow {
   id: string;
