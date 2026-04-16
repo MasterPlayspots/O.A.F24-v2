@@ -1,0 +1,11 @@
+-- Rollback 033: advisory only. The 40-col `users` table in bafa_antraege
+-- was created outside the migrations system (no CREATE TABLE statement in
+-- version control). Automatic rollback is impossible because we don't have
+-- its exact column definition on file.
+--
+-- Real rollback = restore from the pre-apply backup:
+--   wrangler d1 execute bafa_antraege --file backup-bafa-YYYYMMDD.sql --remote
+--
+-- This file exists only to keep the rollback-pair convention intact for
+-- the docs-check CI gate.
+SELECT 'rollback-033: restore from wrangler d1 export backup; no automatic DDL' AS message;

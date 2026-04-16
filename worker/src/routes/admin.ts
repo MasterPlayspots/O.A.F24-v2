@@ -110,6 +110,11 @@ admin.get("/dashboard", async (c) => {
       .prepare("SELECT COUNT(*) AS n FROM netzwerk_anfragen WHERE status = 'offen'")
       .first<{ n: number }>()
       .catch(() => null),
+    // BLOCKER for TASK-048 (CHECK_DB unbinding): worker-check still writes
+    // check_sessions, and that write path is what "checks today" counts.
+    // Until worker-check is retired (Phase-3 H-P3-02 consolidation track),
+    // this one query keeps CHECK_DB bound in main/wrangler.toml. When the
+    // retirement ships, replace with a BAFA_DB query over foerdermittel_cases.
     c.env.CHECK_DB
       .prepare("SELECT COUNT(*) AS n FROM check_sessions WHERE date(created_at) = date('now')")
       .first<{ n: number }>()
