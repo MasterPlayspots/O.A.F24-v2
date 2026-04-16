@@ -10,10 +10,8 @@ import {
 } from "../services/foerdermittel";
 import { scrapeCompanyFromUrl } from "../services/scraper";
 import { requireAuth } from "../middleware/auth";
+import { checkAiQuota, recordAiUsage, AI_QUOTA_PER_DAY } from "../services/ai-quota";
 
-// Block private / internal hosts for any user-supplied URL before we fetch it.
-// Mirrors the allowlist-based admin handler. Returns true if the URL is
-// private / link-local / loopback / file: or otherwise unsafe.
 function isPrivateUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
@@ -71,6 +69,11 @@ interface CheckSession {
 }
 
 const check = new Hono<{ Bindings: Bindings; Variables: Variables }>();
+
+// All /api/check/* handlers require a verified user (H-P3-01 / TASK-036).
+// Five of these handlers invoke Workers-AI (llama-3.1-8b-instruct) or write
+// to R2, so leaving them unauthenticated let a single caller drain quota.
+check.use("/*", requireAuth);
 
 // ============================================
 // Step 1: Submit company form → create session
@@ -177,7 +180,20 @@ check.post("/", requireAuth, async (c) => {
 
   const vorfilterCount = countResult?.cnt ?? 0;
 
-  // Generate greeting via AI
+  // Generate greeting via AI — gated by daily per-user quota (TASK-034).
+  const userForQuota = c.get("user");
+  const quota = await checkAiQuota(c.env, userForQuota.id);
+  if (!quota.allowed) {
+    return c.json(
+      {
+        success: false,
+        error: "AI-Tageslimit erreicht. Bitte morgen erneut versuchen.",
+        limit: AI_QUOTA_PER_DAY,
+        used: quota.used,
+      },
+      429,
+    );
+  }
   let begruessung: string;
   try {
     const result = await runLlama(c.env.AI, {
@@ -201,6 +217,7 @@ Antworte auf Deutsch, freundlich und professionell. Verwende Markdown für Forma
     begruessung =
       result.response ||
       `Willkommen zum Fördermittel-Check für **${formData.firmenname}**! Basierend auf Ihren Angaben kommen ca. **${vorfilterCount} Förderprogramme** in Frage.\n\nUm die passenden Programme zu finden, habe ich ein paar Fragen:\n\n1. Haben Sie in den letzten 3 Jahren bereits Fördermittel erhalten?\n2. Wann planen Sie mit der Umsetzung zu beginnen?\n3. Befindet sich Ihr Unternehmen in wirtschaftlichen Schwierigkeiten?`;
+    await recordAiUsage(c.env, userForQuota.id);
   } catch {
     begruessung = `Willkommen zum Fördermittel-Check für **${formData.firmenname}**! Basierend auf Ihren Angaben kommen ca. **${vorfilterCount} Förderprogramme** in Frage.\n\nUm die passenden Programme zu finden, habe ich ein paar Fragen:\n\n1. Haben Sie in den letzten 3 Jahren bereits Fördermittel erhalten?\n2. Wann planen Sie mit der Umsetzung zu beginnen?\n3. Befindet sich Ihr Unternehmen in wirtschaftlichen Schwierigkeiten?`;
   }
@@ -255,6 +272,20 @@ check.post("/:sessionId/chat", requireAuth, async (c) => {
   const body = (await c.req.json()) as { nachricht?: string };
   if (!body.nachricht) return c.json({ success: false, error: "Nachricht erforderlich" }, 400);
 
+  const chatUser = c.get("user");
+  const chatQuota = await checkAiQuota(c.env, chatUser.id);
+  if (!chatQuota.allowed) {
+    return c.json(
+      {
+        success: false,
+        error: "AI-Tageslimit erreicht. Bitte morgen erneut versuchen.",
+        limit: AI_QUOTA_PER_DAY,
+        used: chatQuota.used,
+      },
+      429,
+    );
+  }
+
   // Load the profile
   const profile = await c.env.BAFA_DB
     .prepare("SELECT * FROM foerdermittel_profile WHERE id = ?")
@@ -278,6 +309,7 @@ check.post("/:sessionId/chat", requireAuth, async (c) => {
   // Save conversation ID back to session
   session.conversationId = result.conversationId;
   await saveSession(sessionId, session, c.env.SESSIONS);
+  await recordAiUsage(c.env, chatUser.id);
 
   // Check if the bot's response suggests moving to document phase
   const isDokumente =
@@ -316,8 +348,20 @@ check.post("/:sessionId/docs", requireAuth, async (c) => {
     customMetadata: { typ, originalName: file.name },
   });
 
-  // AI extraction attempt
+  // AI extraction attempt — gated by quota so large docs don't drain it.
   let kiExtrakt: Record<string, string | number | boolean> = {};
+  const docUser = c.get("user");
+  const docQuota = await checkAiQuota(c.env, docUser.id);
+  if (!docQuota.allowed) {
+    return c.json(
+      {
+        success: true,
+        dokument_id: r2Key,
+        ki_extrakt: {},
+        warning: "AI-Tageslimit erreicht — Dokument gespeichert, aber nicht extrahiert.",
+      },
+    );
+  }
   try {
     const textContent = await file.text();
     const truncated = textContent.slice(0, 3000);
@@ -339,6 +383,7 @@ ${truncated}`,
       const jsonMatch = result.response.match(/\{[\s\S]*\}/);
       if (jsonMatch) kiExtrakt = JSON.parse(jsonMatch[0]);
     }
+    await recordAiUsage(c.env, docUser.id);
   } catch {
     // AI extraction is best-effort
   }
@@ -358,6 +403,21 @@ check.post("/:sessionId/analyze", requireAuth, async (c) => {
   const session = await loadSession(sessionId, c.env.SESSIONS);
   if (!session)
     return c.json({ success: false, error: "Session nicht gefunden oder abgelaufen" }, 404);
+
+  // Full matching run is the heaviest AI path — always gate it.
+  const analyzeUser = c.get("user");
+  const analyzeQuota = await checkAiQuota(c.env, analyzeUser.id);
+  if (!analyzeQuota.allowed) {
+    return c.json(
+      {
+        success: false,
+        error: "AI-Tageslimit erreicht. Bitte morgen erneut versuchen.",
+        limit: AI_QUOTA_PER_DAY,
+        used: analyzeQuota.used,
+      },
+      429,
+    );
+  }
 
   // Load profile
   const profile = await c.env.BAFA_DB
@@ -426,6 +486,7 @@ Nenne die Anzahl, die Top-Programme und eine grobe Einschätzung der Gesamtförd
     zusammenfassung =
       result.response ||
       `Für ${profile.company_name} wurden ${ergebnisse.length} relevante Förderprogramme identifiziert.`;
+    await recordAiUsage(c.env, analyzeUser.id);
   } catch {
     zusammenfassung = `Für ${profile.company_name} wurden ${ergebnisse.length} relevante Förderprogramme identifiziert.`;
   }
@@ -450,6 +511,22 @@ check.get("/:sessionId/plan", requireAuth, async (c) => {
   if (!session)
     return c.json({ success: false, error: "Session nicht gefunden oder abgelaufen" }, 404);
 
+  // Plan generation runs N AI calls (one per top match) — gate at entry
+  // with the current quota, then skip subsequent calls if we exhaust it.
+  const planUser = c.get("user");
+  const planQuota = await checkAiQuota(c.env, planUser.id);
+  if (!planQuota.allowed) {
+    return c.json(
+      {
+        success: false,
+        error: "AI-Tageslimit erreicht. Bitte morgen erneut versuchen.",
+        limit: AI_QUOTA_PER_DAY,
+        used: planQuota.used,
+      },
+      429,
+    );
+  }
+
   // Load matches for this profile
   const matches = await getMatchesForProfile(session.profileId, c.env.BAFA_DB, c.env.FOERDER_DB);
   const topMatches = matches.filter((m) => m.match_score >= 30).slice(0, 5);
@@ -471,6 +548,9 @@ check.get("/:sessionId/plan", requireAuth, async (c) => {
     }> = [];
 
     try {
+      // Re-check quota mid-loop to avoid overshoot when 5 programs hit the cap.
+      const inloopQuota = await checkAiQuota(c.env, planUser.id);
+      if (!inloopQuota.allowed) break;
       const result = await runLlama(c.env.AI, {
         messages: [
           {
@@ -490,6 +570,7 @@ Format: [{"schritt": 1, "aktion": "...", "beschreibung": "...", "dokument_typ": 
         const jsonMatch = result.response.match(/\[[\s\S]*\]/);
         if (jsonMatch) schritte = JSON.parse(jsonMatch[0]);
       }
+      await recordAiUsage(c.env, planUser.id);
     } catch {
       schritte = [
         {

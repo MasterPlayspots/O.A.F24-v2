@@ -123,10 +123,20 @@ export async function getDashboard(
 
 // ── NACHRICHTEN ──────────────────────────────────────────────
 
+/**
+ * @deprecated Uses legacy CHECK worker's `/api/netzwerk/nachrichten`. The
+ * canonical messaging endpoint is now `/api/nachrichten/*` on the FUND24
+ * worker (worker/src/routes/nachrichten.ts). Migration requires switching
+ * from anfrage-attached notes to conversation-based messaging — do not
+ * add new callers; route new features through fund24.ts instead.
+ */
 export async function getNachrichten(anfrageId: string, token: string): Promise<{ nachrichten: Nachricht[] }> {
   return apiCall(API.CHECK, `/api/netzwerk/nachrichten?anfrageId=${anfrageId}`, undefined, token)
 }
 
+/**
+ * @deprecated See getNachrichten() — same migration note.
+ */
 export async function sendeNachricht(anfrageId: string, inhalt: string, token: string): Promise<{ nachricht: Nachricht }> {
   return apiCall(API.CHECK, '/api/netzwerk/nachrichten', {
     method: 'POST',
@@ -135,11 +145,15 @@ export async function sendeNachricht(anfrageId: string, inhalt: string, token: s
 }
 
 // ── TRACKER ──────────────────────────────────────────────────
+// @deprecated: fund24.ts:getTracker() is the canonical reader. This
+// wrapper still targets the legacy CHECK worker.
 
+/** @deprecated Use `getTracker()` from `@/lib/api/fund24`. */
 export async function getTracker(token: string): Promise<{ vorgaenge: TrackerVorgang[] }> {
   return apiCall(API.CHECK, '/api/tracker', undefined, token)
 }
 
+/** @deprecated Use the fund24 tracker API once the PATCH endpoint ships there. */
 export async function updateTrackerPhase(id: string, phase: TrackerPhase, token: string): Promise<{ ok: boolean }> {
   return apiCall(API.CHECK, `/api/tracker/${id}`, {
     method: 'PATCH',
@@ -165,12 +179,17 @@ export async function removeFavorit(programmId: number, token: string): Promise<
 }
 
 // ── NEWS ─────────────────────────────────────────────────────
+// @deprecated: fund24.ts:getNews / getNewsArtikel are the canonical readers
+// (they hit api.fund24.io which now filters soft-deleted articles — see
+// worker migration 029). Leave these in place until all callers migrate.
 
+/** @deprecated Use `getNews()` from `@/lib/api/fund24`. */
 export async function getNews(kategorie?: string): Promise<{ artikel: NewsArtikel[] }> {
   const qs = kategorie ? `?kategorie=${kategorie}` : ''
   return apiCall(API.CHECK, `/api/news${qs}`)
 }
 
+/** @deprecated Use `getNewsArtikel()` from `@/lib/api/fund24`. */
 export async function getNewsArtikel(slug: string): Promise<NewsArtikel> {
   return apiCall(API.CHECK, `/api/news/${slug}`)
 }
@@ -198,11 +217,14 @@ export async function getBeraterProfil(
 // /api/berater/* on API.FUND24, replacing the legacy API.CHECK calls.
 
 // ── BERATER ABWICKLUNG ───────────────────────────────────────
+// @deprecated: fund24.ts has canonical implementations.
 
+/** @deprecated Use `getProvisionVertraege()` from `@/lib/api/fund24`. */
 export async function getProvisionVertraege(token: string): Promise<{ provisionen: Provision[] }> {
   return apiCall(API.CHECK, '/api/berater/provision-vertraege', undefined, token)
 }
 
+/** @deprecated Use `uploadAbwicklungDokument()` from `@/lib/api/fund24`. */
 export async function uploadAbwicklungDokument(
   provisionId: string, formData: FormData, token: string
 ): Promise<{ ok: boolean }> {
@@ -217,15 +239,21 @@ export async function uploadAbwicklungDokument(
 }
 
 // ── ADMIN ────────────────────────────────────────────────────
+// @deprecated block: fund24.ts has parallel implementations that hit the
+// canonical FUND24 worker. Migrate page-by-page, remove from here once
+// all callers are on the fund24.ts version.
 
+/** @deprecated Use `getAdminDashboard()` from `@/lib/api/fund24`. */
 export async function getAdminDashboard(token: string): Promise<AdminDashboard> {
   return apiCall(API.CHECK, '/api/admin/dashboard', undefined, token)
 }
 
+/** @deprecated Use `getAdminUsers()` from `@/lib/api/fund24`. */
 export async function getAdminUsers(token: string): Promise<{ users: Nutzer[] }> {
   return apiCall(API.CHECK, '/api/admin/users', undefined, token)
 }
 
+/** @deprecated Use `updateAdminUser()` from `@/lib/api/fund24`. */
 export async function updateAdminUser(
   id: string,
   daten: { role?: Nutzer['role']; deleted_at?: string },
@@ -237,6 +265,7 @@ export async function updateAdminUser(
   }, token)
 }
 
+/** @deprecated Use `getAdminProvisionen()` from `@/lib/api/fund24`. */
 export async function getAdminProvisionen(token: string): Promise<{ provisionen: Provision[] }> {
   return apiCall(API.CHECK, '/api/admin/provisionen', undefined, token)
 }

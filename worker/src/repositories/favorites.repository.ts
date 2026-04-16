@@ -1,4 +1,10 @@
-// Favorites Repository - Data access layer for the favorites table (foerderprogramme D1)
+// Favorites Repository — canonical data-access for the `favorites` table.
+//
+// Single source of truth across the platform. Two legacy tables
+// (bafa_antraege.foerdermittel_favoriten, bafa_antraege.me_favoriten) were
+// renamed to _deprecated_* in migration 031 and have no readers/writers.
+// All favorite CRUD goes through this module; the sub-app lives at
+// worker/src/routes/foerdermittel/favoriten.ts and binds FOERDER_DB.
 
 export interface FavoriteWithProgram {
   id: string;

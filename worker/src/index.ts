@@ -264,11 +264,16 @@ export default {
         }
 
         try {
-          // Daily backup at 02:00 UTC
+          // Daily backup at 02:00 UTC — covers all 5 D1 databases so a
+          // disaster-recovery restore doesn't lose foerderprogramme catalog,
+          // check sessions, or learnings (Phase-4 L-P4-05).
           await performBackup(
             [
               { name: "zfbf-db", db: env.DB },
               { name: "bafa_antraege", db: env.BAFA_DB },
+              { name: "bafa_learnings", db: env.BAFA_CONTENT },
+              { name: "foerderprogramme", db: env.FOERDER_DB },
+              { name: "foerdermittel-checks", db: env.CHECK_DB },
             ],
             env.REPORTS
           );

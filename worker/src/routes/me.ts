@@ -11,6 +11,11 @@ import { unternehmen as unternehmenRoutes } from "./unternehmen";
 
 const me = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
+// Defense-in-depth: router-level guard. Any new /api/me/* handler is then
+// auto-protected — developers can't accidentally ship an unauthenticated
+// /me endpoint. Per-handler requireAuth below becomes redundant-but-safe.
+me.use("/*", requireAuth);
+
 function forward(targetPath: string) {
   return async (c: import("hono").Context<{ Bindings: Bindings; Variables: Variables }>) => {
     const url = new URL(c.req.url);

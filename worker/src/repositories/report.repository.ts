@@ -1,4 +1,16 @@
-// Report Repository - Data access layer for reports (zfbf-db) and antraege (bafa_antraege)
+// Report Repository — data-access for reports (zfbf-db) and the BAFA
+// beratungsbericht antraege table (bafa_antraege.antraege).
+//
+// NAMING COLLISION WARNING:
+//   `antraege`     = BAFA-Beratungsbericht wrapper (this file, 16 cols).
+//   `antraege_v2`  = Fördermittel funding-platform antrag (19 cols,
+//                    see worker/src/routes/antraege.ts).
+// These are two DIFFERENT features that happen to share a noun. The older
+// `antraege` table backs `/api/reports/*` + Stripe unlock flow; `_v2`
+// backs `/api/antraege/*` + the dokumente/zugriff features. The Phase-4
+// audit flags this collision (H-P4-02); eventual consolidation requires
+// renaming one of them. Until then, callers MUST be explicit about which
+// table they mean — this repo file only ever touches `antraege` (legacy).
 import type { AntragRow, AntragBausteinRow } from "../types";
 
 // ============================================
