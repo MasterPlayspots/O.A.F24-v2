@@ -103,7 +103,8 @@ describe("Payment Routes", () => {
         headers: { "Content-Type": "application/json", "stripe-signature": "t=123,v1=invalidsig" },
         body: '{"type":"checkout.session.completed"}',
       });
-      expect(res.status).toBe(403);
+      // 401 Unauthorized: no valid session (403 would mean forbidden despite auth)
+      expect(res.status).toBe(401);
     });
   });
 });
