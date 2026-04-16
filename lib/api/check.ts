@@ -92,17 +92,22 @@ export async function sendeAnfrage(daten: AnfrageDaten, token: string): Promise<
   return { id: r.anfrage?.id ?? '' }
 }
 
+const ACCEPTABLE_UPDATE_STATUSES = ['angenommen', 'abgelehnt'] as const
+type AcceptableUpdateStatus = (typeof ACCEPTABLE_UPDATE_STATUSES)[number]
+
 export async function updateAnfrage(id: string, status: AnfrageStatus, token: string): Promise<{ ok: boolean }> {
-  // Sprint 16: PATCH /api/berater/anfragen/:id (berater accept/reject)
-  // Worker only allows status ∈ {angenommen, abgelehnt}; map other values
-  // to abgelehnt as a safe default to keep the legacy AnfrageStatus union
-  // ('angenommen' | 'abgelehnt' | 'pending' | …) compatible.
-  const mapped: 'angenommen' | 'abgelehnt' =
-    status === 'angenommen' ? 'angenommen' : 'abgelehnt'
+  // Worker only allows PATCH with status ∈ {angenommen, abgelehnt}. Validate
+  // explicitly — silent coercion of unknown statuses to 'abgelehnt' used to
+  // hide typos and stale UI state; now we fail fast with a clear error.
+  if (!ACCEPTABLE_UPDATE_STATUSES.includes(status as AcceptableUpdateStatus)) {
+    throw new Error(
+      `Ungültiger Anfrage-Status "${status}". Erlaubt: ${ACCEPTABLE_UPDATE_STATUSES.join(', ')}`,
+    )
+  }
   const r = await apiCall<{ success: boolean }>(
     API.FUND24,
     `/api/berater/anfragen/${id}`,
-    { method: 'PATCH', body: JSON.stringify({ status: mapped }) },
+    { method: 'PATCH', body: JSON.stringify({ status }) },
     token
   )
   return { ok: !!r.success }

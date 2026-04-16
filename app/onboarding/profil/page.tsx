@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/lib/store/authStore';
 import { updateBeraterProfil } from '@/lib/api/berater';
+import { BRANCHEN } from '@/lib/constants/branchen';
 import { SchrittAnzeige } from '@/components/shared/SchrittAnzeige';
 import { LadeSpinner } from '@/components/shared/LadeSpinner';
 import { FehlerBox } from '@/components/shared/FehlerBox';
@@ -22,18 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const branchenOptionen = [
-  'IT',
-  'Handwerk',
-  'Handel',
-  'Gastronomie',
-  'Produktion',
-  'Logistik',
-  'Energie',
-  'Beratung',
-  'Gesundheit',
-  'Bildung',
-];
+const branchenOptionen = BRANCHEN;
 
 const bundeslaender = [
   'Baden-Württemberg',

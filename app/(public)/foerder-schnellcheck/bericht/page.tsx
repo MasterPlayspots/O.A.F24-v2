@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -44,11 +44,12 @@ export default function BerichtPage() {
     mode: 'onChange',
   })
 
-  // Redirect guard
-  if (!store.sessionId || store.phase !== 'email_formular') {
-    router.push('/foerder-schnellcheck')
-    return null
-  }
+  // Redirect guard — must run as effect, not during render.
+  const shouldRedirect = !store.sessionId || store.phase !== 'email_formular'
+  useEffect(() => {
+    if (shouldRedirect) router.push('/foerder-schnellcheck')
+  }, [shouldRedirect, router])
+  if (shouldRedirect) return null
 
   const onSubmit = async (data: FormData) => {
     try {

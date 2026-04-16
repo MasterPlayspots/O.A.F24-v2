@@ -8,11 +8,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import * as Sentry from '@sentry/nextjs'
 import { resetPassword } from '@/lib/api/auth'
+import { PASSWORD_REGEX, PASSWORD_ERROR } from '@/lib/validation/password'
 
 const passwordSchema = z.object({
-  password: z.string()
-    .min(8, 'Passwort muss mindestens 8 Zeichen lang sein')
-    .regex(/[!@#$%^&*(),.?":{}|<>]/, 'Passwort muss mindestens ein Sonderzeichen enthalten'),
+  password: z.string().regex(PASSWORD_REGEX, PASSWORD_ERROR),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwörter stimmen nicht überein",

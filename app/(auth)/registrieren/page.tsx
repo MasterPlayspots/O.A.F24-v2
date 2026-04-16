@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { register as apiRegister } from '@/lib/api/auth'
 import { useAuth } from '@/lib/store/authStore'
+import { PASSWORD_REGEX, PASSWORD_ERROR } from '@/lib/validation/password'
 import { ApiError } from '@/lib/api/client'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -19,10 +20,7 @@ import { Suspense } from 'react'
 
 const schema = z.object({
   email: z.string().email('Bitte eine gültige E-Mail eingeben'),
-  password: z
-    .string()
-    .min(8, 'Mindestens 8 Zeichen')
-    .regex(/[!@#$%^&*]/, 'Mindestens ein Sonderzeichen (!@#$%^&*)'),
+  password: z.string().regex(PASSWORD_REGEX, PASSWORD_ERROR),
   firstName: z.string().min(1, 'Vorname ist erforderlich'),
   lastName: z.string().min(1, 'Nachname ist erforderlich'),
   company: z.string().optional(),

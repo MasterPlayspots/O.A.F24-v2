@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FehlerBox } from '@/components/shared/FehlerBox';
 import { NeueVorlageModal } from '@/components/vorlagen/NeueVorlageModal';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { Plus, Copy, Trash2, FileText, Check } from 'lucide-react';
 
 export default function VorlagenPage() {
@@ -62,7 +63,6 @@ export default function VorlagenPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Vorlage wirklich löschen?')) return;
     setDeletingId(id);
     try {
       await deleteVorlage(id);
@@ -137,15 +137,23 @@ export default function VorlagenPage() {
                       <><Copy className="w-3.5 h-3.5 mr-1.5" /> Verwenden</>
                     )}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDelete(v.id)}
-                    disabled={deletingId === v.id}
-                    className="bg-architect-error/20 border-0 text-architect-error-container hover:bg-architect-error/30 hover:text-white"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={deletingId === v.id}
+                        className="bg-architect-error/20 border-0 text-architect-error-container hover:bg-architect-error/30 hover:text-white"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    }
+                    title="Vorlage löschen"
+                    description="Möchten Sie diese Vorlage wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+                    onConfirm={() => handleDelete(v.id)}
+                    confirmText="Löschen"
+                    variant="destructive"
+                  />
                 </div>
               </Card>
             ))}
