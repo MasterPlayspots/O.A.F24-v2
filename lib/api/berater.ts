@@ -37,7 +37,9 @@ export interface ProfilFormData {
   displayName: string
   region: string
   branchen: string[]
+  spezialisierungen?: string[]
   bio?: string
+  websiteUrl?: string
   verfuegbar: boolean
 }
 
@@ -61,8 +63,9 @@ export async function updateBeraterProfil(data: ProfilFormData): Promise<Berater
         display_name: data.displayName,
         region: data.region,
         branchen: data.branchen,
-        spezialisierungen: [],
+        spezialisierungen: data.spezialisierungen ?? [],
         bio: data.bio || null,
+        website: data.websiteUrl || null,
         verfuegbar: data.verfuegbar,
       }),
     },

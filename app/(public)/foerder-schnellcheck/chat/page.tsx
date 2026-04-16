@@ -29,6 +29,9 @@ export default function ChatPage() {
   }, [shouldRedirect, router])
   if (shouldRedirect) return null
 
+  // After the guard, aktiveFrage is guaranteed non-null — but TS can't
+  // narrow across the useEffect boundary. Pull into a local const.
+  const aktiveFrage = store.aktiveFrage!
   const progress = ((store.aktiveFrageIndex + 1) / store.fragen.length) * 100
 
   const handleSubmit = async () => {
@@ -44,7 +47,7 @@ export default function ChatPage() {
       }
 
       let answer = ''
-      switch (store.aktiveFrage.antwortTyp) {
+      switch (aktiveFrage.antwortTyp) {
         case 'ja_nein':
           answer = selectedAnswer
           break
@@ -66,7 +69,7 @@ export default function ChatPage() {
       }
 
       // Send answer
-      await sendeAntwort(store.sessionId, store.aktiveFrage.id, answer)
+      await sendeAntwort(store.sessionId, aktiveFrage.id, answer)
 
       // Check if last question
       if (store.aktiveFrageIndex === store.fragen.length - 1) {
@@ -122,7 +125,7 @@ export default function ChatPage() {
 
       {/* Question Card */}
       <motion.div
-        key={store.aktiveFrage.id}
+        key={aktiveFrage.id}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
@@ -131,18 +134,18 @@ export default function ChatPage() {
         {/* Question */}
         <div className="space-y-2">
           <h2 className="font-display text-2xl font-bold text-white">
-            {store.aktiveFrage.frage}
+            {aktiveFrage.frage}
           </h2>
-          {store.aktiveFrage.kontext && (
+          {aktiveFrage.kontext && (
             <p className="text-white/70 text-sm">
-              {store.aktiveFrage.kontext}
+              {aktiveFrage.kontext}
             </p>
           )}
         </div>
 
         {/* Answer Input */}
         <div className="space-y-4">
-          {store.aktiveFrage.antwortTyp === 'ja_nein' && (
+          {aktiveFrage.antwortTyp === 'ja_nein' && (
             <div className="flex gap-3 sm:flex-row flex-col">
               <Button
                 size="lg"
@@ -163,10 +166,10 @@ export default function ChatPage() {
             </div>
           )}
 
-          {store.aktiveFrage.antwortTyp === 'auswahl' && (
+          {aktiveFrage.antwortTyp === 'auswahl' && (
             <RadioGroup value={selectedAnswer} onValueChange={setSelectedAnswer}>
               <div className="space-y-3">
-                {store.aktiveFrage.optionen?.map((option) => (
+                {aktiveFrage.optionen?.map((option) => (
                   <div key={option} className="flex items-center space-x-3 p-3 rounded-lg bg-architect-surface-low/40 hover:bg-architect-surface/40 cursor-pointer">
                     <RadioGroupItem value={option} id={option} />
                     <Label htmlFor={option} className="cursor-pointer flex-1 text-white">
@@ -178,7 +181,7 @@ export default function ChatPage() {
             </RadioGroup>
           )}
 
-          {store.aktiveFrage.antwortTyp === 'text' && (
+          {aktiveFrage.antwortTyp === 'text' && (
             <Input
               placeholder="Ihre Antwort..."
               value={textAnswer}
@@ -189,7 +192,7 @@ export default function ChatPage() {
             />
           )}
 
-          {store.aktiveFrage.antwortTyp === 'zahl' && (
+          {aktiveFrage.antwortTyp === 'zahl' && (
             <Input
               type="number"
               placeholder="Zahl eingeben..."

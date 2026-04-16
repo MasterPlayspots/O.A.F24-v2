@@ -20,10 +20,10 @@ import { motion } from 'framer-motion'
 
 const schema = z.object({
   email: z.string().email('Bitte geben Sie eine gültige E-Mail ein'),
-  datenschutz: z.literal(true, {
-    errorMap: () => ({ message: 'Bitte akzeptieren Sie die Datenschutzerklärung' }),
+  datenschutz: z.boolean().refine((v) => v === true, {
+    message: 'Bitte akzeptieren Sie die Datenschutzerklärung',
   }),
-  marketing: z.boolean().optional().default(false),
+  marketing: z.boolean().optional(),
 })
 
 type FormData = z.infer<typeof schema>

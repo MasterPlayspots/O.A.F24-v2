@@ -53,7 +53,10 @@ export async function generateFoerdercheckPDF(data: FoerdercheckPDFInput): Promi
     p.score != null ? `${p.score}%` : '—',
   ])
 
-  const autoTable = (autoTableMod as unknown as { default: (d: jsPDF, o: Record<string, unknown>) => void }).default
+  // jspdf-autotable attaches itself to the jsPDF prototype; for dynamic
+  // import we call it explicitly. The `as unknown` casts work around
+  // the module's dual CJS/ESM shape.
+  const autoTable = (autoTableMod as unknown as { default: (d: InstanceType<typeof jsPDF>, o: Record<string, unknown>) => void }).default
   autoTable(doc, {
     startY: 70,
     head: [['#', 'Programm', 'Förderart', 'Betrag', 'Match']],

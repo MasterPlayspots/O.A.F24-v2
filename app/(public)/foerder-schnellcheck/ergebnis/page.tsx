@@ -21,6 +21,8 @@ export default function ErgebnisPage() {
   }, [shouldRedirect, router])
   if (shouldRedirect) return null
 
+  const scoring = store.scoring!
+
   const formatCurrency = (value: number | undefined) => {
     if (!value) return '—'
     return new Intl.NumberFormat('de-DE', {
@@ -49,7 +51,7 @@ export default function ErgebnisPage() {
 
       {/* Top 3 Programs */}
       <div className="space-y-4">
-        {store.scoring.top3.map((treffer, index) => (
+        {scoring.top3.map((treffer, index) => (
           <motion.div
             key={treffer.programmId}
             initial={{ opacity: 0, y: 20 }}
@@ -132,11 +134,11 @@ export default function ErgebnisPage() {
         </p>
         <div className="flex items-baseline gap-2">
           <span className="font-display text-4xl sm:text-5xl font-bold text-architect-primary-light">
-            {formatCurrency(store.scoring.gesamtMin)}
+            {formatCurrency(scoring.gesamtMin)}
           </span>
           <span className="text-white/60">bis</span>
           <span className="font-display text-4xl sm:text-5xl font-bold text-architect-primary-light">
-            {formatCurrency(store.scoring.gesamtMax)}
+            {formatCurrency(scoring.gesamtMax)}
           </span>
         </div>
         <p className="text-sm text-white/70 mt-2">

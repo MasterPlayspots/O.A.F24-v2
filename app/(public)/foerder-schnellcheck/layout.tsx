@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
@@ -30,7 +31,7 @@ export default function FoerderSchnellcheckLayout({
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center px-6 py-8 sm:px-8 sm:py-12">
         <div className="w-full max-w-2xl">
-          {children}
+          <Suspense>{children}</Suspense>
         </div>
       </main>
 
