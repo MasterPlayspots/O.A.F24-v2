@@ -16,8 +16,8 @@ export default function SupportPage() {
 
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           {[
-            { title: 'Abwicklung & Prozesse', desc: 'Fragen zu Antragsverfahren, Dokumentation und Förderrichtlinien', email: 'info@fund24.io', time: 'Durchschnittliche Antwortzeit: 4 Stunden' },
-            { title: 'Technischer Support', desc: 'Probleme mit der Plattform, Bugs und technische Fragen', email: 'info@fund24.io', time: 'Durchschnittliche Antwortzeit: 2 Stunden' },
+            { title: 'Abwicklung & Prozesse', desc: 'Fragen zu Antragsverfahren, Dokumentation und Förderrichtlinien', email: 'support@fund24.io', time: 'Durchschnittliche Antwortzeit: 4 Stunden' },
+            { title: 'Technischer Support', desc: 'Probleme mit der Plattform, Bugs und technische Fragen', email: 'support@fund24.io', time: 'Durchschnittliche Antwortzeit: 2 Stunden' },
             { title: 'Telefonischer Support', desc: 'Direkter Kontakt für dringende Anliegen', email: '+49 151 29617192', isPhone: true, time: 'Mo-Fr 9:00-17:00 Uhr' },
           ].map((c) => (
             <div key={c.title} className="bg-architect-surface/60 rounded-lg p-6 hover:bg-architect-surface/40 transition-colors">
@@ -52,8 +52,8 @@ export default function SupportPage() {
               <p className="text-white/80 text-sm mb-3">
                 Für kritische Systemausfälle außerhalb unserer Servicezeiten:
               </p>
-              <a href="mailto:info@fund24.io" className="text-architect-primary-light hover:text-white font-semibold">
-                info@fund24.io
+              <a href="mailto:support@fund24.io" className="text-architect-primary-light hover:text-white font-semibold">
+                support@fund24.io
               </a>
               <p className="text-xs text-white/60 mt-2">
                 Bitte nutzen Sie diesen Kanal nur für kritische Störungen.
@@ -69,8 +69,8 @@ export default function SupportPage() {
             {[
               { q: '1. Wie lange dauert es, bis mein Support-Anliegen bearbeitet wird?', a: 'Unser Support-Team bearbeitet Anfragen in der Regel innerhalb von 2-4 Stunden während der Geschäftszeiten. Dringende technische Probleme erhalten höchste Priorität. Für nicht-technische Fragen zu Abwicklung und Prozessen kalkulieren wir bis zu 4 Stunden ein.' },
               { q: '2. Kann ich fund24 auch per Telefon erreichen?', a: 'Ja, wir bieten Telefon-Support unter +49 151 29617192 montags bis freitags von 09:00 bis 17:00 Uhr an. Für eine schnellere Bearbeitung komplexer Anliegen empfehlen wir, eine E-Mail zu schreiben und die gewünschte Rückrufzeit anzugeben.' },
-              { q: '3. Meine Website oder App funktioniert nicht. Wer ist der richtige Kontakt?', a: 'Für alle technischen Probleme wenden Sie sich bitte an unser Technical Support Team unter info@fund24.io. Bitte beschreiben Sie das Problem so detailliert wie möglich und geben Sie Screenshots oder Fehlermeldungen an, damit wir schneller helfen können.' },
-              { q: '4. Was ist der Unterschied zwischen den Support-Adressen?', a: 'Beide Adressen werden vom selben Team betreut. Bitte kontaktieren Sie uns einfach unter info@fund24.io.' },
+              { q: '3. Meine Website oder App funktioniert nicht. Wer ist der richtige Kontakt?', a: 'Für alle technischen Probleme wenden Sie sich bitte an unser Technical Support Team unter support@fund24.io. Bitte beschreiben Sie das Problem so detailliert wie möglich und geben Sie Screenshots oder Fehlermeldungen an, damit wir schneller helfen können.' },
+              { q: '4. Was ist der Unterschied zwischen den Support-Adressen?', a: 'Beide Adressen werden vom selben Team betreut. Bitte kontaktieren Sie uns einfach unter support@fund24.io.' },
               { q: '5. Gibt es einen Ticketing-System für meine Support-Anfragen?', a: 'Ja! Bei jeder E-Mail-Anfrage erhalten Sie automatisch eine Ticket-Nummer. Mit dieser Nummer können Sie die Bearbeitung jederzeit nachverfolgbar halten und beschleunigen. Bitte geben Sie die Ticket-Nummer in jeder Nachricht an.' },
             ].map((f) => (
               <div key={f.q} className="pb-6">
@@ -86,7 +86,7 @@ export default function SupportPage() {
           <p className="text-architect-primary-light mb-6">
             Kontaktieren Sie uns direkt – unser Team freut sich auf Ihre Nachricht!
           </p>
-          <a href="mailto:info@fund24.io" className="inline-block bg-white text-architect-primary px-6 py-3 rounded-lg font-semibold hover:bg-white/90 transition-colors">
+          <a href="mailto:support@fund24.io" className="inline-block bg-white text-architect-primary px-6 py-3 rounded-lg font-semibold hover:bg-white/90 transition-colors">
             E-Mail schreiben
           </a>
         </div>

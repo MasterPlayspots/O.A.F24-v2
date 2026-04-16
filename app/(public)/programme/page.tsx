@@ -6,7 +6,7 @@ export const revalidate = 3600
 
 export const metadata = {
   title: 'Förderprogramme | fund24',
-  description: 'Durchsuchen Sie 2.500+ Förderprogramme für Ihr Unternehmen — nach Bundesland, Förderart und Bereich.',
+  description: 'Durchsuchen Sie 3.400+ Förderprogramme für Ihr Unternehmen — nach Bundesland, Förderart und Bereich.',
 }
 
 export default async function ProgrammePage() {

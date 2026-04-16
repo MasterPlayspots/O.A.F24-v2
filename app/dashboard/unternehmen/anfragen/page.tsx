@@ -107,7 +107,7 @@ export default function UnternehmenAnfragenPage() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="font-display text-4xl font-bold text-white mb-2">Anfragen</h1>
-          <p className="text-white/60">Übersicht aller Ihre Anfragen an Berater</p>
+          <p className="text-white/60">Übersicht aller Ihrer Anfragen an Berater</p>
         </div>
 
         {anfragen.length === 0 ? (

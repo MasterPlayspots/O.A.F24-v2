@@ -116,6 +116,8 @@ export default function AdminPage() {
     { label: 'Nutzer verwalten', href: '/admin/users', description: 'Rollen und Zugang' },
     { label: 'Aktuelles', href: '/admin/aktuelles', description: 'News-Artikel verwalten' },
     { label: 'Provisionen', href: '/admin/provisionen', description: 'Berater-Provisionen' },
+    { label: 'Audit Logs', href: '/admin/audit-logs', description: 'Compliance & Forensik' },
+    { label: 'Email Outbox', href: '/admin/email-outbox', description: 'Gesendete E-Mails + Retry' },
   ]
 
   return (

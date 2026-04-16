@@ -1,11 +1,12 @@
 import { createMetadata } from '@/lib/seo/metadata'
 
 export const metadata = createMetadata({
-  title: 'Aktuelles',
-  description: 'Neuigkeiten und Updates rund um Fördermittel und fund24.',
-  path: '/aktuelles',
+  title: 'Berichte',
+  description: 'Dieser Bereich ist nur für angemeldete Nutzer zugänglich.',
+  path: '/dashboard/berater/berichte',
+  noIndex: true,
 })
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return children
 }

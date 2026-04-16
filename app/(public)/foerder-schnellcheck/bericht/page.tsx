@@ -159,7 +159,7 @@ export default function BerichtPage() {
             {/* Legal Note */}
             <div className="bg-architect-surface-low/40 rounded-lg p-4 text-xs text-white/60 space-y-2">
               <p>
-                Mit der Anmeldung erklären Sie sich mit unserer Datenschutzerklärung einverstanden. Wir verwenden Ihre Daten nur zur Zusendung des Reports und zum Versand von Newsletters.
+                Mit der Anmeldung erklären Sie sich mit unserer Datenschutzerklärung einverstanden. Wir verwenden Ihre Daten nur zur Zusendung des Reports und zum Versand von Newslettern.
               </p>
               <p>
                 Sie können sich jederzeit abmelden.

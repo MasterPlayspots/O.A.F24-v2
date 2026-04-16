@@ -16,7 +16,7 @@ const SCHRITTE = ['Angaben', 'Chat', 'Dokumente', 'Analyse', 'Ergebnisse']
 
 const PHASES = [
   'Bedarfs-Analyst läuft...',
-  'Programm-Scanner prüft 2.500+ Programme...',
+  'Programm-Scanner prüft 3.400+ Programme...',
   'Regional-Experte prüft Bundesland-Programme...',
   'Kumulierungs-Jurist prüft Kombinationen...',
   'Kombinations-Optimierer kalkuliert...',

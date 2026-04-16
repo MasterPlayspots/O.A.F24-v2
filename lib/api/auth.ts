@@ -122,8 +122,16 @@ export async function resetPassword(token: string, password: string) {
   })
 }
 export async function logout(token: string) {
-  if (typeof document !== 'undefined') {
-    document.cookie = 'fund24-auth=; path=/; max-age=0'
+  // Clear the HttpOnly session cookie via Next.js same-origin endpoint.
+  // `document.cookie =` cannot touch HttpOnly cookies (browser ignores it),
+  // so the previous no-op write to 'fund24-auth' was wrong on both axes:
+  // wrong cookie name and wrong mechanism.
+  if (typeof fetch !== 'undefined') {
+    try {
+      await fetch('/api/session', { method: 'DELETE', credentials: 'same-origin' })
+    } catch {
+      // Best-effort; worker logout below is the authoritative invalidation.
+    }
   }
   return apiCall<{ ok: boolean }>(API.FUND24, '/api/auth/logout', { method: 'POST' }, token)
 }

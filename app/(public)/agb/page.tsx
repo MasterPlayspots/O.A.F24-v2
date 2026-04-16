@@ -48,14 +48,14 @@ export default function AGBPage() {
 
             <h3 className="font-display font-semibold text-white mt-4">2.3 Verfügbarkeit</h3>
             <p>
-              Wir streben eine Verfügbarkeit von 99% an, können aber keine Garantie übernehmen. Wir behhalten uns das Recht vor, die Plattform zu Wartungszwecken zu unterbrechen, sofern wir Sie angemessen benachrichtigen.
+              Wir streben eine Verfügbarkeit von 99% an, können aber keine Garantie übernehmen. Wir behalten uns das Recht vor, die Plattform zu Wartungszwecken zu unterbrechen, sofern wir Sie angemessen benachrichtigen.
             </p>
           </div>
         </section>
 
         {/* Registrierung und Konten */}
         <section className="mb-12">
-          <h2 className="font-display text-2xl font-bold text-white mb-4">3. Registrierung und Konteniverwaltung</h2>
+          <h2 className="font-display text-2xl font-bold text-white mb-4">3. Registrierung und Kontenverwaltung</h2>
           <div className="space-y-4 text-white/80">
             <p>
               <strong>3.1 Registrierungsvoraussetzungen:</strong> Sie müssen mindestens 18 Jahre alt sein und über die gesetzliche Handlungsfähigkeit verfügen.
@@ -86,7 +86,7 @@ export default function AGBPage() {
               <strong>4.3 Zahlung:</strong> Zahlungen erfolgen gemäß Rechnungsstellung. Zahlungsverzug führt zu Strafzinsen in Höhe von 1% pro Monat.
             </p>
             <p>
-              <strong>4.4 Keine Rückerstattung von Provisionen:</strong> Zahlte Provisionen werden nicht erstattet, auch wenn ein Antrag später abgelehnt wird.
+              <strong>4.4 Keine Rückerstattung von Provisionen:</strong> Gezahlte Provisionen werden nicht erstattet, auch wenn ein Antrag später abgelehnt wird.
             </p>
           </div>
         </section>
@@ -180,7 +180,7 @@ export default function AGBPage() {
           <h2 className="font-display text-2xl font-bold text-white mb-4">10. Änderungen der AGB</h2>
           <div className="text-white/80">
             <p>
-              Wir behaften uns das Recht vor, diese AGB jederzeit mit 30 Tagen Vorlaufzeit zu ändern. Änderungen werden per E-Mail mitgeteilt. Durch Weitergenutzung der Plattform akzeptieren Sie die neuen Bedingungen.
+              Wir behalten uns das Recht vor, diese AGB jederzeit mit 30 Tagen Vorlaufzeit zu ändern. Änderungen werden per E-Mail mitgeteilt. Durch Weitergenutzung der Plattform akzeptieren Sie die neuen Bedingungen.
             </p>
           </div>
         </section>
@@ -216,7 +216,7 @@ export default function AGBPage() {
               <strong>Fröba Sales Solutions UG (haftungsbeschränkt)</strong><br />
               Johann-Nikolaus-Zitter Str. 31<br />
               96317 Kronach<br />
-              E-Mail: info@fund24.io<br />
+              E-Mail: support@fund24.io<br />
               Telefon: +49 151 29617192
             </p>
           </div>
@@ -225,10 +225,7 @@ export default function AGBPage() {
         {/* Letzte Aktualisierung */}
         <div className="pt-8 text-sm text-white/60">
           <p>
-            <strong>Letzte Aktualisierung:</strong> {new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
-          <p className="mt-2 italic text-architect-primary-light bg-architect-primary/20 p-3 rounded">
-            Diese AGB sind zu Demonstrationszwecken erstellt. Bitte lassen Sie diese von einem Rechtsanwalt überarbeiten und anpassen, bevor Sie mit dem öffentlichen Betrieb starten.
+            <strong>Letzte Aktualisierung:</strong> 16. April 2026
           </p>
         </div>
       </div>
