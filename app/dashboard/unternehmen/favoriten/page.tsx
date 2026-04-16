@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { Star, Trash2 } from 'lucide-react';
 
 export default function FavoritenPage() {
@@ -109,19 +110,27 @@ export default function FavoritenPage() {
                       Gespeichert am {new Date(favorit.created_at).toLocaleDateString('de-DE')}
                     </p>
                   </div>
-                  <Button
-                    onClick={() => handleRemove(favorit.programm_id)}
-                    disabled={loescht === favorit.programm_id}
-                    variant="ghost"
-                    size="sm"
-                    className="text-architect-error-container hover:text-white hover:bg-architect-error/20 shrink-0"
-                  >
-                    {loescht === favorit.programm_id ? (
-                      <LadeSpinner />
-                    ) : (
-                      <Trash2 className="w-4 h-4" />
-                    )}
-                  </Button>
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        disabled={loescht === favorit.programm_id}
+                        variant="ghost"
+                        size="sm"
+                        className="text-architect-error-container hover:text-white hover:bg-architect-error/20 shrink-0"
+                      >
+                        {loescht === favorit.programm_id ? (
+                          <LadeSpinner />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                      </Button>
+                    }
+                    title="Favorit entfernen"
+                    description="Möchten Sie dieses Programm wirklich aus Ihren Favoriten entfernen?"
+                    onConfirm={() => handleRemove(favorit.programm_id)}
+                    confirmText="Entfernen"
+                    variant="destructive"
+                  />
                 </div>
               </Card>
             ))}

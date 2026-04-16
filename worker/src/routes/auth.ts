@@ -11,6 +11,7 @@ import {
   registerRateLimit,
   forgotPasswordRateLimit,
   verifyEmailRateLimit,
+  refreshRateLimit,
 } from "../middleware/rateLimit";
 import { requireAuth } from "../middleware/auth";
 import { sendPasswordResetEmail, sendVerificationCodeEmail } from "../services/email";
@@ -238,7 +239,7 @@ auth.post("/login", loginRateLimit, async (c) => {
 });
 
 // POST /refresh - uses JOIN to avoid N+1 query
-auth.post("/refresh", async (c) => {
+auth.post("/refresh", refreshRateLimit, async (c) => {
   const { refreshToken } = await c.req.json();
   if (!refreshToken) return c.json({ success: false, error: "Refresh Token erforderlich" }, 400);
 

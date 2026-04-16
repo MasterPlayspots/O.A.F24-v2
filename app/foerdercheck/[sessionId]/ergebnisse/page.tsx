@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ErgebnisKarte } from '@/components/foerdercheck/ErgebnisKarte'
 import { BeraterMatchKarte } from '@/components/foerdercheck/BeraterMatchKarte'
+import { toast } from 'sonner'
 import { Download, CheckCircle2 } from 'lucide-react'
 
 const SCHRITTE = ['Angaben', 'Chat', 'Dokumente', 'Analyse', 'Ergebnisse']
@@ -82,7 +83,7 @@ export default function ErgebnissePage() {
 
   const handleDownloadPDF = () => {
     // Placeholder for PDF download functionality
-    alert('PDF-Download wird in Kürze implementiert')
+    toast.info('PDF-Download wird in Kürze implementiert')
   }
 
   if (loading || isLoading) {

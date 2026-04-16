@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePreCheck } from '@/lib/store/preCheckStore'
 import { Button } from '@/components/ui/button'
@@ -12,11 +13,13 @@ export default function ErgebnisPage() {
   const router = useRouter()
   const store = usePreCheck()
 
-  // Redirect guard
-  if (!store.sessionId || store.phase !== 'ergebnis' || !store.scoring) {
-    router.push('/foerder-schnellcheck')
-    return null
-  }
+  // Redirect guard — must run as effect, not during render.
+  const shouldRedirect =
+    !store.sessionId || store.phase !== 'ergebnis' || !store.scoring
+  useEffect(() => {
+    if (shouldRedirect) router.push('/foerder-schnellcheck')
+  }, [shouldRedirect, router])
+  if (shouldRedirect) return null
 
   const formatCurrency = (value: number | undefined) => {
     if (!value) return '—'

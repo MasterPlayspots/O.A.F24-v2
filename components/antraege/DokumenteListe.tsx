@@ -2,6 +2,7 @@
 
 // DokumenteListe — Liste + Upload + Delete von Antrag-Dokumenten.
 import { useRef, useState } from 'react';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 
 export interface AntragDokument {
   id: string;
@@ -51,7 +52,6 @@ export function DokumenteListe({ dokumente, onUpload, onDelete }: Props) {
 
   const handleDelete = async (id: string) => {
     if (!onDelete) return;
-    if (!confirm('Dokument wirklich löschen?')) return;
     setDeleting(id);
     setError('');
     try {
@@ -120,16 +120,24 @@ export function DokumenteListe({ dokumente, onUpload, onDelete }: Props) {
                 )}
               </div>
               {onDelete && (
-                <button
-                  type="button"
-                  onClick={() => handleDelete(d.id)}
-                  disabled={deleting === d.id}
-                  className="shrink-0 px-3 py-1.5 rounded-md font-body text-xs text-architect-error-container
-                             hover:bg-architect-error/20 transition disabled:opacity-40"
-                  aria-label={`${d.filename} löschen`}
-                >
-                  {deleting === d.id ? '…' : 'Löschen'}
-                </button>
+                <ConfirmDialog
+                  trigger={
+                    <button
+                      type="button"
+                      disabled={deleting === d.id}
+                      className="shrink-0 px-3 py-1.5 rounded-md font-body text-xs text-architect-error-container
+                                 hover:bg-architect-error/20 transition disabled:opacity-40"
+                      aria-label={`${d.filename} löschen`}
+                    >
+                      {deleting === d.id ? '…' : 'Löschen'}
+                    </button>
+                  }
+                  title="Dokument löschen"
+                  description={`Möchten Sie "${d.filename}" wirklich löschen?`}
+                  onConfirm={() => handleDelete(d.id)}
+                  confirmText="Löschen"
+                  variant="destructive"
+                />
               )}
             </div>
           ))}

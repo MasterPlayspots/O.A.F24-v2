@@ -79,7 +79,7 @@ payments.post("/stripe/webhook", async (c) => {
   if (!sig) return c.json({ error: "Missing signature" }, 400);
   const payload = await c.req.text();
   if (!(await verifyStripeSignature(payload, sig, c.env.STRIPE_WEBHOOK_SECRET)))
-    return c.json({ error: "Invalid signature" }, 403);
+    return c.json({ error: "Invalid signature" }, 401);
 
   const event = JSON.parse(payload);
   const eventKey = `stripe:${event.id}`;
@@ -101,7 +101,7 @@ payments.post("/stripe/webhook", async (c) => {
           eventType: AUDIT_EVENTS.PAYMENT,
           detail: `No payment record for Stripe ${s.id} / ${reportId}`,
         });
-        return c.json({ received: true, error: "No matching payment" });
+        return c.json({ error: "Payment not found" }, 404);
       }
       // Verify paid amount matches stored order
       const paidCents = s.amount_total as number | undefined;
@@ -111,7 +111,7 @@ payments.post("/stripe/webhook", async (c) => {
           eventType: AUDIT_EVENTS.PAYMENT,
           detail: `Amount mismatch: paid ${paidCents} vs expected ${storedPayment.amount} for ${reportId}`,
         });
-        return c.json({ received: true, error: "Amount mismatch" });
+        return c.json({ error: "Amount mismatch" }, 400);
       }
       await OrderRepo.updatePaymentStatus(db, s.id, "completed");
       await ReportRepo.unlockReport(db, reportId, s.id);

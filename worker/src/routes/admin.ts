@@ -13,6 +13,32 @@ import * as OrderRepo from "../repositories/order.repository";
 const admin = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 admin.use("/*", requireAuth, requireRole("admin"));
 
+// Allowlist for the /check-foerdermittel batch HEAD crawler.
+// Only known-safe public hosts may be fetched; blocks poisoned rows in
+// foerderprogramme.url from pointing the worker at internal addresses.
+const CHECK_FOERDERMITTEL_ALLOWED_HOSTS = [
+  "www.foerderdatenbank.de",
+  "foerderdatenbank.de",
+  "www.foerdermittel.net",
+  "foerdermittel.net",
+  "api.bafa.de",
+  "www.bafa.de",
+  "bafa.de",
+  "www.kfw.de",
+  "kfw.de",
+];
+function isCheckFoerdermittelAllowedUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+    return CHECK_FOERDERMITTEL_ALLOWED_HOSTS.some(
+      (h) => parsed.hostname === h || parsed.hostname.endsWith("." + h),
+    );
+  } catch {
+    return false;
+  }
+}
+
 // ============================================================
 // Provisionen — list + update (admin-only)
 // Table: bafa_antraege.provisionen
@@ -278,12 +304,15 @@ admin.get("/check-foerdermittel", async (c) => {
     return c.json({ done: true, batch, summary: counts.results });
   }
 
+  const rows = programs.results as { id: number; url: string }[];
+  const safeRows = rows.filter((p) => isCheckFoerdermittelAllowedUrl(p.url));
+  const blockedCount = rows.length - safeRows.length;
   const results = await Promise.all(
-    (programs.results as { id: number; url: string }[]).map(async (p) => {
+    safeRows.map(async (p) => {
       try {
         const res = await fetch(p.url, {
           method: "HEAD",
-          redirect: "follow",
+          redirect: "error",
           signal: AbortSignal.timeout(8000),
         });
         return { id: p.id, status: res.status };
@@ -304,6 +333,7 @@ admin.get("/check-foerdermittel", async (c) => {
   return c.json({
     batch,
     checked: results.length,
+    blocked: blockedCount,
     alive: results.filter((r) => r.status === 200).length,
     dead: dead.map((d) => d.id),
     errors: results.filter((r) => r.status !== 200 && r.status !== 404 && r.status !== 410).length,

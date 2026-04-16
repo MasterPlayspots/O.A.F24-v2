@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/lib/store/authStore';
 import { updateUnternehmen } from '@/lib/api/unternehmen';
+import { BRANCHEN } from '@/lib/constants/branchen';
 import { LadeSpinner } from '@/components/shared/LadeSpinner';
 import { FehlerBox } from '@/components/shared/FehlerBox';
 import { Button } from '@/components/ui/button';
@@ -32,19 +33,7 @@ const rechtsformOptionen = [
   'eG',
 ];
 
-const branchenOptionen = [
-  'IT & Software',
-  'Handwerk',
-  'Handel',
-  'Gastronomie',
-  'Produktion & Fertigung',
-  'Logistik',
-  'Energie',
-  'Beratung & Dienstleistung',
-  'Gesundheit & Pflege',
-  'Bildung',
-  'Bau & Immobilien',
-];
+const branchenOptionen = BRANCHEN;
 
 const bundeslaender = [
   'Baden-Württemberg',

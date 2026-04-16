@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -14,14 +14,16 @@ import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { FehlerBox } from '@/components/shared/FehlerBox'
 import { LadeSpinner } from '@/components/shared/LadeSpinner'
+import Link from 'next/link'
 import { CheckCircle2, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const schema = z.object({
   email: z.string().email('Bitte geben Sie eine gültige E-Mail ein'),
-  dsgvo: z.boolean().refine((v) => v === true, {
-    message: 'Bitte akzeptieren Sie die DSGVO',
+  datenschutz: z.literal(true, {
+    errorMap: () => ({ message: 'Bitte akzeptieren Sie die Datenschutzerklärung' }),
   }),
+  marketing: z.boolean().optional().default(false),
 })
 
 type FormData = z.infer<typeof schema>
@@ -42,11 +44,12 @@ export default function BerichtPage() {
     mode: 'onChange',
   })
 
-  // Redirect guard
-  if (!store.sessionId || store.phase !== 'email_formular') {
-    router.push('/foerder-schnellcheck')
-    return null
-  }
+  // Redirect guard — must run as effect, not during render.
+  const shouldRedirect = !store.sessionId || store.phase !== 'email_formular'
+  useEffect(() => {
+    if (shouldRedirect) router.push('/foerder-schnellcheck')
+  }, [shouldRedirect, router])
+  if (shouldRedirect) return null
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -59,7 +62,7 @@ export default function BerichtPage() {
         return
       }
 
-      await fordereBerichtAn(store.sessionId, data.email, data.dsgvo)
+      await fordereBerichtAn(store.sessionId, data.email, data.datenschutz)
       setSuccess(true)
 
       // Reset store after 3 seconds
@@ -139,21 +142,38 @@ export default function BerichtPage() {
               )}
             </div>
 
-            {/* DSGVO Checkbox */}
+            {/* Datenschutz — Pflicht */}
             <div className="space-y-3">
               <div className="flex items-start gap-3">
                 <Checkbox
-                  id="dsgvo"
-                  {...register('dsgvo')}
+                  id="datenschutz"
+                  {...register('datenschutz')}
                   className="mt-1"
                 />
-                <Label htmlFor="dsgvo" className="text-sm cursor-pointer leading-relaxed text-white/80">
-                  Ich akzeptiere die Datenschutzerklärung und möchte E-Mails von fund24 erhalten
+                <Label htmlFor="datenschutz" className="text-sm cursor-pointer leading-relaxed text-white/80">
+                  Ich akzeptiere die{' '}
+                  <Link href="/datenschutz" target="_blank" className="text-architect-primary-light underline hover:text-white">
+                    Datenschutzerklärung
+                  </Link>
                 </Label>
               </div>
-              {errors.dsgvo && (
-                <p className="text-sm text-architect-error-container">{errors.dsgvo.message}</p>
+              {errors.datenschutz && (
+                <p className="text-sm text-architect-error-container">{errors.datenschutz.message}</p>
               )}
+            </div>
+
+            {/* Newsletter — Optional */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="marketing"
+                  {...register('marketing')}
+                  className="mt-1"
+                />
+                <Label htmlFor="marketing" className="text-sm cursor-pointer leading-relaxed text-white/80">
+                  Ich möchte den fund24 Newsletter mit neuen Förderprogrammen erhalten (optional)
+                </Label>
+              </div>
             </div>
 
             {/* Legal Note */}

@@ -8,6 +8,7 @@ import { getAnfragen } from '@/lib/api/check';
 import { Anfrage } from '@/lib/types';
 import { FehlerBox } from '@/components/shared/FehlerBox';
 import { LeererZustand } from '@/components/shared/LeererZustand';
+import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
 import {
   Table,
@@ -146,7 +147,16 @@ export default function UnternehmenAnfragenPage() {
                       </TableCell>
                       <TableCell>
                         {anfrage.status === 'angenommen' && (
-                          <Button variant="outline" size="sm" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              toast.info(
+                                'Nachrichten-Funktion für Unternehmen wird in Kürze freigeschaltet. Ihr Berater meldet sich in der Zwischenzeit per E-Mail.',
+                              )
+                            }
+                            className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white"
+                          >
                             Nachricht
                           </Button>
                         )}

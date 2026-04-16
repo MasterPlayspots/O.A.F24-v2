@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
 import { Star, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import type { BeraterProfil, BeraterExpertise, Dienstleistung } from '@/lib/types';
@@ -113,7 +114,7 @@ export default function BeraterDetailPage({ params }: BeraterDetailPageProps) {
       }, token);
       setShowAnfrageDialog(false);
       setAnfrageMessage('');
-      alert('Ihre Anfrage wurde erfolgreich gesendet!');
+      toast.success('Ihre Anfrage wurde erfolgreich gesendet!');
     } catch (err) {
       Sentry.captureException(err, { tags: { area: 'berater', op: 'anfrage-send' } });
       setAnfrageError(

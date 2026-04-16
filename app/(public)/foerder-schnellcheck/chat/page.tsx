@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePreCheck } from '@/lib/store/preCheckStore'
 import { sendeAntwort, fuehreScoring } from '@/lib/api/precheck'
@@ -21,11 +21,13 @@ export default function ChatPage() {
   const [textAnswer, setTextAnswer] = useState<string>('')
   const [numberAnswer, setNumberAnswer] = useState<string>('')
 
-  // Redirect guard
-  if (!store.sessionId || store.phase !== 'chat' || !store.aktiveFrage) {
-    router.push('/foerder-schnellcheck')
-    return null
-  }
+  // Redirect guard — must run as an effect, not during render.
+  const shouldRedirect =
+    !store.sessionId || store.phase !== 'chat' || !store.aktiveFrage
+  useEffect(() => {
+    if (shouldRedirect) router.push('/foerder-schnellcheck')
+  }, [shouldRedirect, router])
+  if (shouldRedirect) return null
 
   const progress = ((store.aktiveFrageIndex + 1) / store.fragen.length) * 100
 
@@ -101,6 +103,7 @@ export default function ChatPage() {
 
   return (
     <div className="space-y-8">
+      <h1 className="sr-only">Fördercheck — Fragebogen</h1>
       {/* Progress */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">

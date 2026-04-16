@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/lib/store/authStore';
 import { addDienstleistung } from '@/lib/api/berater';
+import { toast } from 'sonner';
 import { SchrittAnzeige } from '@/components/shared/SchrittAnzeige';
 import { LadeSpinner } from '@/components/shared/LadeSpinner';
 import { FehlerBox } from '@/components/shared/FehlerBox';
@@ -91,9 +92,21 @@ export default function DienstleistungenPage() {
     try {
       setFehler('');
       setLadet(true);
-      for (const entry of data.entries) {
-        await addDienstleistung(entry);
+      const results = await Promise.allSettled(
+        data.entries.map((entry) => addDienstleistung(entry)),
+      );
+      const failed = results.filter((r) => r.status === 'rejected');
+      if (failed.length > 0) {
+        const firstReason = failed[0] && (failed[0] as PromiseRejectedResult).reason;
+        const reasonMsg =
+          firstReason instanceof Error ? firstReason.message : 'unbekannter Fehler';
+        toast.error(
+          `${failed.length} von ${data.entries.length} Einträgen konnten nicht gespeichert werden (${reasonMsg}). Bitte erneut versuchen.`,
+        );
+        setFehler(`${failed.length} Einträge fehlgeschlagen`);
+        return;
       }
+      toast.success('Alle Einträge gespeichert.');
       router.push('/dashboard/berater');
     } catch (error) {
       setFehler(error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten');

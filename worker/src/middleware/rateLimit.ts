@@ -72,6 +72,15 @@ export const verifyEmailRateLimit = rateLimit({
   keyPrefix: "verify-email",
 });
 
+// Refresh-token rotation: 5 per minute per IP. Stops a stolen refresh-token
+// attacker from grinding out access tokens; legitimate clients need at most
+// one refresh every ~15min.
+export const refreshRateLimit = rateLimit({
+  maxRequests: 5,
+  windowSeconds: 60,
+  keyPrefix: "refresh",
+});
+
 // Global rate limit: 120 requests per minute per IP for all API endpoints
 export const globalRateLimit = rateLimit({
   maxRequests: 120,

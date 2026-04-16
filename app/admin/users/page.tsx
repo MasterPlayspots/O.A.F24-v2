@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { LadeSpinner } from '@/components/shared/LadeSpinner'
 import { FehlerBox } from '@/components/shared/FehlerBox'
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { Search, Trash2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import type { Nutzer } from '@/lib/types'
@@ -87,8 +88,6 @@ export default function AdminUsersPage() {
   }
 
   const handleDeactivate = async (userId: string) => {
-    if (!confirm('Diesen Nutzer wirklich deaktivieren?')) return
-
     try {
       setUpdatingId(userId)
       if (!token) throw new Error('Kein Token')
@@ -180,15 +179,23 @@ export default function AdminUsersPage() {
                     </Select>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeactivate(user.id)}
-                      disabled={updatingId === user.id}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <ConfirmDialog
+                      trigger={
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={updatingId === user.id}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      }
+                      title="Nutzer deaktivieren"
+                      description="Möchten Sie diesen Nutzer wirklich deaktivieren? Der Account bleibt bestehen, aber der Nutzer kann sich nicht mehr einloggen."
+                      onConfirm={() => handleDeactivate(user.id)}
+                      confirmText="Deaktivieren"
+                      variant="destructive"
+                    />
                   </TableCell>
                 </TableRow>
               ))
