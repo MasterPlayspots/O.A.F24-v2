@@ -5,7 +5,7 @@ import { ProgrammListe } from '@/components/foerdercheck/ProgrammListe'
 export const revalidate = 3600
 
 export const metadata = {
-  title: 'Förderprogramme | fund24',
+  title: 'Förderprogramme',
   description: 'Durchsuchen Sie 3.400+ Förderprogramme für Ihr Unternehmen — nach Bundesland, Förderart und Bereich.',
 }
 

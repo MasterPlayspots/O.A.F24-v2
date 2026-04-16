@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Support | fund24',
+  title: 'Support',
   description: 'Kontaktieren Sie uns für Fragen zur Abwicklung, technischen Support oder telefonische Beratung.',
 }
 

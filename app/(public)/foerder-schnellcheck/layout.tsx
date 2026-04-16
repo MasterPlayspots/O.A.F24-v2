@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
 export const metadata = {
-  title: 'Fördercheck | fund24',
+  title: 'Fördercheck',
   description: 'Kostenloser AI-gestützter Fördercheck für Ihr Unternehmen — schnell und einfach.',
 }
 

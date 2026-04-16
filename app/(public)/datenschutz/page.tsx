@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Datenschutz | fund24',
+  title: 'Datenschutz',
   description: 'Datenschutzerklärung und Informationen zur Datenverarbeitung bei fund24.',
 }
 
