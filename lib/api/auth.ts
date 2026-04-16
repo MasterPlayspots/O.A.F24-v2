@@ -100,11 +100,6 @@ export async function getMe(token: string): Promise<Nutzer> {
   return mapNutzer(u)
 }
 
-export async function verifyEmail(code: string, token: string) {
-  return apiCall<{ ok: boolean }>(API.FUND24, '/api/auth/verify-email', {
-    method: 'POST', body: JSON.stringify({ code }),
-  }, token)
-}
 export async function resendVerification(email: string) {
   return apiCall<{ success: boolean; message?: string }>(API.FUND24, '/api/auth/resend-code', {
     method: 'POST',

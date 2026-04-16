@@ -120,16 +120,6 @@ export async function addExpertise(data: ExpertiseFormData): Promise<ExpertiseEn
   return r.expertise
 }
 
-export async function listExpertise(): Promise<ExpertiseEntry[]> {
-  const r = await apiCall<{ success: boolean; expertise: ExpertiseEntry[] }>(
-    API.FUND24,
-    '/api/berater/expertise',
-    undefined,
-    token()
-  )
-  return r.expertise ?? []
-}
-
 // ============================================================
 // Dienstleistungen
 // ============================================================
@@ -199,16 +189,6 @@ export async function addDienstleistung(
     token()
   )
   return r.dienstleistung
-}
-
-export async function listDienstleistungen(): Promise<DienstleistungEntry[]> {
-  const r = await apiCall<{ success: boolean; dienstleistungen: DienstleistungEntry[] }>(
-    API.FUND24,
-    '/api/berater/dienstleistungen',
-    undefined,
-    token()
-  )
-  return r.dienstleistungen ?? []
 }
 
 // ============================================================
