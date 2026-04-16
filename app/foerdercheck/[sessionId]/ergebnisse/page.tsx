@@ -136,7 +136,7 @@ export default function ErgebnissePage() {
           <div className="mb-12">
             <h2 className="mb-4 text-2xl font-bold">Empfohlene Berater</h2>
             <p className="mb-6 text-sm text-muted-foreground">
-              Diese Berater haben Expertise in Ihren Förderbereichcen
+              Diese Berater haben Expertise in Ihren Förderbereichen
             </p>
             <div className="grid gap-6">
               {berater.map((match) => (

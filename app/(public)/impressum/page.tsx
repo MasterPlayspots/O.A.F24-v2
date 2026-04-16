@@ -13,12 +13,12 @@ export default function ImpressumPage() {
 
         {/* Angaben gemäß § 5 DDG */}
         <section className="mb-12">
-          <h2 className="font-display text-2xl font-bold text-white mb-6">Angaben gemäß § 5 Telemediengesetz (TMG)</h2>
+          <h2 className="font-display text-2xl font-bold text-white mb-6">Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)</h2>
 
           <div className="space-y-8">
             {/* Verantwortlicher */}
             <div>
-              <h3 className="font-display text-lg font-semibold text-white mb-3">Verantwortlicher im Sinne des TMG und MDStV</h3>
+              <h3 className="font-display text-lg font-semibold text-white mb-3">Verantwortlicher im Sinne des DDG und MDStV</h3>
               <div className="bg-architect-surface-low/40 rounded-lg p-6 space-y-2 text-white/80">
                 <p>
                   <strong>Fröba Sales Solutions UG (haftungsbeschränkt)</strong>
@@ -44,7 +44,7 @@ export default function ImpressumPage() {
                   <strong>Telefon:</strong> +49 151 29617192
                 </p>
                 <p>
-                  <strong>E-Mail:</strong> info@fund24.io
+                  <strong>E-Mail:</strong> support@fund24.io
                 </p>
                 <p>
                   <strong>Webseite:</strong> www.fund24.io
@@ -99,7 +99,7 @@ export default function ImpressumPage() {
           <div className="prose prose-invert max-w-none text-white/80">
             <h3 className="font-semibold">Haftung für Inhalte</h3>
             <p>
-              Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+              Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir gemäß § 7 Abs.1 DDG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
             </p>
 
             <h3 className="font-semibold mt-6">Haftung für Links</h3>
@@ -159,7 +159,7 @@ export default function ImpressumPage() {
         {/* Letzte Aktualisierung */}
         <div className="pt-8 text-sm text-white/60">
           <p>
-            <strong>Letzte Aktualisierung:</strong> {new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })}
+            <strong>Letzte Aktualisierung:</strong> 16. April 2026
           </p>
         </div>
       </div>

@@ -148,11 +148,11 @@ export default function FoerderSchnellcheckPage() {
 
       {/* Info Box */}
       <div className="bg-architect-primary/20 rounded-lg p-6 space-y-3">
-        <h3 className="font-display font-semibold text-architect-primary-light">Was passiert nächster?</h3>
+        <h3 className="font-display font-semibold text-architect-primary-light">Was passiert als Nächstes?</h3>
         <ol className="space-y-2 text-sm text-white/80">
           <li>1. Wir analysieren Ihre Website und erstellen ein Profil</li>
           <li>2. Sie beantworten einige Fragen zu Ihrem Vorhaben</li>
-          <li>3. KI matched Sie mit den passendsten Programmen</li>
+          <li>3. Die KI matcht Sie mit den passendsten Programmen</li>
           <li>4. Sie erhalten einen detaillierten Report per E-Mail</li>
         </ol>
       </div>

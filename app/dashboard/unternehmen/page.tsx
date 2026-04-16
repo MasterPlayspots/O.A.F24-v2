@@ -232,7 +232,7 @@ export default function UnternehmenDashboardPage() {
           )}
         </Card>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-8">
           <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
             <Link href="/dashboard/unternehmen/antraege">Meine Anträge</Link>
           </Button>
@@ -241,6 +241,9 @@ export default function UnternehmenDashboardPage() {
           </Button>
           <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
             <Link href="/dashboard/unternehmen/favoriten">Meine Favoriten</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
+            <Link href="/dashboard/unternehmen/tracker">Förder-Tracker</Link>
           </Button>
         </div>
       </div>

@@ -297,6 +297,18 @@ export default function BeraterDashboardPage() {
           <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
             <Link href="/dashboard/berater/abwicklung">Provisionen</Link>
           </Button>
+          <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
+            <Link href="/dashboard/berater/profil">Mein Profil</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
+            <Link href="/dashboard/berater/berichte">Berichte</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
+            <Link href="/dashboard/berater/vorlagen">Vorlagen</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="bg-architect-surface/60 border-0 text-white hover:bg-architect-surface/40 hover:text-white">
+            <Link href="/dashboard/berater/tracker">Tracker</Link>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,13 +1,15 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Search, Users, FileCheck, ShieldCheck, Zap, Sparkles } from 'lucide-react'
+import { createMetadata } from '@/lib/seo/metadata'
 
 export const revalidate = 3600
-export const metadata = {
-  title: 'Fördermittel einfach finden',
+export const metadata = createMetadata({
+  title: 'Fördermittel für KMU finden',
   description:
-    'Kostenloser KI-Fördercheck für Unternehmen · 3.400+ aktive Förderprogramme · Matching mit geprüften Beratern · Von Antrag bis Abwicklung auf einer Plattform.',
-}
+    'fund24 verbindet kleine und mittlere Unternehmen mit zertifizierten Fördermittelberatern. Über 3.400 Förderprogramme.',
+  path: '/',
+})
 
 export default function LandingPage() {
   return (

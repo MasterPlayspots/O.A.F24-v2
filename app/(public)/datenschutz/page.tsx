@@ -25,7 +25,7 @@ export default function DatenschutzPage() {
               Deutschland
             </p>
             <p>
-              <strong>E-Mail:</strong> info@fund24.io<br />
+              <strong>E-Mail:</strong> support@fund24.io<br />
               <strong>Telefon:</strong> +49 151 29617192
             </p>
           </div>
@@ -158,7 +158,7 @@ export default function DatenschutzPage() {
               <li><strong>Widerspruch (Art. 21 DSGVO):</strong> Sie können der Verarbeitung widersprechen.</li>
             </ul>
             <p className="mt-4">
-              Um Ihre Rechte wahrzunehmen, kontaktieren Sie bitte: <strong>info@fund24.io</strong>
+              Um Ihre Rechte wahrzunehmen, kontaktieren Sie bitte: <strong>support@fund24.io</strong>
             </p>
           </div>
         </section>
@@ -171,12 +171,12 @@ export default function DatenschutzPage() {
               Sie haben das Recht, sich bei einer Datenschutzbehörde zu beschweren, wenn Sie der Ansicht sind, dass Ihre Rechte verletzt wurden.
             </p>
             <p>
-              <strong>Zuständige Behörde für Berlin:</strong><br />
-              Berliner Beauftragte für Datenschutz und Informationsfreiheit<br />
-              Friedrichstraße 219<br />
-              10969 Berlin<br />
-              Tel.: +49 (0) 30 13889-0<br />
-              E-Mail: mailbox@datenschutz-berlin.de
+              <strong>Zuständige Behörde (Bayern):</strong><br />
+              Bayerisches Landesamt für Datenschutzaufsicht (BayLDA)<br />
+              Promenade 18<br />
+              91522 Ansbach<br />
+              Tel.: +49 (0) 981 180093-0<br />
+              E-Mail: poststelle@lda.bayern.de
             </p>
           </div>
         </section>
@@ -264,7 +264,7 @@ export default function DatenschutzPage() {
           <div className="bg-architect-primary/20 rounded-lg p-6 text-white/80">
             <p>
               <strong>Datenschutzbeauftragter:</strong><br />
-              E-Mail: info@fund24.io<br />
+              E-Mail: support@fund24.io<br />
               Telefon: +49 151 29617192
             </p>
             <p className="mt-4">
@@ -276,10 +276,7 @@ export default function DatenschutzPage() {
         {/* Letzte Aktualisierung */}
         <div className="pt-8 text-sm text-white/60">
           <p>
-            <strong>Letzte Aktualisierung:</strong> {new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
-          <p className="mt-2 italic text-architect-primary-light bg-architect-primary/20 p-3 rounded">
-            Diese Datenschutzerklärung ist zu Demonstrationszwecken erstellt. Bitte lassen Sie sie von einem Rechtsanwalt prüfen, bevor Sie mit dem öffentlichen Betrieb starten.
+            <strong>Letzte Aktualisierung:</strong> 16. April 2026
           </p>
         </div>
       </div>

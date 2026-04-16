@@ -105,7 +105,7 @@ export default function RootLayout({
               contactPoint: {
                 "@type": "ContactPoint",
                 contactType: "customer support",
-                email: "info@fund24.io",
+                email: "support@fund24.io",
                 telephone: "+49-151-29617192",
                 availableLanguage: ["de"],
               },

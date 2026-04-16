@@ -1,12 +1,12 @@
 import { createMetadata } from '@/lib/seo/metadata'
 
 export const metadata = createMetadata({
-  title: 'Meine Anfragen',
+  title: 'Onboarding — Unternehmen',
   description: 'Dieser Bereich ist nur für angemeldete Nutzer zugänglich.',
-  path: '/dashboard/unternehmen/anfragen',
+  path: '/onboarding/unternehmen',
   noIndex: true,
 })
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return children
 }
