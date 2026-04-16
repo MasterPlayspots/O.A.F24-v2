@@ -54,16 +54,6 @@ export interface UnternehmenFormData {
   ist_kmu: boolean
 }
 
-export async function getUnternehmen(): Promise<Unternehmen | null> {
-  const r = await apiCall<{ success: boolean; unternehmen: Unternehmen | null }>(
-    API.FUND24,
-    '/api/unternehmen/profil',
-    undefined,
-    token()
-  )
-  return r.unternehmen
-}
-
 export async function updateUnternehmen(data: UnternehmenFormData): Promise<Unternehmen> {
   const r = await apiCall<{ success: boolean; unternehmen: Unternehmen }>(
     API.FUND24,

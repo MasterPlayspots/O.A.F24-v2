@@ -1,11 +1,7 @@
 // lib/api/fund24.ts — fund24-api Worker Client
 import { apiCall } from './client'
 import { API } from './config'
-import type { StatsResponse, FilterOptions, ProgrammeResponse, Foerderprogramm } from '../types'
-
-export async function getStats(): Promise<StatsResponse> {
-  return apiCall<StatsResponse>(API.FUND24, '/api/stats')
-}
+import type { FilterOptions, ProgrammeResponse, Foerderprogramm } from '../types'
 
 export async function getFilterOptions(): Promise<FilterOptions> {
   return apiCall<FilterOptions>(API.FUND24, '/api/filter-options')
@@ -225,15 +221,15 @@ export async function updateAntragStatus(
 }
 
 export async function createAntrag(body: { programm_id: string; beschreibung?: string }): Promise<{ id: string }> {
-  // Worker (foerdermittel/cases) returns {success, data:{caseId}}.
-  // Wrapper normalizes to {id} for the existing frontend caller.
-  const r = await apiCall<{ success: boolean; data?: { caseId?: string }; case?: { id: string }; id?: string }>(
+  // Worker (foerdermittel/cases.ts:361) returns:
+  //   { success: true, data: { caseId: "uuid" } }
+  const r = await apiCall<{ success: boolean; data: { caseId: string } }>(
     API.FUND24,
     '/api/me/antraege',
     { method: 'POST', body: JSON.stringify(body) },
     token()
   )
-  return { id: r.data?.caseId ?? r.case?.id ?? r.id ?? '' }
+  return { id: r.data.caseId }
 }
 
 // ---------- Vorlagen (Template-Library) ----------
@@ -374,11 +370,6 @@ export async function listBeraterKunden(): Promise<BeraterKunde[]> {
   return apiCall<BeraterKunde[]>(API.FUND24, '/api/berater/me/kunden', undefined, token())
 }
 
-// ---------- Dokumente Soft-Delete ----------
-export async function deleteDokument(id: string) {
-  return apiCall(API.FUND24, `/api/dokumente/${id}`, { method: 'DELETE' }, token())
-}
-
 // ---------- Admin: Cert-Approval-Queue + Audit-Logs ----------
 export interface CertPending {
   id: string
@@ -456,10 +447,6 @@ export async function updateAdminNews(id: string, daten: Partial<NewsArtikel>): 
   )
 }
 
-export async function deleteAdminNews(id: string) {
-  return apiCall(API.FUND24, `/api/admin/news/${id}`, { method: 'DELETE' }, token())
-}
-
 // ---------- Berater Abwicklung ----------
 
 export async function getProvisionVertraege(): Promise<{ provisionen: Provision[] }> {
@@ -485,36 +472,11 @@ export async function getTracker(): Promise<{ vorgaenge: TrackerVorgang[] }> {
   )
 }
 
-export async function createTrackerVorgang(body: {
-  titel: string
-  beschreibung?: string
-  programm_name?: string
-  foerdersumme?: number
-  naechste_frist?: string
-  prioritaet?: 'niedrig' | 'normal' | 'hoch' | 'dringend'
-}): Promise<{ id: string }> {
-  return apiCall<{ id: string }>(
-    API.FUND24,
-    '/api/tracker',
-    { method: 'POST', body: JSON.stringify(body) },
-    token()
-  )
-}
-
 export async function updateTrackerPhase(id: string, phase: TrackerPhase) {
   return apiCall(
     API.FUND24,
     `/api/tracker/${id}`,
     { method: 'PATCH', body: JSON.stringify({ phase }) },
-    token()
-  )
-}
-
-export async function deleteTrackerVorgang(id: string) {
-  return apiCall(
-    API.FUND24,
-    `/api/tracker/${id}`,
-    { method: 'DELETE' },
     token()
   )
 }

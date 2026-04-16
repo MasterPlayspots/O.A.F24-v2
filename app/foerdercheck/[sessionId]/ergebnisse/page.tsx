@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ErgebnisKarte } from '@/components/foerdercheck/ErgebnisKarte'
 import { BeraterMatchKarte } from '@/components/foerdercheck/BeraterMatchKarte'
+import { generateFoerdercheckPDF } from '@/lib/pdf/foerdercheck-report'
 import { toast } from 'sonner'
 import { Download, CheckCircle2 } from 'lucide-react'
 
@@ -81,9 +82,40 @@ export default function ErgebnissePage() {
     }
   }
 
-  const handleDownloadPDF = () => {
-    // Placeholder for PDF download functionality
-    toast.info('PDF-Download wird in Kürze implementiert')
+  const handleDownloadPDF = async () => {
+    if (!check) return
+    try {
+      await generateFoerdercheckPDF({
+        sessionId,
+        unternehmen: check.firmenname || 'Unbekannt',
+        programme: (check.ergebnisse ?? []).map((e) => {
+          const name =
+            (e as unknown as { titel?: string; name?: string; programm_name?: string }).titel ??
+            (e as unknown as { name?: string; programm_name?: string }).name ??
+            (e as unknown as { programm_name?: string }).programm_name ??
+            'Programm'
+          const foerderart = (e as unknown as { foerderart?: string }).foerderart
+          const foerderbetrag =
+            (e as unknown as { foerderbetrag?: string; max_betrag?: string }).foerderbetrag ??
+            (e as unknown as { max_betrag?: string }).max_betrag
+          const scoreRaw = (e as unknown as { relevanz_score?: number; score?: number })
+            .relevanz_score ??
+            (e as unknown as { score?: number }).score
+          return {
+            name,
+            foerderart,
+            foerderbetrag,
+            score: typeof scoreRaw === 'number' ? Math.round(scoreRaw) : undefined,
+          }
+        }),
+        erstelltAm: new Date().toLocaleDateString('de-DE'),
+      })
+      toast.success('PDF wurde heruntergeladen')
+    } catch (err) {
+      toast.error('PDF konnte nicht erstellt werden')
+      // eslint-disable-next-line no-console
+      console.error('PDF generation failed:', err)
+    }
   }
 
   if (loading || isLoading) {
@@ -164,7 +196,6 @@ export default function ErgebnissePage() {
             variant="outline"
             onClick={handleDownloadPDF}
             className="flex-1"
-            disabled
           >
             <Download className="mr-2 h-4 w-4" />
             Ergebnisse als PDF
