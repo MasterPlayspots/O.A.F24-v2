@@ -18,10 +18,10 @@ export function BeraterMatchKarte({
   anfrageGesendet,
 }: BeraterMatchKarteProps) {
   const getScoreBadgeColor = (score: number) => {
-    if (score >= 0.8) return 'bg-green-100 text-green-800'
-    if (score >= 0.6) return 'bg-cyan-100 text-cyan-800'
-    if (score >= 0.4) return 'bg-blue-100 text-blue-800'
-    return 'bg-amber-100 text-amber-800'
+    if (score >= 0.8) return 'bg-chart-5/15 text-chart-5'
+    if (score >= 0.6) return 'bg-chart-3/15 text-chart-3'
+    if (score >= 0.4) return 'bg-primary/15 text-primary'
+    return 'bg-brass/15 text-brass'
   }
 
   return (
@@ -41,7 +41,7 @@ export function BeraterMatchKarte({
                     className={`h-4 w-4 ${
                       i < Math.floor(berater.berater.ratingAvg)
                         ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-gray-300'
+                        : 'text-muted-foreground/60'
                     }`}
                   />
                 ))}
@@ -95,7 +95,7 @@ export function BeraterMatchKarte({
       <div className="mb-6 flex items-center gap-2">
         <div
           className={`h-2 w-2 rounded-full ${
-            berater.berater.verfuegbar ? 'bg-green-500' : 'bg-gray-300'
+            berater.berater.verfuegbar ? 'bg-chart-5' : 'bg-gray-300'
           }`}
         />
         <span className="text-sm">
