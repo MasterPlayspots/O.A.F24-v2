@@ -45,11 +45,20 @@ Strategie-Planung aus der ersten Session dieses Tages ist unverändert gültig. 
 | P0.1 | Vercel Commit-Verification-Policy | Noah | ✅ DONE |
 | P0.1b | `vercel --prod` strukturell blocken | Noah | ✅ DONE (~/.zshrc function) |
 | P0.1c | Git-Identity global setzen | Noah | ✅ DONE (`froeba.kevin@gmail.com` / `Noah`) |
-| P0.4 | vercel.json + CLI-Default-Quirk | — | ✅ bestätigt (`--prod --yes` deployed zu prod), Fix via P0.1b |
-| P0.2 | Worker-Tests-Failure auf main fixen | Claude | ⏳ unverändert broken |
-| P0.3 | Docs-Check-Pipeline fixen oder disablen | Claude | ⏳ unverändert broken |
+| P0.4 | vercel.json + CLI-Default-Quirk | — | ✅ bestätigt, Fix via P0.1b |
+| P0.2 | Worker-Tests-Failure auf main fixen | Claude | ✅ DONE (commit `b10eb4e`, 117/117 grün) |
+| P0.3 | Docs-Check-Pipeline fixen oder disablen | Claude | ✅ DONE (commit `b59d714`, Generator deterministisch + Drift geschlossen) |
+| — | Preview-Env-Vars verifiziert | Noah | ✅ DONE (je 3 Envs für SEMANTIC + FUND24) |
 
-**Noch offen:** P0.2 + P0.3. Das sind die echten CI-Blocker die jeden PR rot markieren.
+**Phase 0 ist vollständig geschlossen.** Dieser PR dient als Verifikations-Lauf — wenn alle CI-Checks grün sind, ist die Struktur empirisch bestätigt.
+
+## Session Log — 2026-04-19 Nachmittag
+
+- `f29af7f` — Strategy-Bundle (`.claude/strategy/`) aus zwei überlebenden Handovers rekonstruiert
+- `b10eb4e` — P0.2 Worker-Tests (HTTP 403→401 Assertion-Fix, ursprünglich auf `fix/payments-test-auth-assertion` vom 2026-04-16)
+- `b59d714` — P0.3 Docs-Check Root-Cause-Fix (Datum-Marker aus `gen-api-docs.ts` entfernt, `docs/API.md` resynced: 143 → 145 Endpoints)
+- Preview-Env-Vars via `vercel env ls` verifiziert: `NEXT_PUBLIC_SEMANTIC_API_URL` + `NEXT_PUBLIC_FUND24_API_URL` in Development/Preview/Production alle vorhanden
+- Nebenbefund: npm audit zeigt 3 moderate (root) + 4 high severity (worker) Vulnerabilities — nicht für Phase 0 adressiert, für Backlog B-060 vorgemerkt
 
 ---
 
