@@ -36,8 +36,6 @@ jobs:
           # Echte Werte werden nur in Vercel verwendet.
           NEXT_PUBLIC_CHECK_API_URL: https://example.workers.dev
           NEXT_PUBLIC_FUND24_API_URL: https://example.workers.dev
-          NEXT_PUBLIC_SEMANTIC_API_URL: https://example.workers.dev
-          NEXT_PUBLIC_ZFBF_API_URL: https://example.workers.dev
           JWT_SECRET: ci-dummy-secret-not-used-in-production
         run: npm run build
 

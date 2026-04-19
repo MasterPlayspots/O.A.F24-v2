@@ -31,24 +31,16 @@ vercel env add NEXT_PUBLIC_CHECK_API_URL production preview development
 vercel env add NEXT_PUBLIC_FUND24_API_URL production preview development
 # Wert: https://fund24-api.froeba-kevin.workers.dev
 
-vercel env add NEXT_PUBLIC_SEMANTIC_API_URL production preview development
-# Wert: https://fund24-semantic-search.froeba-kevin.workers.dev
-
-vercel env add NEXT_PUBLIC_ZFBF_API_URL production preview development
-# Wert: https://zfbf-api.froeba-kevin.workers.dev
-
 vercel env add NEXT_PUBLIC_APP_URL production preview development
 # Wert: https://fund24-team-muse-ai.vercel.app
 ```
 
-**Alle 5 Variablen im Überblick:**
+**Alle 3 Variablen im Überblick:**
 
 | Variable | Wert |
 |---|---|
 | `NEXT_PUBLIC_CHECK_API_URL` | `https://foerdermittel-check-api.froeba-kevin.workers.dev` |
 | `NEXT_PUBLIC_FUND24_API_URL` | `https://fund24-api.froeba-kevin.workers.dev` |
-| `NEXT_PUBLIC_SEMANTIC_API_URL` | `https://fund24-semantic-search.froeba-kevin.workers.dev` |
-| `NEXT_PUBLIC_ZFBF_API_URL` | `https://zfbf-api.froeba-kevin.workers.dev` |
 | `NEXT_PUBLIC_APP_URL` | `https://fund24-team-muse-ai.vercel.app` |
 
 ---

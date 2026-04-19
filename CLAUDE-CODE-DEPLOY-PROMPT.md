@@ -27,8 +27,6 @@ Nutze `vercel env add` oder die Vercel API:
 |---|---|
 | NEXT_PUBLIC_CHECK_API_URL | https://foerdermittel-check-api.froeba-kevin.workers.dev |
 | NEXT_PUBLIC_FUND24_API_URL | https://fund24-api.froeba-kevin.workers.dev |
-| NEXT_PUBLIC_SEMANTIC_API_URL | https://fund24-semantic-search.froeba-kevin.workers.dev |
-| NEXT_PUBLIC_ZFBF_API_URL | https://zfbf-api.froeba-kevin.workers.dev |
 | NEXT_PUBLIC_APP_URL | https://fund24-team-muse-ai.vercel.app |
 
 Jede Variable muss für Production, Preview UND Development gesetzt werden.

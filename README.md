@@ -35,8 +35,6 @@ Siehe `.env.example`. In **Vercel** müssen folgende Variablen für die Producti
 |---|---|
 | `NEXT_PUBLIC_CHECK_API_URL` | foerdermittel-check-api Worker |
 | `NEXT_PUBLIC_FUND24_API_URL` | fund24-api Worker |
-| `NEXT_PUBLIC_SEMANTIC_API_URL` | fund24-semantic-search Worker |
-| `NEXT_PUBLIC_ZFBF_API_URL` | zfbf-api Worker |
 | `JWT_SECRET` *(server-only!)* | Muss mit dem Secret des check-api Workers übereinstimmen — wird von der Next.js-Middleware zur Token-Verifikation genutzt |
 
 ## Skripte
