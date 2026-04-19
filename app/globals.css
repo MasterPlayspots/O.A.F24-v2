@@ -4,12 +4,66 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * ============================================================================
+ * SOVEREIGN TRUST — Design System for fund24
+ * ============================================================================
+ *
+ * Positioning: Trusted AI for German grant law & governance.
+ * Audience: Mittelständische Geschäftsführer, Steuerberater, Fachanwälte.
+ * Archetype: Harvey AI × Bloomberg Law × Foreign Affairs.
+ *
+ * Design philosophy
+ *
+ *   1. Authority, not enthusiasm. No gradients, no glows, no decorative
+ *      effects. Typographic weight and generous whitespace do the work.
+ *
+ *   2. One accent, earned. Brass is reserved for institutional flourishes:
+ *      verified-seals, legal references, numeric emphasis (€2,4M), dividing
+ *      rules. It never carries body text, never fills a CTA in light mode.
+ *      If you use brass more than 3× on a page, you are overusing it.
+ *
+ *   3. Navy does the work. It is the primary CTA fill, the text weight,
+ *      the borders on emphasis. It does NOT need help from shadows or
+ *      gradients to feel important.
+ *
+ *   4. Serif for gravitas, sans for clarity, mono for precision. Headlines
+ *      and monetary figures use Source Serif 4. Body and UI use Inter.
+ *      Legal references, program IDs, Aktenzeichen use JetBrains Mono.
+ *
+ *   5. Tight corners, small radii. 4px radius. Anything softer signals
+ *      consumer product. We are adjacent to a ministry.
+ *
+ * Palette anchors
+ *
+ *   Bone        #F5F1E6   page background, primary-fg on dark
+ *   Ivory       #FDFBF5   card / elevated surface
+ *   Parchment   #E3DFD4   secondary / inactive
+ *   Platinum    #D4CFC0   border, rule
+ *   Slate       #4A5568   muted foreground, metadata
+ *   Oxford Navy #0F1E3D   primary CTA, headline weight
+ *   Ink         #0A1528   foreground text, dark-mode background
+ *   Lifted Navy #132544   dark-mode card
+ *   Brass       #B8935A   institutional accent (light mode)
+ *   Brass Light #D4B87A   institutional accent (dark mode) + dark primary
+ *   Oxblood     #7C2D2D   destructive (light)
+ *   Oxblood Lt  #B8544A   destructive (dark)
+ *   Moss        #5A6B4F   approval / growth (not "tech green")
+ *
+ * ============================================================================
+ */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
   --font-sans: var(--font-inter);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-manrope);
+  --font-mono: var(--font-jetbrains-mono);
+  --font-heading: var(--font-source-serif);
+  --font-display: var(--font-source-serif);
+  --font-serif: var(--font-source-serif);
+  --font-body: var(--font-inter);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -40,97 +94,150 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
 
-  /* Institutional Architect Design System (stitch-export/DESIGN.md) */
-  --color-architect-primary: #6575ad;
-  --color-architect-primary-container: #4a5a8f;
-  --color-architect-tertiary: #069e7c;
-  --color-architect-surface: #737688;
-  --color-architect-surface-low: #637c74;
-  --color-architect-error: #ba1a1a;
-  --color-architect-error-container: #ffdad6;
-  --color-architect-on-primary: #ffffff;
-  --color-architect-on-tertiary: #000000;
-  --color-architect-primary-light: #c9d1ff;
-  --color-architect-tertiary-light: #7fe8c8;
-  --font-display: var(--font-manrope);
-  --font-body: var(--font-inter);
+  /*
+   * Brass — first-class accent for institutional flourishes.
+   * Import as `text-brass`, `bg-brass`, `border-brass` in components.
+   */
+  --color-brass: var(--brass);
+  --color-brass-muted: var(--brass-muted);
 
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+  /*
+   * Legacy `architect-*` tokens remapped to Sovereign palette so existing
+   * component classes (`bg-architect-surface`, etc.) don't break during
+   * migration. Prefer the semantic tokens above for new code.
+   */
+  --color-architect-primary: #0F1E3D;            /* oxford navy */
+  --color-architect-primary-container: #0A1528;  /* ink */
+  --color-architect-tertiary: #B8935A;           /* brass */
+  --color-architect-surface: #F5F1E6;            /* bone */
+  --color-architect-surface-low: #E3DFD4;        /* parchment */
+  --color-architect-error: #7C2D2D;              /* oxblood */
+  --color-architect-error-container: #F0D7D0;    /* oxblood tint */
+  --color-architect-on-primary: #F5F1E6;         /* bone */
+  --color-architect-on-tertiary: #0A1528;        /* ink */
+  --color-architect-primary-light: #D6DBE6;      /* navy tint */
+  --color-architect-tertiary-light: #E6D9BE;     /* brass tint */
+
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-xl: calc(var(--radius) * 1.5);
+  --radius-2xl: calc(var(--radius) * 2);
+  --radius-3xl: calc(var(--radius) * 2.5);
+  --radius-4xl: calc(var(--radius) * 3);
 }
 
+/* ==========================================================================
+ * LIGHT MODE — default (bone page, navy ink, brass accent)
+ * ========================================================================== */
 :root {
-  --background: #737688;
-  --foreground: #ffffff;
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: oklch(0.935 0.015 85);        /* #F5F1E6 bone */
+  --foreground: oklch(0.150 0.025 260);       /* #0A1528 ink */
+
+  --card: oklch(0.975 0.008 85);              /* #FDFBF5 ivory */
+  --card-foreground: oklch(0.150 0.025 260);
+
+  --popover: oklch(0.975 0.008 85);
+  --popover-foreground: oklch(0.150 0.025 260);
+
+  --primary: oklch(0.220 0.060 260);          /* #0F1E3D oxford navy */
+  --primary-foreground: oklch(0.935 0.015 85);
+
+  --secondary: oklch(0.875 0.012 85);         /* #E3DFD4 parchment */
+  --secondary-foreground: oklch(0.150 0.025 260);
+
+  --muted: oklch(0.905 0.012 85);             /* #EDE9DF lighter parchment */
+  --muted-foreground: oklch(0.470 0.025 255); /* #4A5568 slate */
+
+  /*
+   * Accent in shadcn is used for hover states on interactive elements.
+   * Brass is too loud for background hover — it would scream on every
+   * button. Accent is a warm-tinted parchment; brass lives separately as
+   * a first-class token (see `--brass` below).
+   */
+  --accent: oklch(0.895 0.018 82);            /* #E8E2D0 warm parchment */
+  --accent-foreground: oklch(0.150 0.025 260);
+
+  --destructive: oklch(0.380 0.100 25);       /* #7C2D2D oxblood */
+
+  --border: oklch(0.830 0.012 85);            /* #D4CFC0 platinum */
+  --input: oklch(0.830 0.012 85);
+  --ring: oklch(0.220 0.060 260);             /* matches primary */
+
+  /* Institutional chart palette — earth tones, no rainbow. */
+  --chart-1: oklch(0.220 0.060 260);          /* navy */
+  --chart-2: oklch(0.650 0.085 75);           /* brass */
+  --chart-3: oklch(0.470 0.025 255);          /* slate */
+  --chart-4: oklch(0.380 0.100 25);           /* oxblood (loss / decline) */
+  --chart-5: oklch(0.510 0.045 130);          /* moss (approval / growth) */
+
+  /* Brass accent — use sparingly for verified-seals, metric emphasis. */
+  --brass: oklch(0.650 0.085 75);             /* #B8935A */
+  --brass-muted: oklch(0.480 0.080 75);       /* #8A6B3F */
+
+  --radius: 0.25rem;                          /* 4px — corporate-tight */
+
+  --sidebar: oklch(0.955 0.012 85);
+  --sidebar-foreground: oklch(0.150 0.025 260);
+  --sidebar-primary: oklch(0.220 0.060 260);
+  --sidebar-primary-foreground: oklch(0.935 0.015 85);
+  --sidebar-accent: oklch(0.875 0.012 85);
+  --sidebar-accent-foreground: oklch(0.150 0.025 260);
+  --sidebar-border: oklch(0.830 0.012 85);
+  --sidebar-ring: oklch(0.220 0.060 260);
 }
 
+/* ==========================================================================
+ * DARK MODE — Bloomberg / WSJ dark
+ *
+ * Navy background. Brass becomes primary because navy-on-navy is
+ * invisible. Bone stays foreground. Serif still does the display work.
+ * ========================================================================== */
 .dark {
-  --background: #737688;
-  --foreground: #ffffff;
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0.150 0.025 260);       /* #0A1528 ink */
+  --foreground: oklch(0.935 0.015 85);        /* #F5F1E6 bone */
+
+  --card: oklch(0.230 0.050 260);             /* #132544 lifted navy */
+  --card-foreground: oklch(0.935 0.015 85);
+
+  --popover: oklch(0.230 0.050 260);
+  --popover-foreground: oklch(0.935 0.015 85);
+
+  --primary: oklch(0.780 0.080 80);           /* #D4B87A brass light */
+  --primary-foreground: oklch(0.150 0.025 260);
+
+  --secondary: oklch(0.280 0.040 260);        /* #1E3155 */
+  --secondary-foreground: oklch(0.935 0.015 85);
+
+  --muted: oklch(0.280 0.040 260);
+  --muted-foreground: oklch(0.700 0.020 250); /* #9FA8B8 */
+
+  --accent: oklch(0.280 0.040 260);
+  --accent-foreground: oklch(0.935 0.015 85);
+
+  --destructive: oklch(0.580 0.140 25);       /* #B8544A oxblood light */
+
+  --border: oklch(1 0.005 80 / 12%);
+  --input: oklch(1 0.005 80 / 15%);
+  --ring: oklch(0.780 0.080 80);              /* matches primary (brass) */
+
+  --chart-1: oklch(0.780 0.080 80);           /* brass */
+  --chart-2: oklch(0.650 0.085 75);           /* brass muted */
+  --chart-3: oklch(0.700 0.020 250);          /* slate light */
+  --chart-4: oklch(0.580 0.140 25);           /* oxblood light */
+  --chart-5: oklch(0.640 0.050 130);          /* moss light */
+
+  --brass: oklch(0.780 0.080 80);             /* #D4B87A */
+  --brass-muted: oklch(0.650 0.085 75);       /* #B8935A */
+
+  --sidebar: oklch(0.230 0.050 260);
+  --sidebar-foreground: oklch(0.935 0.015 85);
+  --sidebar-primary: oklch(0.780 0.080 80);
+  --sidebar-primary-foreground: oklch(0.150 0.025 260);
+  --sidebar-accent: oklch(0.280 0.040 260);
+  --sidebar-accent-foreground: oklch(0.935 0.015 85);
+  --sidebar-border: oklch(1 0.005 80 / 12%);
+  --sidebar-ring: oklch(0.780 0.080 80);
 }
 
 @layer base {
@@ -139,8 +246,49 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01", "liga", "kern";
   }
   html {
     @apply font-sans;
+  }
+
+  /*
+   * Display typography — Source Serif 4 with optical sizing. Use these
+   * class combinations for headlines:
+   *   <h1 class="font-display text-5xl tracking-tight">...
+   *   <h2 class="font-display text-3xl">...
+   * Money figures should always be serif too — they read as significant.
+   */
+  h1, h2, h3, h4 {
+    font-feature-settings: "ss01", "kern", "onum";
+  }
+
+  /*
+   * Horizontal rule — institutional thin line with brass inflection
+   * available via .rule-brass modifier. Use <hr class="rule-brass" /> for
+   * the "verified seal" underline under key facts.
+   */
+  hr {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 1.5rem 0;
+  }
+  hr.rule-brass {
+    border-top-color: var(--brass);
+  }
+
+  /*
+   * Monospace utility for legal references & program IDs. Use sparingly.
+   *   <span class="font-mono text-xs uppercase tracking-widest">KfW 067</span>
+   */
+  .font-ref {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    font-weight: 500;
   }
 }
