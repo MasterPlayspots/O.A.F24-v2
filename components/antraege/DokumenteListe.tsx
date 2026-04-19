@@ -95,7 +95,7 @@ export function DokumenteListe({ dokumente, onUpload, onDelete }: Props) {
       )}
 
       {dokumente.length === 0 ? (
-        <div className="bg-bg-muted/30 rounded-lg p-8 text-center">
+        <div className="bg-[#637c74]/30 rounded-lg p-8 text-center">
           <p className="font-body text-sm text-white/50">Keine Dokumente hochgeladen.</p>
         </div>
       ) : (
@@ -103,7 +103,7 @@ export function DokumenteListe({ dokumente, onUpload, onDelete }: Props) {
           {dokumente.map((d) => (
             <div
               key={d.id}
-              className="flex items-center justify-between gap-4 bg-bg-muted/40 hover:bg-bg-muted/60 rounded-md px-5 py-3 transition"
+              className="flex items-center justify-between gap-4 bg-[#637c74]/40 hover:bg-[#637c74]/60 rounded-md px-5 py-3 transition"
             >
               <div className="min-w-0 flex-1">
                 <p className="font-body text-sm text-white truncate">{d.filename}</p>

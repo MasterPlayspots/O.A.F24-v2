@@ -1,80 +1,10 @@
-// Email Service — Resend API, fund24 Sovereign Trust branded templates.
-// PATCH: Sovereign palette. Only `wrap()` and `cta()` changed here.
-//
-// Mail clients do not support CSS variables; hex is inlined. Values match
-// anchors declared in app/globals.css:
-//
-//   #F5F1E6  bone (page bg)
-//   #FDFBF5  ivory (card)
-//   #0A1528  ink (text)
-//   #0F1E3D  oxford navy (CTA)
-//   #B8935A  brass (rule, mark)
-//   #4A5568  slate (footer, metadata)
-//   #D4CFC0  platinum (borders)
-//
-// Typography is kept to system sans (Inter is not available in most mail
-// clients; the system sans stack below renders well everywhere and keeps
-// the institutional register).
-//
-// When globals.css anchors change, update these constants and redeploy
-// the worker.
+// Email Service — Resend API, fund24 branded templates.
+// All copy is German, design mirrors the Architect Dark UI so emails feel
+// like part of the product. FROM address uses the authenticated fund24.io
+// domain configured in Resend.
 
 const FROM = 'fund24 <noreply@fund24.io>';
 const BRAND_URL = 'https://fund24.io';
-
-// Shared HTML shell. All 9 templates call wrap() with title + body blocks.
-function wrap(title: string, body: string, preview: string = ''): string {
-  return `<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${title}</title>
-</head>
-<body style="margin:0;padding:0;background:#F5F1E6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#0A1528">
-<div style="display:none;max-height:0;overflow:hidden">${preview}</div>
-<div style="max-width:600px;margin:0 auto;padding:48px 24px">
-
-  <!-- Brand mark row: brass rule + mono wordmark -->
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-    <tr>
-      <td style="padding-bottom:32px">
-        <div style="display:inline-block;vertical-align:middle;width:24px;height:2px;background:#B8935A;margin-right:12px"></div>
-        <span style="font-family:Menlo,Consolas,'Courier New',monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#B8935A;font-weight:600">fund24</span>
-      </td>
-    </tr>
-  </table>
-
-  <!-- Card -->
-  <div style="background:#FDFBF5;border:1px solid #D4CFC0;border-top:3px solid #0F1E3D;border-radius:2px;padding:40px 32px">
-    ${body}
-  </div>
-
-  <!-- Legal footer -->
-  <p style="margin:24px 0 0;font-family:-apple-system,sans-serif;font-size:11px;color:#4A5568;text-align:center;line-height:1.7">
-    <a href="${BRAND_URL}" style="color:#0F1E3D;text-decoration:none;font-weight:500">fund24.io</a> — Trusted AI für deutsche Fördermittel<br />
-    Fröba Sales Solutions UG (haftungsbeschränkt), Kronach · <a href="${BRAND_URL}/impressum" style="color:#4A5568">Impressum</a> · <a href="${BRAND_URL}/datenschutz" style="color:#4A5568">Datenschutz</a>
-  </p>
-</div>
-</body>
-</html>`;
-}
-
-function cta(href: string, label: string): string {
-  // Navy fill, bone text, brass arrow — the seal-like CTA.
-  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:32px auto 8px">
-<tr><td style="border-radius:2px;background:#0F1E3D" align="center">
-<a href="${href}" style="display:inline-block;padding:14px 32px;background:#0F1E3D;color:#F5F1E6;text-decoration:none;border-radius:2px;font-weight:500;font-size:14px;letter-spacing:0.02em;font-family:-apple-system,BlinkMacSystemFont,sans-serif">
-${label} <span style="color:#B8935A;margin-left:6px">→</span>
-</a>
-</td></tr>
-</table>`;
-}
-
-// ---
-// Resend delivery — unchanged from original; included so this file is a
-// drop-in replacement for the helper section of email.ts.
-// ---
 
 interface ResendPayload {
   to: string;
@@ -98,9 +28,40 @@ async function send(apiKey: string, payload: ResendPayload): Promise<boolean> {
   }
 }
 
-// ============================================================================
-// TEMPLATES — unchanged from original fund24 email.ts
-// ============================================================================
+// Shared HTML shell. All templates call wrap() with title + body blocks.
+function wrap(title: string, body: string, preview: string = ''): string {
+  return `<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${title}</title>
+</head>
+<body style="margin:0;padding:0;background:#737688;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#ffffff">
+<div style="display:none;max-height:0;overflow:hidden">${preview}</div>
+<div style="max-width:600px;margin:0 auto;padding:40px 24px">
+  <p style="margin:0 0 24px;font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.5)">fund24</p>
+  <div style="background:rgba(99,124,116,0.45);border-radius:12px;padding:32px">
+    ${body}
+  </div>
+  <p style="margin:24px 0 0;font-size:12px;color:rgba(255,255,255,0.4);text-align:center;line-height:1.6">
+    <a href="${BRAND_URL}" style="color:rgba(255,255,255,0.6);text-decoration:none">fund24.io</a> — Fördermittel einfach finden<br />
+    Fröba Sales Solutions UG (haftungsbeschränkt), Kronach · <a href="${BRAND_URL}/impressum" style="color:rgba(255,255,255,0.4)">Impressum</a> · <a href="${BRAND_URL}/datenschutz" style="color:rgba(255,255,255,0.4)">Datenschutz</a>
+  </p>
+</div>
+</body>
+</html>`;
+}
+
+function cta(href: string, label: string): string {
+  return `<p style="margin:28px 0 8px;text-align:center">
+<a href="${href}" style="display:inline-block;padding:14px 32px;background:#6575ad;background:linear-gradient(135deg,#6575ad 0%,#4a5a8f 100%);color:#ffffff;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px">${label}</a>
+</p>`;
+}
+
+// ============================================================
+// Existing: Auth flows
+// ============================================================
 
 export async function sendPasswordResetEmail(apiKey: string, to: string, firstName: string, resetUrl: string): Promise<boolean> {
   const body = `

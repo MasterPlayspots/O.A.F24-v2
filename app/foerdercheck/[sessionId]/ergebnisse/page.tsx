@@ -141,7 +141,7 @@ export default function ErgebnissePage() {
                 {resultCount} passende Programme für {check.firmenname}
               </p>
             </div>
-            <CheckCircle2 className="h-12 w-12 text-chart-5" />
+            <CheckCircle2 className="h-12 w-12 text-green-500" />
           </div>
         </Card>
 

@@ -133,9 +133,9 @@ export default function AnalysePage() {
 
           {timeout ? (
             <div className="space-y-6">
-              <div className="rounded-lg border border-primary/20 bg-primary/10 p-6 text-center">
-                <p className="text-primary font-medium mb-2">Analyse dauert länger als erwartet</p>
-                <p className="text-sm text-primary mb-6">
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 text-center">
+                <p className="text-blue-900 font-medium mb-2">Analyse dauert länger als erwartet</p>
+                <p className="text-sm text-blue-800 mb-6">
                   Die Analyse wird im Hintergrund fortgesetzt. Sie können zur Übersicht zurückkehren
                   und später auf die Ergebnisse prüfen.
                 </p>
@@ -166,7 +166,7 @@ export default function AnalysePage() {
                   >
                     <div className="flex-shrink-0">
                       {status === 'completed' && (
-                        <CheckCircle2 className="h-6 w-6 text-chart-5" />
+                        <CheckCircle2 className="h-6 w-6 text-green-500" />
                       )}
                       {status === 'active' && (
                         <Loader2 className="h-6 w-6 animate-spin text-primary" />

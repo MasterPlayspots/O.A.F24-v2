@@ -14,7 +14,7 @@ export function SchrittAnzeige({ schritte, aktuell }: SchrittAnzeigeProps) {
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium ${
                 i < aktuell
-                  ? 'bg-chart-5 text-white'
+                  ? 'bg-green-500 text-white'
                   : i === aktuell
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-muted-foreground'
@@ -25,7 +25,7 @@ export function SchrittAnzeige({ schritte, aktuell }: SchrittAnzeigeProps) {
             <span className="hidden text-xs sm:block">{schritt}</span>
           </div>
           {i < schritte.length - 1 && (
-            <div className={`hidden h-0.5 w-8 sm:block ${i < aktuell ? 'bg-chart-5' : 'bg-muted'}`} />
+            <div className={`hidden h-0.5 w-8 sm:block ${i < aktuell ? 'bg-green-500' : 'bg-muted'}`} />
           )}
         </div>
       ))}

@@ -1,61 +1,43 @@
 import type { Metadata, Viewport } from "next";
-import { Source_Serif_4, Inter, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Manrope, Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieBanner } from "@/components/cookie-banner/CookieBanner";
 import { ConsentGatedAnalytics } from "@/components/analytics/ConsentGatedAnalytics";
 
-/*
- * Sovereign Trust — type stack for governance AI
- *
- *   Source Serif 4 — display & editorial
- *     Variable axis (200–900, 8pt–60pt optical sizing). Adobe's modern
- *     companion to Source Sans. It sits in the same tonal register as
- *     Freight Text or Whitney Serif without the licensing cost. Reads
- *     serious without feeling antiquated. Money figures are serif.
- *
- *   Inter — body & UI
- *     Stays. Battle-tested. Inter + Source Serif 4 is a canonical
- *     institutional pairing (used by the Financial Times site, Foreign
- *     Affairs, many regtech platforms).
- *
- *   JetBrains Mono — legal references, program IDs, Aktenzeichen
- *     Technical precision. Used for anything that reads like a citation:
- *     "BAFA-Förderrichtlinie vom 11.08.2023", "KfW 067", "§ 14 UStG".
- */
-const sourceSerif = Source_Serif_4({
-  variable: "--font-source-serif",
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
-  axes: ["opsz"],
-  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
 });
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-  display: "swap",
-});
-
-const jetBrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-  display: "swap",
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://fund24.io"),
   title: {
-    default: "fund24 — Fördermittel verlässlich finden",
+    default: "fund24 – Fördermittel einfach finden",
     template: "%s | fund24",
   },
   description:
-    "KI-gestützte Fördermittel-Plattform nach deutschem Recht. 3.400+ geprüfte Programme, BAFA-zertifizierte Berater, rechtssichere Antragstellung.",
+    "Kostenloser KI-Fördercheck für Unternehmen. 3.400+ aktive Förderprogramme. Berater-Matching. Antrag, Bericht und Abwicklung an einem Ort.",
   applicationName: "fund24",
   keywords: [
     "Fördermittel", "Förderprogramme", "Fördercheck", "Zuschüsse",
     "BAFA", "KfW", "Unternehmen", "Förderberater", "Mittelstand", "KMU",
-    "Governance", "Compliance", "Rechtssicher",
   ],
   authors: [{ name: "fund24" }],
   creator: "Fröba Sales Solutions UG",
@@ -64,15 +46,15 @@ export const metadata: Metadata = {
     locale: "de_DE",
     url: "https://fund24.io",
     siteName: "fund24",
-    title: "fund24 — Fördermittel verlässlich finden",
+    title: "fund24 – Fördermittel einfach finden",
     description:
-      "KI-gestützte Fördermittel-Plattform nach deutschem Recht. 3.400+ geprüfte Programme. BAFA-zertifizierte Berater.",
+      "Kostenloser KI-Fördercheck. 3.400+ aktive Förderprogramme. Berater-Matching. Von Antrag bis Abwicklung auf einer Plattform.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "fund24 — Fördermittel verlässlich finden",
+    title: "fund24 – Fördermittel einfach finden",
     description:
-      "KI-gestützte Fördermittel-Plattform nach deutschem Recht. Rechtssicher von Antrag bis Abwicklung.",
+      "Kostenloser KI-Fördercheck für Unternehmen. Programme, Berater, Anträge, Berichte — alles an einem Ort.",
   },
   robots: {
     index: true,
@@ -90,10 +72,6 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F5F1E6" },
-    { media: "(prefers-color-scheme: dark)", color: "#0A1528" },
-  ],
 };
 
 export default function RootLayout({
@@ -116,7 +94,7 @@ export default function RootLayout({
               url: "https://fund24.io",
               logo: "https://fund24.io/icon.png",
               description:
-                "KI-gestützte Fördermittel-Plattform nach deutschem Recht. 3.400+ Programme, Berater-Matching, rechtssichere Antragstellung.",
+                "Plattform für Fördermittel: KI-Fördercheck, 3.400+ Programme, Berater-Matching, Antragstellung und Abwicklung.",
               address: {
                 "@type": "PostalAddress",
                 streetAddress: "Johann-Nikolaus-Zitter Str. 31",
@@ -137,7 +115,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${sourceSerif.variable} ${inter.variable} ${jetBrainsMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${inter.variable} antialiased`}
       >
         <Providers>{children}</Providers>
         <Toaster />

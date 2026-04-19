@@ -231,7 +231,7 @@ export default function LandingPage() {
             <Button
               asChild
               size="lg"
-              className="bg-gradient-to-br from-architect-tertiary to-bg-chart-5 hover:brightness-110 text-white font-display shadow-[0_10px_40px_rgba(6,158,124,0.3)]"
+              className="bg-gradient-to-br from-architect-tertiary to-[#057a62] hover:brightness-110 text-white font-display shadow-[0_10px_40px_rgba(6,158,124,0.3)]"
             >
               <Link href="/registrieren?rolle=berater">
                 Als Berater registrieren

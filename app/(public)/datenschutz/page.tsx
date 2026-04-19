@@ -138,7 +138,7 @@ export default function DatenschutzPage() {
               <li>Nur mit Ihrem Zugriff verfügbar gemacht</li>
               <li>Nach Ablauf Ihres Kontos oder auf Anfrage gelöscht</li>
             </ul>
-            <p className="mt-4 bg-primary/10 border border-primary/20 rounded-lg p-4">
+            <p className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
               <strong>Hinweis:</strong> Wir sind nicht für den Inhalt verantwortlich, den Sie hochladen. Stellen Sie sicher, dass Sie keine sensiblen Informationen ohne Verschlüsselung teilen.
             </p>
           </div>
@@ -252,7 +252,7 @@ export default function DatenschutzPage() {
               <li>Mit Ihrer ausdrücklichen Zustimmung</li>
               <li>Zur Erfüllung von Verträgen mit Ihnen</li>
             </ul>
-            <p className="mt-4 bg-primary/10 border border-primary/20 rounded-lg p-4">
+            <p className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
               <strong>Hinweis:</strong> Für Berater mit Kundenverwalter-Funktion können Ihre Unternehmensdaten sichtbar für den verwaltenden Berater sein. Sie können dies in den Kontoverwaltungseinstellungen kontrollieren.
             </p>
           </div>

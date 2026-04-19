@@ -50,19 +50,19 @@ export function NotificationsBell() {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="relative p-2 rounded-full hover:bg-muted dark:hover:bg-card"
+        className="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
         aria-label="Benachrichtigungen"
       >
         <Bell className="w-5 h-5" />
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 bg-destructive text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-foreground border border-border dark:border-border/50 rounded-lg shadow-xl z-50">
-          <div className="p-3 border-b border-border dark:border-border/50 flex items-center justify-between">
+        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl z-50">
+          <div className="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
             <span className="font-semibold text-sm">Benachrichtigungen</span>
             {unread > 0 && (
               <Button size="sm" variant="ghost" onClick={handleReadAll}>
@@ -72,19 +72,19 @@ export function NotificationsBell() {
           </div>
           <div className="max-h-96 overflow-y-auto">
             {items.length === 0 ? (
-              <p className="p-6 text-sm text-center text-muted-foreground">Keine Benachrichtigungen</p>
+              <p className="p-6 text-sm text-center text-slate-500">Keine Benachrichtigungen</p>
             ) : (
               items.map((n) => (
                 <button
                   key={n.id}
                   onClick={() => handleRead(n.id)}
-                  className={`w-full text-left p-3 border-b border-slate-100 dark:border-slate-800 hover:bg-background dark:hover:bg-card ${
-                    !n.read_at ? 'bg-primary/10/50 dark:bg-primary/10' : ''
+                  className={`w-full text-left p-3 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 ${
+                    !n.read_at ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                   }`}
                 >
                   <p className="text-sm font-medium">{n.titel || n.typ}</p>
-                  {n.body && <p className="text-xs text-muted-foreground mt-0.5">{n.body}</p>}
-                  <p className="text-[10px] text-muted-foreground/70 mt-1">
+                  {n.body && <p className="text-xs text-slate-500 mt-0.5">{n.body}</p>}
+                  <p className="text-[10px] text-slate-400 mt-1">
                     {new Date(n.created_at).toLocaleString('de-DE')}
                   </p>
                 </button>

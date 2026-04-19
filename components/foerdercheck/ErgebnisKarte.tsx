@@ -14,15 +14,15 @@ export function ErgebnisKarte({ ergebnis }: ErgebnisKarteProps) {
   const getKlasseColor = (klasse: string) => {
     switch (klasse) {
       case 'A':
-        return 'bg-chart-5/15 text-chart-5 hover:bg-chart-5/15'
+        return 'bg-green-100 text-green-800 hover:bg-green-100'
       case 'B':
-        return 'bg-chart-3/15 text-chart-3 hover:bg-chart-3/15'
+        return 'bg-cyan-100 text-cyan-800 hover:bg-cyan-100'
       case 'C':
-        return 'bg-primary/15 text-primary hover:bg-primary/15'
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-100'
       case 'D':
-        return 'bg-brass/15 text-brass hover:bg-brass/15'
+        return 'bg-amber-100 text-amber-800 hover:bg-amber-100'
       default:
-        return 'bg-muted text-foreground'
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
