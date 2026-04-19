@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Allgemeine Geschäftsbedingungen (AGB) | fund24',
+  title: 'Allgemeine Geschäftsbedingungen (AGB)',
   description: 'Allgemeine Geschäftsbedingungen für die Nutzung der fund24 Plattform.',
 }
 

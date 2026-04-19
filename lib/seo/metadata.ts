@@ -22,10 +22,14 @@ export function createMetadata({
   path,
   noIndex = false,
 }: CreateMetadataArgs): Metadata {
+  // Raw title for the <title> element — the root layout's
+  // title.template ("%s | fund24") appends the suffix. The full
+  // composition is retained for OG/Twitter below, which have no
+  // template layer and need a self-contained social-preview title.
   const fullTitle = `${title} | ${SITE_NAME}`
   const url = `${BASE_URL}${path}`
   return {
-    title: fullTitle,
+    title,
     description,
     openGraph: {
       title: fullTitle,

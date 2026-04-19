@@ -15,12 +15,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   try {
     const article = await getNewsArtikel(slug)
     return {
-      title: `${article.titel} | fund24`,
+      title: article.titel,
       description: article.zusammenfassung,
     }
   } catch {
     return {
-      title: 'Artikel nicht gefunden | fund24',
+      title: 'Artikel nicht gefunden',
     }
   }
 }
