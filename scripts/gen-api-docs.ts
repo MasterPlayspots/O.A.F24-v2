@@ -98,8 +98,6 @@ function generate() {
     `**Auto-generated** from \`${ROUTES_DIR}\` — do not edit by hand.`,
     "Run `npm run docs:api` to regenerate. CI blocks merges when this file is stale.",
     "",
-    `_Last generated: ${new Date().toISOString().split("T")[0]}_`,
-    "",
     "## Summary",
     "",
     "| Group | Endpoints |",

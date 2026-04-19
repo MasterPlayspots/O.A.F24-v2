@@ -3,8 +3,6 @@
 **Auto-generated** from `worker/src/routes` — do not edit by hand.
 Run `npm run docs:api` to regenerate. CI blocks merges when this file is stale.
 
-_Last generated: 2026-04-15_
-
 ## Summary
 
 | Group | Endpoints |
@@ -12,7 +10,7 @@ _Last generated: 2026-04-15_
 | `admin` | 15 |
 | `antraege` | 8 |
 | `auth` | 11 |
-| `berater` | 11 |
+| `berater` | 13 |
 | `beratungen` | 3 |
 | `branchen` | 2 |
 | `check` | 5 |
@@ -33,27 +31,27 @@ _Last generated: 2026-04-15_
 | `verify-payment` | 1 |
 | `vorlagen` | 3 |
 
-**Total:** 143 endpoints across 23 groups
+**Total:** 145 endpoints across 23 groups
 
 ## admin (15)
 
 | Method | Path | Auth | Source |
 |---|---|---|---|
-| `GET` | `/audit-logs` | requireAuth (blanket) | [`admin.ts:135`](../worker/src/routes/admin.ts#L135) |
-| `POST` | `/audit-logs/cleanup` | requireAuth (blanket) | [`admin.ts:149`](../worker/src/routes/admin.ts#L149) |
-| `GET` | `/bafa-cert/pending` | requireAuth (blanket) | [`admin.ts:427`](../worker/src/routes/admin.ts#L427) |
-| `GET` | `/check-foerdermittel` | requireAuth (blanket) | [`admin.ts:261`](../worker/src/routes/admin.ts#L261) |
-| `GET` | `/dashboard` | requireAuth (blanket) | [`admin.ts:103`](../worker/src/routes/admin.ts#L103) |
-| `GET` | `/email-outbox` | requireAuth (blanket) | [`admin.ts:334`](../worker/src/routes/admin.ts#L334) |
-| `POST` | `/email-outbox/:id/retry` | requireAuth (blanket) | [`admin.ts:374`](../worker/src/routes/admin.ts#L374) |
-| `POST` | `/onboarding/dispatch` | requireAuth (blanket) | [`admin.ts:95`](../worker/src/routes/admin.ts#L95) |
-| `GET` | `/provisionen` | requireAuth (blanket) | [`admin.ts:41`](../worker/src/routes/admin.ts#L41) |
-| `PATCH` | `/provisionen/:id` | requireAuth (blanket) | [`admin.ts:59`](../worker/src/routes/admin.ts#L59) |
-| `GET` | `/stats` | requireAuth (blanket) | [`admin.ts:236`](../worker/src/routes/admin.ts#L236) |
-| `GET` | `/users` | requireAuth (blanket) | [`admin.ts:155`](../worker/src/routes/admin.ts#L155) |
-| `DELETE` | `/users/:id` | requireAuth (blanket) | [`admin.ts:207`](../worker/src/routes/admin.ts#L207) |
-| `PATCH` | `/users/:id` | requireAuth (blanket) | [`admin.ts:164`](../worker/src/routes/admin.ts#L164) |
-| `PATCH` | `/users/:id/role` | requireAuth (blanket) | [`admin.ts:193`](../worker/src/routes/admin.ts#L193) |
+| `GET` | `/audit-logs` | requireAuth (blanket) | [`admin.ts:166`](../worker/src/routes/admin.ts#L166) |
+| `POST` | `/audit-logs/cleanup` | requireAuth (blanket) | [`admin.ts:180`](../worker/src/routes/admin.ts#L180) |
+| `GET` | `/bafa-cert/pending` | requireAuth (blanket) | [`admin.ts:462`](../worker/src/routes/admin.ts#L462) |
+| `GET` | `/check-foerdermittel` | requireAuth (blanket) | [`admin.ts:292`](../worker/src/routes/admin.ts#L292) |
+| `GET` | `/dashboard` | requireAuth (blanket) | [`admin.ts:129`](../worker/src/routes/admin.ts#L129) |
+| `GET` | `/email-outbox` | requireAuth (blanket) | [`admin.ts:369`](../worker/src/routes/admin.ts#L369) |
+| `POST` | `/email-outbox/:id/retry` | requireAuth (blanket) | [`admin.ts:409`](../worker/src/routes/admin.ts#L409) |
+| `POST` | `/onboarding/dispatch` | requireAuth (blanket) | [`admin.ts:121`](../worker/src/routes/admin.ts#L121) |
+| `GET` | `/provisionen` | requireAuth (blanket) | [`admin.ts:67`](../worker/src/routes/admin.ts#L67) |
+| `PATCH` | `/provisionen/:id` | requireAuth (blanket) | [`admin.ts:85`](../worker/src/routes/admin.ts#L85) |
+| `GET` | `/stats` | requireAuth (blanket) | [`admin.ts:267`](../worker/src/routes/admin.ts#L267) |
+| `GET` | `/users` | requireAuth (blanket) | [`admin.ts:186`](../worker/src/routes/admin.ts#L186) |
+| `DELETE` | `/users/:id` | requireAuth (blanket) | [`admin.ts:238`](../worker/src/routes/admin.ts#L238) |
+| `PATCH` | `/users/:id` | requireAuth (blanket) | [`admin.ts:195`](../worker/src/routes/admin.ts#L195) |
+| `PATCH` | `/users/:id/role` | requireAuth (blanket) | [`admin.ts:224`](../worker/src/routes/admin.ts#L224) |
 
 ## antraege (8)
 
@@ -72,19 +70,19 @@ _Last generated: 2026-04-15_
 
 | Method | Path | Auth | Source |
 |---|---|---|---|
-| `POST` | `/forgot-password` | - | [`auth.ts:476`](../worker/src/routes/auth.ts#L476) |
-| `POST` | `/login` | - | [`auth.ts:128`](../worker/src/routes/auth.ts#L128) |
-| `POST` | `/logout` | requireAuth | [`auth.ts:576`](../worker/src/routes/auth.ts#L576) |
-| `GET` | `/me` | requireAuth | [`auth.ts:428`](../worker/src/routes/auth.ts#L428) |
-| `PATCH` | `/me` | requireAuth | [`auth.ts:452`](../worker/src/routes/auth.ts#L452) |
-| `POST` | `/refresh` | - | [`auth.ts:241`](../worker/src/routes/auth.ts#L241) |
-| `POST` | `/register` | - | [`auth.ts:47`](../worker/src/routes/auth.ts#L47) |
-| `POST` | `/resend-code` | - | [`auth.ts:402`](../worker/src/routes/auth.ts#L402) |
-| `POST` | `/reset-password` | - | [`auth.ts:528`](../worker/src/routes/auth.ts#L528) |
-| `POST` | `/verify-code` | - | [`auth.ts:289`](../worker/src/routes/auth.ts#L289) |
-| `POST` | `/verify-email` | - | [`auth.ts:279`](../worker/src/routes/auth.ts#L279) |
+| `POST` | `/forgot-password` | - | [`auth.ts:477`](../worker/src/routes/auth.ts#L477) |
+| `POST` | `/login` | - | [`auth.ts:129`](../worker/src/routes/auth.ts#L129) |
+| `POST` | `/logout` | requireAuth | [`auth.ts:577`](../worker/src/routes/auth.ts#L577) |
+| `GET` | `/me` | requireAuth | [`auth.ts:429`](../worker/src/routes/auth.ts#L429) |
+| `PATCH` | `/me` | requireAuth | [`auth.ts:453`](../worker/src/routes/auth.ts#L453) |
+| `POST` | `/refresh` | - | [`auth.ts:242`](../worker/src/routes/auth.ts#L242) |
+| `POST` | `/register` | - | [`auth.ts:48`](../worker/src/routes/auth.ts#L48) |
+| `POST` | `/resend-code` | - | [`auth.ts:403`](../worker/src/routes/auth.ts#L403) |
+| `POST` | `/reset-password` | - | [`auth.ts:529`](../worker/src/routes/auth.ts#L529) |
+| `POST` | `/verify-code` | - | [`auth.ts:290`](../worker/src/routes/auth.ts#L290) |
+| `POST` | `/verify-email` | - | [`auth.ts:280`](../worker/src/routes/auth.ts#L280) |
 
-## berater (11)
+## berater (13)
 
 | Method | Path | Auth | Source |
 |---|---|---|---|
@@ -92,6 +90,8 @@ _Last generated: 2026-04-15_
 | `POST` | `/abwicklung/upload` | requireAuth | [`berater.ts:629`](../worker/src/routes/berater.ts#L629) |
 | `GET` | `/anfragen` | requireAuth | [`berater.ts:393`](../worker/src/routes/berater.ts#L393) |
 | `PATCH` | `/anfragen/:id` | requireAuth | [`berater.ts:414`](../worker/src/routes/berater.ts#L414) |
+| `POST` | `/bafa-cert` | requireAuth | [`berater.ts:670`](../worker/src/routes/berater.ts#L670) |
+| `GET` | `/bafa-cert/status` | requireAuth | [`berater.ts:752`](../worker/src/routes/berater.ts#L752) |
 | `GET` | `/dienstleistungen` | requireAuth | [`berater.ts:316`](../worker/src/routes/berater.ts#L316) |
 | `POST` | `/dienstleistungen` | requireAuth | [`berater.ts:331`](../worker/src/routes/berater.ts#L331) |
 | `GET` | `/expertise` | requireAuth | [`berater.ts:238`](../worker/src/routes/berater.ts#L238) |
@@ -119,11 +119,11 @@ _Last generated: 2026-04-15_
 
 | Method | Path | Auth | Source |
 |---|---|---|---|
-| `POST` | `/` | - | [`check.ts:54`](../worker/src/routes/check.ts#L54) |
-| `POST` | `/:sessionId/analyze` | - | [`check.ts:329`](../worker/src/routes/check.ts#L329) |
-| `POST` | `/:sessionId/chat` | - | [`check.ts:222`](../worker/src/routes/check.ts#L222) |
-| `POST` | `/:sessionId/docs` | - | [`check.ts:272`](../worker/src/routes/check.ts#L272) |
-| `GET` | `/:sessionId/plan` | - | [`check.ts:420`](../worker/src/routes/check.ts#L420) |
+| `POST` | `/` | requireAuth | [`check.ts:81`](../worker/src/routes/check.ts#L81) |
+| `POST` | `/:sessionId/analyze` | requireAuth | [`check.ts:401`](../worker/src/routes/check.ts#L401) |
+| `POST` | `/:sessionId/chat` | requireAuth | [`check.ts:266`](../worker/src/routes/check.ts#L266) |
+| `POST` | `/:sessionId/docs` | requireAuth | [`check.ts:331`](../worker/src/routes/check.ts#L331) |
+| `GET` | `/:sessionId/plan` | requireAuth | [`check.ts:508`](../worker/src/routes/check.ts#L508) |
 
 ## checks (2)
 
@@ -172,16 +172,16 @@ _Last generated: 2026-04-15_
 
 | Method | Path | Auth | Source |
 |---|---|---|---|
-| `GET` | `/anfragen` | requireAuth | [`me.ts:68`](../worker/src/routes/me.ts#L68) |
-| `GET` | `/antraege` | requireAuth | [`me.ts:27`](../worker/src/routes/me.ts#L27) |
-| `POST` | `/antraege` | requireAuth | [`me.ts:29`](../worker/src/routes/me.ts#L29) |
-| `GET` | `/beratungen` | requireAuth | [`me.ts:51`](../worker/src/routes/me.ts#L51) |
-| `GET` | `/dashboard` | requireAuth | [`me.ts:89`](../worker/src/routes/me.ts#L89) |
-| `GET` | `/favoriten` | requireAuth | [`me.ts:32`](../worker/src/routes/me.ts#L32) |
-| `GET` | `/notifications` | requireAuth | [`me.ts:35`](../worker/src/routes/me.ts#L35) |
-| `GET` | `/unternehmen` | requireAuth | [`me.ts:46`](../worker/src/routes/me.ts#L46) |
-| `POST` | `/unternehmen` | requireAuth | [`me.ts:48`](../worker/src/routes/me.ts#L48) |
-| `PUT` | `/unternehmen` | requireAuth | [`me.ts:47`](../worker/src/routes/me.ts#L47) |
+| `GET` | `/anfragen` | requireAuth | [`me.ts:73`](../worker/src/routes/me.ts#L73) |
+| `GET` | `/antraege` | requireAuth | [`me.ts:32`](../worker/src/routes/me.ts#L32) |
+| `POST` | `/antraege` | requireAuth | [`me.ts:34`](../worker/src/routes/me.ts#L34) |
+| `GET` | `/beratungen` | requireAuth | [`me.ts:56`](../worker/src/routes/me.ts#L56) |
+| `GET` | `/dashboard` | requireAuth | [`me.ts:94`](../worker/src/routes/me.ts#L94) |
+| `GET` | `/favoriten` | requireAuth | [`me.ts:37`](../worker/src/routes/me.ts#L37) |
+| `GET` | `/notifications` | requireAuth | [`me.ts:40`](../worker/src/routes/me.ts#L40) |
+| `GET` | `/unternehmen` | requireAuth | [`me.ts:51`](../worker/src/routes/me.ts#L51) |
+| `POST` | `/unternehmen` | requireAuth | [`me.ts:53`](../worker/src/routes/me.ts#L53) |
+| `PUT` | `/unternehmen` | requireAuth | [`me.ts:52`](../worker/src/routes/me.ts#L52) |
 
 ## nachrichten (5)
 
@@ -210,7 +210,7 @@ _Last generated: 2026-04-15_
 | `GET` | `/` | requireAuth (blanket) | [`news.ts:55`](../worker/src/routes/news.ts#L55) |
 | `GET` | `/` | requireAuth (blanket) | [`news.ts:107`](../worker/src/routes/news.ts#L107) |
 | `POST` | `/` | requireAuth (blanket) | [`news.ts:115`](../worker/src/routes/news.ts#L115) |
-| `DELETE` | `/:id` | requireAuth (blanket) | [`news.ts:204`](../worker/src/routes/news.ts#L204) |
+| `DELETE` | `/:id` | requireAuth (blanket) | [`news.ts:205`](../worker/src/routes/news.ts#L205) |
 | `PATCH` | `/:id` | requireAuth (blanket) | [`news.ts:158`](../worker/src/routes/news.ts#L158) |
 | `GET` | `/:slug` | requireAuth (blanket) | [`news.ts:77`](../worker/src/routes/news.ts#L77) |
 
