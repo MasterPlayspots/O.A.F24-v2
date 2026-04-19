@@ -195,7 +195,7 @@ export default function DokumentePage() {
               {uploadedFiles.map((file, idx) => (
                 <div key={idx} className="flex items-center justify-between rounded-lg bg-muted p-3">
                   <div className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    <CheckCircle2 className="h-5 w-5 text-chart-5" />
                     <div>
                       <p className="text-sm font-medium">{file.name}</p>
                       <p className="text-xs text-muted-foreground">
@@ -230,10 +230,10 @@ export default function DokumentePage() {
         </Card>
 
         {/* DSGVO Notice */}
-        <Card className="mb-6 border-blue-200 bg-blue-50 p-4">
+        <Card className="mb-6 border-primary/20 bg-primary/10 p-4">
           <div className="flex gap-3">
-            <Lock className="mt-0.5 h-5 w-5 text-blue-600 flex-shrink-0" />
-            <div className="text-sm text-blue-900">
+            <Lock className="mt-0.5 h-5 w-5 text-primary flex-shrink-0" />
+            <div className="text-sm text-primary">
               <p className="font-medium mb-1">Datenschutz</p>
               <p>
                 Ihre Dokumente werden verschlüsselt und auf Servern in der EU gespeichert. Alle Daten

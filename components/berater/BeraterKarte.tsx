@@ -24,7 +24,7 @@ export function BeraterKarte({ berater }: BeraterKarteProps) {
           return (
             <div key={i} className="relative h-4 w-4">
               <Star
-                className="h-4 w-4 text-gray-300"
+                className="h-4 w-4 text-muted-foreground/60"
                 fill="currentColor"
               />
               {(isFull || isHalf) && (
@@ -41,7 +41,7 @@ export function BeraterKarte({ berater }: BeraterKarteProps) {
             </div>
           );
         })}
-        <span className="ml-2 text-sm font-medium text-gray-700">
+        <span className="ml-2 text-sm font-medium text-foreground/80">
           {roundedRating.toFixed(1)}
         </span>
       </div>
@@ -54,15 +54,15 @@ export function BeraterKarte({ berater }: BeraterKarteProps) {
         {/* Header with badges */}
         <div className="mb-4 flex items-start justify-between">
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600">
+            <h3 className="text-lg font-semibold text-foreground group-hover:text-primary">
               {berater.displayName}
             </h3>
             {berater.region && (
-              <p className="mt-1 text-sm text-gray-600">{berater.region}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{berater.region}</p>
             )}
           </div>
           {berater.verfuegbar && (
-            <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200">
+            <Badge variant="outline" className="ml-2 bg-chart-5/10 text-chart-5 border-green-200">
               Verfügbar
             </Badge>
           )}
@@ -78,7 +78,7 @@ export function BeraterKarte({ berater }: BeraterKarteProps) {
         {/* Specializations */}
         {berater.branchen && berater.branchen.length > 0 && (
           <div className="mb-4">
-            <p className="mb-2 text-xs font-medium text-gray-500 uppercase">
+            <p className="mb-2 text-xs font-medium text-muted-foreground uppercase">
               Spezialisierungen
             </p>
             <div className="flex flex-wrap gap-1">
@@ -97,8 +97,8 @@ export function BeraterKarte({ berater }: BeraterKarteProps) {
         )}
 
         {/* Footer - learn more hint */}
-        <div className="mt-6 pt-4 border-t border-gray-100">
-          <p className="text-sm font-medium text-blue-600 group-hover:text-blue-700">
+        <div className="mt-6 pt-4 border-t border-border">
+          <p className="text-sm font-medium text-primary group-hover:text-primary">
             Profil ansehen →
           </p>
         </div>

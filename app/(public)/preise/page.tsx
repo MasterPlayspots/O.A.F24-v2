@@ -105,7 +105,7 @@ export default function PricingPage() {
                   href={t.cta.href}
                   className={`mt-8 inline-flex items-center justify-center rounded-md px-6 py-3 font-display font-semibold text-sm tracking-wide transition ${
                     t.featured
-                      ? 'bg-gradient-to-br from-architect-tertiary to-[#057a62] hover:brightness-110 text-white shadow-[0_10px_40px_rgba(6,158,124,0.25)]'
+                      ? 'bg-gradient-to-br from-architect-tertiary to-bg-chart-5 hover:brightness-110 text-white shadow-[0_10px_40px_rgba(6,158,124,0.25)]'
                       : 'bg-gradient-to-br from-architect-primary to-architect-primary-container hover:brightness-110 text-white shadow-[0_10px_40px_rgba(101,117,173,0.25)]'
                   }`}
                 >
